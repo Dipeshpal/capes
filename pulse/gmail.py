@@ -33,8 +33,8 @@ MAX_ATTACHMENT_BYTES = 2_000_000
 def credentials() -> tuple[str, str]:
     address, password = os.getenv("GMAIL_ADDRESS"), os.getenv("GMAIL_APP_PASSWORD")
     if not address or not password:
-        raise ToolError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set on the server (see README > Gmail setup)")
-    return address, password.replace(" ", "")
+        raise ToolError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set on the server (see docs/gmail.md)")
+    return address.strip().strip("\"'"), password.strip().strip("\"'").replace(" ", "")
 
 
 def quote(name: str) -> str:
@@ -640,7 +640,7 @@ async def gmail_delete_draft(args):
     def work(a):
         with Mailbox() as mb:
             row, msg = one_message(mb, int(a["id"]))
-            if "\\Draft" not in row["flags"]:
+            if "\\Draft" not in row["flags"] and "\\Draft" not in row["labels"]:
                 raise ToolError("That message is not a draft; use gmail_trash to delete regular mail")
             if not msg["Message-ID"]:
                 raise ToolError("Draft has no Message-ID; delete it in Gmail")

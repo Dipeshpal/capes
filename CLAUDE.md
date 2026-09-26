@@ -10,7 +10,8 @@ Personal MCP server for social accounts (Discord, Gmail, X/Twitter), deployed by
 - `pulse/discord.py`: Discord over REST only (no gateway). `pulse/gmail.py`: IMAP/SMTP with an app password. `pulse/twitter.py`: Apify.
 - `scripts/pulse.mjs`: zero-dependency Node installer (`install`, `connect`): deploys to Vercel, connects clients.
 - `tests/`: `protocol.py` (MCP protocol, auth, README/tool-list/permission/env-var consistency), `gmail_offline.py` (fake IMAP), `check_docs.py` (doc links), `discord_e2e.py` (needs a running server and a Discord test server).
-- `docs/`: one guide per service (`vercel`, `discord`, `gmail`, `apify`) plus `clients`, `troubleshooting`, `contributing`; linked from the README services table.
+- `docs/`: one guide per service (`vercel`, `discord`, `gmail`, `apify`) plus `clients`, `usage`, `architecture` (goals, design, security model), `troubleshooting`, `contributing`, and the generated `tools.md`. Linked from the README.
+- `scripts/gen_tools_doc.py`: regenerates `docs/tools.md` from the tool registry (`--check` fails when stale).
 
 ## Commands
 
@@ -21,6 +22,7 @@ uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python 
 # tests (no credentials needed; same set runs in CI)
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with aiohttp python scripts/gen_tools_doc.py --check   # regenerate without --check after tool changes
 python tests/check_docs.py
 # opt-in, needs a running server and a Discord test server (MODE=full only on a disposable one)
 GUILD=<test-server-id> MODE=read python tests/discord_e2e.py

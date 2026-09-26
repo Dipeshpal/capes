@@ -1,6 +1,18 @@
 # Contributing
 
-Thanks for helping. This page tells you how the repo is organized, how to run and test it, and how the `.claude/` folder helps you (and your AI assistant) contribute safely.
+Thanks for helping. Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
+
+Read [What pulse-mcp is for](architecture.md) first if you want the big picture.
+
+## Ways to contribute
+
+| You want to | Do this |
+|-------------|---------|
+| Report a bug | Open an issue with the bug template. Include the exact error text and what you expected. Never paste tokens, keys or app passwords. |
+| Fix a typo or unclear step in a guide | Edit the file in `docs/` or `README.md` and open a pull request. If a menu name changed, say which page you saw. |
+| Add or improve a tool | Follow [Add a tool](#add-a-tool) below. |
+| Add a whole service (Calendar, Slack, ...) | Open an issue first with the feature template: the service's API, how a user gets credentials, whether it is free, and which tools you plan. Then follow [Add a service](#add-a-service). |
+| Improve tests | Add cases to `tests/`. A test that reproduces a real bug is especially welcome. |
 
 ## Set up
 
@@ -11,76 +23,123 @@ cp .env.example .env        # fill in only what you want to test
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
 
-The server listens on `http://127.0.0.1:8000`. Set `MCP_API_KEY` in `.env` and call `POST /mcp` with `Authorization: Bearer <key>`, or point an MCP client at it.
+The server listens on `http://127.0.0.1:8000`. Set `MCP_API_KEY` in `.env`, then call `POST /mcp` with `Authorization: Bearer <key>` (examples in [Usage](usage.md#calling-the-server-without-an-ai-client)), or point an MCP client at it.
 
-## Repo map
+## Workflow
 
-| Path | What it is |
-|------|------------|
-| `api/index.py` | FastAPI app: auth, `/mcp`, health. Importing a module in `pulse/` registers its tools. |
-| `pulse/registry.py` | `@tool(...)` decorator and `ToolError`. |
-| `pulse/mcp.py` | JSON-RPC handling for MCP (`initialize`, `tools/list`, `tools/call`). |
-| `pulse/discord.py`, `gmail.py`, `twitter.py` | The integrations. |
-| `scripts/pulse.mjs` | Zero-dependency installer and client connector. |
-| `tests/` | Offline tests and an opt-in Discord end-to-end script. |
-| `docs/` | Per-service guides linked from the README. |
-| `CLAUDE.md`, `.claude/` | Project context for Claude Code (below). |
+1. Fork the repo (or create a branch if you have access): `git switch -c feat/gmail-snooze` (prefixes: `feat/`, `fix/`, `docs/`, `test/`).
+2. Make your change. Keep it focused: one topic per pull request.
+3. Run the checks below until they pass.
+4. Commit with an imperative subject line and a short body that says **why**, for example `Fix draft deletion: Gmail marks drafts with a label, not a flag`.
+5. Open a pull request using the template. Say what you tested and, honestly, what you could not test (for example "no access to a real Discord server").
+6. Respond to review. CI must be green.
 
-## Tests
+## Checks
 
-Run all offline checks before every pull request (none need credentials):
+Run before every pull request. None needs credentials.
 
 ```bash
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
 node --check scripts/pulse.mjs
 ```
 
-`tests/discord_e2e.py` runs against a live server and a Discord server. Use `MODE=read` anywhere. Use `MODE=full` only on a disposable test server, because it posts messages and creates and deletes channels, roles and threads. See the header of the file for variables.
+What they protect:
 
-The same offline checks run in GitHub Actions (`.github/workflows/ci.yml`) on every push and pull request.
+- `protocol.py`: the MCP protocol and auth, every tool's schema and safety label, and that the README tool list, the Discord permission number and the environment variables in docs agree with the code.
+- `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail.
+- `gen_tools_doc.py --check`: [docs/tools.md](tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
+- `check_docs.py`: every relative link and `#anchor` in the docs resolves.
+
+`tests/discord_e2e.py` runs against a live server and a real Discord server. Use `MODE=read` anywhere. Use `MODE=full` only on a disposable test server, because it posts messages and creates and deletes channels, roles and threads. The file header lists its variables.
+
+The same checks run in GitHub Actions on every push and pull request, together with a scan of the whole git history for secrets.
+
+## Add a tool
+
+1. Find the module (`pulse/discord.py`, `pulse/gmail.py`, ...) and add an async function with `@tool(...)`:
+
+   ```python
+   @tool(
+       "gmail_snooze",
+       "Hide a message from the inbox until a date.",
+       {"id": {"type": "integer"}, "until": {"type": "string", "description": "ISO date"}},
+       ["id", "until"],
+       hint="write",
+   )
+   async def gmail_snooze(args: dict):
+       ...
+   ```
+
+2. Choose the honest `hint`: `read` (no side effects), `write` (creates or changes things), `destructive` (deletes or is hard to undo).
+3. Write a description a language model can act on: what it does, what it needs, limits. Raise `ToolError("what to do next")` for expected failures.
+4. Add a test (offline if at all possible), then run `python scripts/gen_tools_doc.py` and add the tool name to the README tool list. `tests/protocol.py` fails if the README or docs/tools.md miss it.
+
+The conventions are in [`CLAUDE.md`](../CLAUDE.md) and `.claude/rules/tools.md`.
+
+## Add a service
+
+1. Create `pulse/<service>.py` with its `@tool` functions. Read credentials with `os.getenv` inside the function, not at import time. Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request.
+2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too).
+3. Add the environment variables to `.env.example`, `docs/vercel.md` and the installer prompts in `scripts/pulse.mjs`.
+4. Write `docs/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
+5. Add a row to the README services table and a line to `docs/troubleshooting.md`.
+6. Add tests.
+
+With Claude Code, `/add-tool <service> <tool>` does the scaffolding and reminds you of every step.
+
+## Code style
+
+- Python 3.12, type hints where they help, no unused code or speculative options.
+- Small functions, clear names, comments only for non-obvious reasons.
+- Compact tool results: return the fields a person needs, not the raw API payload.
+- No emojis in code or docs. Plain, direct language.
+
+## Security rules for contributors
+
+- Never commit credentials, keys, tokens, real IDs or message content. Use placeholders like `YOUR_API_KEY`.
+- Do not print secrets in logs, tool results or error messages.
+- Do not test destructive Discord tools on a real community server.
+- If you think you committed a secret, tell the maintainer at once. The fix is to rotate it and recreate the repository, not just to delete the line ([why](../CLAUDE.md#security-non-negotiable)).
 
 ## The `.claude/` folder
 
-The repo ships its Claude Code setup so every contributor's assistant starts with the same knowledge. Read [`CLAUDE.md`](../CLAUDE.md) first; it is loaded automatically in every Claude Code session. Everything below follows the [Claude Code directory layout](https://code.claude.com/docs/en/claude-directory).
+The repo ships its Claude Code setup so every contributor's assistant starts with the same knowledge. [`CLAUDE.md`](../CLAUDE.md) is loaded automatically in every Claude Code session. The layout follows the [Claude Code directory guide](https://code.claude.com/docs/en/claude-directory).
 
 | Path | Purpose | Loaded |
 |------|---------|--------|
 | `CLAUDE.md` | Project overview, commands, conventions, gotchas, security rules | Every session |
-| `.claude/settings.json` | Shared permissions: allows the safe test/git commands, denies reading `.env*`, `.pulse.local.json`, force pushes, `vercel env pull` | Every session |
+| `.claude/settings.json` | Shared permissions: allows the safe test and git commands, denies reading `.env*`, `.pulse.local.json`, force pushes and `vercel env pull` | Every session |
 | `.claude/settings.local.json` | Your personal overrides (git-ignored, never committed) | Every session |
 | `.claude/rules/security.md` | Secret-handling rules | Every session |
 | `.claude/rules/tools.md` | How to write a tool | When you touch `pulse/` or `api/` |
-| `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its doc |
-| `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its doc or test |
+| `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its guide |
+| `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its guide or its test |
 | `.claude/rules/installer.md` | Installer conventions | When you touch `scripts/` |
-| `.claude/rules/docs.md` | Documentation conventions | When you touch README, docs, CLAUDE.md |
+| `.claude/rules/docs.md` | Documentation conventions | When you touch README, docs or CLAUDE.md |
 | `.claude/skills/add-tool/` | `/add-tool <service> <tool>`: scaffold a tool, tests and docs | When you run it |
-| `.claude/skills/run-tests/` | `/run-tests`: run every credential-free test | When you run it |
+| `.claude/skills/run-tests/` | `/run-tests`: run every credential-free check | When you run it |
 | `.claude/skills/deploy/` | `/deploy`: test, deploy to Vercel, smoke-test without printing secrets | When you run it |
-| `.claude/skills/security-audit/` | `/security-audit`: scan all history for leaks | When you run it |
+| `.claude/skills/security-audit/` | `/security-audit`: scan all git history for leaks | When you run it |
 | `.claude/agents/tool-reviewer.md` | Subagent that reviews tool changes (`@tool-reviewer`) | When invoked |
 | `.claude/agent-memory/tool-reviewer/MEMORY.md` | Shared, committed lessons the reviewer reads and extends | By the reviewer |
 
-Typical flow with Claude Code: run `claude` in the repo, ask it to add a tool with `/add-tool slack slack_send_message`, let it write code, tests and docs, run `/run-tests`, then ask `@tool-reviewer` to review the diff.
+Typical flow: run `claude` in the repo, ask it to add a tool with `/add-tool slack slack_send_message`, let it write code, tests and docs, run `/run-tests`, then ask `@tool-reviewer` to review the diff.
 
-Editing the `.claude/` folder:
+Editing the folder:
 
 - Rules with a `paths:` list load only when Claude reads a matching file, which keeps context small. Keep each rule short and specific.
-- Add lessons to `.claude/agent-memory/tool-reviewer/MEMORY.md` only if they are durable and safe for a shared file: no credentials, no personal IDs, no message content.
+- Add lessons to `.claude/agent-memory/tool-reviewer/MEMORY.md` only if they are durable and safe to share: no credentials, no personal IDs, no message content.
 - Personal preferences belong in `.claude/settings.local.json` or your own `~/.claude/`, not in the shared files.
 
-Not using Claude Code? The same content is plain Markdown: `CLAUDE.md` and `.claude/rules/*.md` are the project's coding and security guidelines.
+Not using Claude Code? It is all plain Markdown: `CLAUDE.md` and `.claude/rules/*.md` are the project's coding and security guidelines.
 
 ## Pull request checklist
 
-- [ ] Offline tests, docs link check and `node --check` pass.
-- [ ] New or changed tool has an honest `hint` (`read`, `write`, `destructive`) and a test.
-- [ ] README tool list, `docs/<service>.md`, `.env.example` and installer prompts are updated.
-- [ ] No secrets, tokens, real IDs or message content anywhere in the diff (`/security-audit`).
-- [ ] You say in the PR what you could not test.
-
-## Security
-
-Never commit credentials. If you think you did, tell the maintainer immediately; the fix is to rotate the secret and recreate the repository, not just to delete the line. Details in [`CLAUDE.md`](../CLAUDE.md#security-non-negotiable).
+- [ ] The checks above pass and CI is green.
+- [ ] New or changed tools have an honest `hint` and a test.
+- [ ] README tool list, `docs/tools.md`, `docs/<service>.md`, `.env.example` and installer prompts are updated where relevant.
+- [ ] No secrets, tokens, real IDs or message content in the diff.
+- [ ] The description says what you could not test.

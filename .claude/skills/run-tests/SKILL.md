@@ -7,6 +7,7 @@ Run these from the repository root and report pass/fail counts for each. Stop an
 ```bash
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
 node --check scripts/pulse.mjs
 ```

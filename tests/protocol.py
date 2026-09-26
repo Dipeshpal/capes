@@ -117,6 +117,8 @@ section = readme.split("## Tools", 1)[1].split("## Check that it works", 1)[0]
 documented = set(re.findall(r"\b(?:discord|gmail|twitter)_[a-z_]+\b", section))
 check("README tool list equals tools/list", documented == set(names), {"missing_in_readme": sorted(set(names) - documented), "unknown_in_readme": sorted(documented - set(names))})
 
+check(f"README states the tool count ({len(TOOLS)})", f"{len(TOOLS)} tools" in readme, "update the number in README.md")
+
 wanted = ["VIEW_CHANNEL", "SEND_MESSAGES", "SEND_MESSAGES_IN_THREADS", "EMBED_LINKS", "ATTACH_FILES", "READ_MESSAGE_HISTORY", "ADD_REACTIONS", "USE_EXTERNAL_EMOJIS", "MANAGE_MESSAGES", "MANAGE_CHANNELS", "MANAGE_ROLES", "MANAGE_THREADS", "CREATE_PUBLIC_THREADS", "CREATE_PRIVATE_THREADS", "CREATE_INSTANT_INVITE", "KICK_MEMBERS", "BAN_MEMBERS", "MODERATE_MEMBERS"]
 integer = str(sum(1 << PERMISSIONS[n] for n in wanted))
 for rel in ("docs/discord.md", "scripts/pulse.mjs"):
@@ -127,6 +129,10 @@ for f in list((ROOT / "pulse").glob("*.py")) + [ROOT / "api" / "index.py"]:
     env_used |= set(re.findall(r'getenv\("([A-Z_]+)"', f.read_text(encoding="utf-8")))
 example = (ROOT / ".env.example").read_text(encoding="utf-8")
 check("every env var used in code is in .env.example", all(v in example for v in env_used), sorted(v for v in env_used if v not in example))
+import importlib.util  # noqa: E402
+_spec = importlib.util.spec_from_file_location("gen_tools_doc", ROOT / "scripts" / "gen_tools_doc.py")
+_gen = importlib.util.module_from_spec(_spec); _spec.loader.exec_module(_gen)
+check("docs/tools.md is up to date (run scripts/gen_tools_doc.py)", (ROOT / "docs" / "tools.md").read_text(encoding="utf-8").splitlines() == _gen.render().splitlines())
 vercel_doc = (ROOT / "docs" / "vercel.md").read_text(encoding="utf-8")
 check("every env var used in code is in docs/vercel.md", all(v in vercel_doc for v in env_used), sorted(v for v in env_used if v not in vercel_doc))
 

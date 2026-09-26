@@ -93,7 +93,7 @@ class FakeIMAP:
 
     def _msgs(self):
         if self.selected == "[Gmail]/Drafts":
-            return [m for m in self.state["all"] if "\\Draft" in m["flags"]]
+            return [m for m in self.state["all"] if "\\Draft" in m["labels"]]
         return self.state["all"]
 
     def uid(self, cmd, *args):
@@ -102,7 +102,7 @@ class FakeIMAP:
             if args[:3] == ("CHARSET", "UTF-8", "X-GM-RAW"):
                 q = self.literal.decode(); self.literal = None
                 st["queries"].append(q)
-                hits = [m for m in self._msgs() if (("is:unread" not in q or "\\Seen" not in m["flags"]) and ("in:drafts" not in q or "\\Draft" in m["flags"]))]
+                hits = [m for m in self._msgs() if (("is:unread" not in q or "\\Seen" not in m["flags"]) and ("in:drafts" not in q or "\\Draft" in m["labels"]))]
                 return "OK", [" ".join(str(m["uid"]) for m in hits).encode()]
             if args[0] is None: return "OK", [b" ".join(str(m["uid"]).encode() for m in self._msgs())]
             if args[0] == "X-GM-THRID": return "OK", [" ".join(str(m["uid"]) for m in self._msgs() if str(m["thrid"]) == args[1]).encode()]
@@ -139,7 +139,8 @@ class FakeIMAP:
     def append(self, folder, flags, date, data):
         st = self.state
         uid = max(m["uid"] for m in st["all"]) + 1
-        st["all"].append({"uid": uid, "raw": data, "flags": {"\\Draft"}, "labels": {"\\Draft"}, "thrid": 9000 + uid})
+        # Real Gmail: drafts carry the \Draft label in All Mail, not the IMAP \Draft flag (found by a live test)
+        st["all"].append({"uid": uid, "raw": data, "flags": set(), "labels": {"\\Draft"}, "thrid": 9000 + uid})
         return "OK", [b"[APPENDUID 1 %d] done" % uid]
 
     def expunge(self):

@@ -14,16 +14,31 @@ Your tokens live only in your own Vercel project. Nothing is shared with anyone.
 
 ## Contents
 
+- [What we are trying to achieve](#what-we-are-trying-to-achieve)
 - [How it works](#how-it-works)
 - [Set up in 6 steps](#set-up-in-6-steps)
 - [Services and credentials](#services-and-credentials)
 - [Deploy](#deploy)
 - [Connect your AI client](#connect-your-ai-client)
+- [Using it](#using-it)
 - [Tools](#tools)
 - [Check that it works](#check-that-it-works)
-- [Contributing and the `.claude` folder](#contributing-and-the-claude-folder)
+- [Contributing](#contributing)
+- [The `.claude` folder](#the-claude-folder)
 - [Security](#security)
 - [All guides](#all-guides)
+
+## What we are trying to achieve
+
+Assistants are great at reading, summarizing and acting, but your real work lives in accounts they cannot reach: your inbox, your community chat, your social feeds. pulse-mcp is a small server that gives an assistant controlled access to **your own** accounts through one standard door (MCP), so the same setup works in Claude, Codex, Cursor and any other MCP client.
+
+- **Personal and private:** you deploy your own copy; credentials stay in your own Vercel project; there is no central service.
+- **Easy to set up:** one command or one button, plus a click-by-click guide per service. About 20 minutes from nothing.
+- **Complete:** full toolkits for Discord, Gmail and X, not demos.
+- **Safe by default:** tools are labelled read, write or destructive so clients ask before risky calls; sending is always explicit.
+- **Free to run** for personal use, and **easy to extend** with your own tools.
+
+The full picture, design decisions, security model and ideas for later are in [What pulse-mcp is for](docs/architecture.md).
 
 ## How it works
 
@@ -115,7 +130,21 @@ Or set a client up by hand. The [client guide](docs/clients.md) has the exact st
 
 Restart the client after connecting so it loads the tools.
 
+## Using it
+
+Once connected, just talk to your assistant and it picks the tools:
+
+- "How many unread emails do I have? Summarize the five newest."
+- "Draft a reply to the last email from Sam. Show me before sending."
+- "Read the last 50 messages in #support and list the open questions."
+- "Post the release notes in #announcements and pin them."
+- "Search X for people talking about MCP servers."
+
+Sending mail and messages cannot be undone, so ask for a draft first when it matters. [Using pulse-mcp](docs/usage.md) has more examples, safety habits, and how to call the server with `curl` for debugging.
+
 ## Tools
+
+47 tools. The table below is the quick list; [docs/tools.md](docs/tools.md) is the generated reference with every tool's description, kind and arguments.
 
 **Gmail**: `gmail_search`, `gmail_get_message`, `gmail_get_thread`, `gmail_get_attachment`, `gmail_list_labels`, `gmail_send_email` (HTML, cc/bcc, attachments), `gmail_reply` (reply-all, quoted original), `gmail_forward`, `gmail_create_draft`, `gmail_list_drafts`, `gmail_send_draft`, `gmail_delete_draft`, `gmail_modify` (read/unread, star, archive, labels), `gmail_trash`, `gmail_mark_spam`, `gmail_create_label`, `gmail_delete_label`
 
@@ -137,23 +166,24 @@ Notes: tools are flagged read, write or destructive so clients can ask before ri
 2. In your AI client, ask "List my Discord channels" (Discord), "How many unread emails do I have?" (Gmail) or "Search X for MCP servers" (Apify).
 3. Something wrong? [Troubleshooting](docs/troubleshooting.md) maps every common error to its fix.
 
-## Contributing and the `.claude` folder
+## Contributing
 
-Contributions are welcome. Start with [docs/contributing.md](docs/contributing.md): repo map, how to run and test locally, and the pull request checklist.
+Anyone can contribute: fix a bug, sharpen a guide, add a tool, or build a whole new service (Calendar, Slack, Telegram...).
 
-The repo includes its Claude Code setup so your assistant knows the project from the first prompt:
+1. Read [What pulse-mcp is for](docs/architecture.md) and [Contributing](docs/contributing.md).
+2. Fork, branch (`feat/...`, `fix/...`, `docs/...`), make one focused change.
+3. Run the checks (no credentials needed):
 
-| Path | What it gives you |
-|------|-------------------|
-| [`CLAUDE.md`](CLAUDE.md) | Overview, commands, conventions, gotchas and security rules, loaded in every session |
-| [`.claude/rules/`](.claude/rules) | Focused rules that load when you touch matching files (tools, Discord, Gmail, installer, docs) plus always-on security rules |
-| [`.claude/skills/`](.claude/skills) | Slash commands: `/add-tool`, `/run-tests`, `/deploy`, `/security-audit` |
-| [`.claude/agents/tool-reviewer.md`](.claude/agents/tool-reviewer.md) | A reviewer subagent for tool changes, with shared memory in [`.claude/agent-memory/`](.claude/agent-memory/tool-reviewer/MEMORY.md) |
-| [`.claude/settings.json`](.claude/settings.json) | Shared permissions: safe commands allowed; reading secret files and force pushes denied |
+   ```bash
+   uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
+   uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+   uv run --with aiohttp python scripts/gen_tools_doc.py --check
+   python tests/check_docs.py
+   ```
 
-With Claude Code: run `claude` in the repo, then for example `/add-tool slack slack_send_message`, `/run-tests`, and ask `@tool-reviewer` to review your diff. Details in [docs/contributing.md](docs/contributing.md#the-claude-folder).
+4. Open a pull request using the template. Say what you tested and what you could not. CI runs the same checks plus a secret scan.
 
-Adding a tool takes one Python function:
+New service? Open an issue first with the feature template. Adding a tool takes one Python function:
 
 ```python
 # pulse/hello.py  (then import it in api/index.py)
@@ -166,6 +196,20 @@ async def hello(args: dict):
 
 Run the server locally: `cp .env.example .env`, fill it in, then `uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py`.
 
+## The `.claude` folder
+
+The repo includes its Claude Code setup so a contributor's assistant knows the project from the first prompt:
+
+| Path | What it gives you |
+|------|-------------------|
+| [`CLAUDE.md`](CLAUDE.md) | Overview, commands, conventions, gotchas and security rules, loaded in every session |
+| [`.claude/rules/`](.claude/rules) | Focused rules that load when you touch matching files (tools, Discord, Gmail, installer, docs) plus always-on security rules |
+| [`.claude/skills/`](.claude/skills) | Slash commands: `/add-tool`, `/run-tests`, `/deploy`, `/security-audit` |
+| [`.claude/agents/tool-reviewer.md`](.claude/agents/tool-reviewer.md) | A reviewer subagent for tool changes, with shared memory in [`.claude/agent-memory/`](.claude/agent-memory/tool-reviewer/MEMORY.md) |
+| [`.claude/settings.json`](.claude/settings.json) | Shared permissions: safe commands allowed; reading secret files and force pushes denied |
+
+With Claude Code: run `claude` in the repo, then for example `/add-tool slack slack_send_message`, `/run-tests`, and ask `@tool-reviewer` to review your diff. The full table of what each file does is in [docs/contributing.md](docs/contributing.md#the-claude-folder).
+
 ## Security
 
 - Never commit `.env*` or `.pulse.local.json` (both git-ignored; only `.env.example` is tracked).
@@ -175,4 +219,8 @@ Run the server locally: `cp .env.example .env`, fill it in, then `uv run --with 
 
 ## All guides
 
-[Vercel](docs/vercel.md) | [Discord](docs/discord.md) | [Gmail](docs/gmail.md) | [Apify](docs/apify.md) | [Connect your client](docs/clients.md) | [Troubleshooting](docs/troubleshooting.md) | [Contributing](docs/contributing.md)
+**Setup:** [Vercel](docs/vercel.md) | [Discord](docs/discord.md) | [Gmail](docs/gmail.md) | [Apify](docs/apify.md) | [Connect your client](docs/clients.md)
+
+**Use:** [Using pulse-mcp](docs/usage.md) | [Tool reference](docs/tools.md) | [Troubleshooting](docs/troubleshooting.md)
+
+**Understand and contribute:** [What pulse-mcp is for](docs/architecture.md) | [Contributing](docs/contributing.md)

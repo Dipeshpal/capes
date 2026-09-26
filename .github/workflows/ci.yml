@@ -18,6 +18,7 @@ jobs:
       - run: pip install fastapi aiohttp python-dotenv httpx
       - run: python tests/protocol.py
       - run: python tests/gmail_offline.py
+      - run: python scripts/gen_tools_doc.py --check
       - run: python tests/check_docs.py
       - run: node --check scripts/pulse.mjs
 
