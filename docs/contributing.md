@@ -142,6 +142,7 @@ The repo ships its Claude Code setup so every contributor's assistant starts wit
 | `.claude/rules/dashboard.md` | Front-end and dashboard security rules | When you touch `dashboard/` or `pulse/dashboard.py`, `pulse/security.py`, `pulse/store.py` |
 | `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its guide |
 | `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its guide or its test |
+| `.claude/rules/github.md` | CI, ruleset and governance rules | When you touch `.github/`, `docs/governance.md` or `SECURITY.md` |
 | `.claude/rules/installer.md` | Installer conventions | When you touch `scripts/` |
 | `.claude/rules/docs.md` | Documentation conventions | When you touch README, docs or CLAUDE.md |
 | `.claude/skills/add-tool/` | `/add-tool <service> <tool>`: scaffold a tool, tests and docs | When you run it |

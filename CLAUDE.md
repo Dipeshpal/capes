@@ -11,7 +11,8 @@ Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by ea
 - `pulse/discord.py`: Discord over REST only (no gateway). `pulse/gmail.py`: IMAP/SMTP with an app password. `pulse/twitter.py`: Apify.
 - `scripts/capes.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
 - `tests/`: `protocol.py`, `dashboard.py`, `gmail_offline.py` (fake IMAP), `discord_offline.py` (fake Discord REST server), `claude_config.py`, `check_docs.py`, `discord_e2e.py` (opt-in).
-- `docs/`: guides per service (`vercel`, `discord`, `gmail`, `apify`), `dashboard`, `clients`, `usage`, `architecture` (goals, security model, comparison), `troubleshooting`, `contributing`, `release-checklist`, generated `tools.md`, `assets/` screenshots.
+- `.github/`: CI (`ci.yml`: jobs `lint`, `test`, `guard`), `CODEOWNERS`, issue/PR templates, Dependabot config, and `rulesets/protect-default-branch.json` (the branch rules; see `docs/governance.md`).
+- `docs/`: guides per service (`vercel`, `discord`, `gmail`, `apify`), `dashboard`, `clients`, `usage`, `architecture` (goals, security model, comparison), `troubleshooting`, `contributing`, `governance` (who can merge), `release-checklist`, generated `tools.md`, `assets/` (screenshots, `logo.png`, `social-preview.png`). The dashboard's own logo and favicons are in `dashboard/`.
 
 ## Commands
 
@@ -39,6 +40,20 @@ printf '%s' 'VALUE' | vercel env add NAME production
 
 Env vars: `MCP_API_KEY` (required); `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` (optional, a tool without its token returns a clear `ToolError`); `KV_REST_API_URL`/`KV_REST_API_TOKEN` (optional Redis for dashboard settings); `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS`, `PULSE_DISABLED_TOOLS` (always-on restrictions).
 
+## Git and GitHub workflow
+
+- The default branch is `main` and it is protected by a repository ruleset (`.github/rulesets/protect-default-branch.json`): **direct pushes are rejected**. Work on a branch (`feat/`, `fix/`, `docs/`), push it, open a PR with `gh pr create`, wait for `lint`, `test` and `guard`, then the owner merges: `gh pr merge N --squash --admin --delete-branch` (the owner bypass works only through a PR). Squash merge only, linear history.
+- Outside contributors fork and open PRs; only a code owner (`.github/CODEOWNERS`) approves and merges. Their first workflow run needs the maintainer's approval. Never use `pull_request_target`, and keep the workflow token read-only. See `docs/governance.md`.
+- Before `git add -A`, run `git status --short` and `git ls-files -o --exclude-standard`. A rename once made `.pulse.local.json` (a key file) stop matching `.gitignore`, so it got committed locally; it was caught before pushing and purged. When you rename an ignored file, update `.gitignore` in the same step and check.
+- The `gh` token needs the `workflow` scope to push changes under `.github/workflows/` (`gh auth refresh -h github.com -s workflow`, then approve in the browser).
+- Rulesets and branch protection need a public repo or a paid plan (a private free repo returns 403). Right after a visibility change GitHub briefly returns "Repository has been locked"; wait and retry.
+- Dependabot PRs change `.github/` or `requirements.txt`, so the guard fails on them by design. Review the diff, comment `@dependabot rebase` when siblings conflict (each edits a neighbouring line of `requirements.txt`), or apply the bump yourself and re-pin with `python scripts/check_claude_config.py --update`.
+- Commits end with the `Co-Authored-By` and `Claude-Session` trailers; PR bodies end with the "Generated with Claude Code" line.
+
+## Naming
+
+The project brand is **Capes** (repo `Dipeshpal/capes`, Vercel project `capes-mcp`, MCP client entry `capes`, installer `scripts/capes.mjs`). Some internal names deliberately kept the old `pulse` name so nothing already deployed breaks: the `pulse/` package, `PULSE_*` env vars, the `pulse_session` cookie and the `pulse:settings` Redis key. Do not rename them without a migration note.
+
 ## Conventions
 
 - Runtime is Python on Vercel. Runtime dependencies are only `fastapi`, `aiohttp`, `python-dotenv` (`requirements.txt`); CI blocks new ones. Prefer the standard library.
@@ -59,7 +74,17 @@ Env vars: `MCP_API_KEY` (required); `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_A
 - The dashboard CSP forbids inline scripts and styles. Never use `innerHTML`; the `h()` helper inserts text only.
 - Settings are cached for 10 s per instance. If Redis is configured but down, use the last known settings, else fail closed (read-only).
 - A new Vercel deployment is needed after changing env vars. A `401` from the live URL usually means Deployment Protection is on.
+- Discord: pinning needs its own **Pin Messages** permission (bit 51), separate from Manage Messages since 2025. A bot with Manage Messages still gets `403` (50013) on pin. The invite integer is `2253295267998935` and `INVITE_PERMISSIONS` in `pulse/discord.py` must equal it (`tests/protocol.py` checks). Re-opening the invite link for a server the bot is already in updates its role only after **Authorize** is clicked; a role can also be edited by hand in Server Settings.
+- The dashboard builds the invite link itself (`GET /dashboard/api/discord-invite`): a bot's user ID equals its application ID, so no `CLIENT_ID` is needed.
+- Vercel: `<name>.vercel.app` may be taken (`capes.vercel.app` was), so the project is `capes-mcp`. Only the project's automatic production domain is public; an address added with `vercel alias set` is covered by Deployment Protection and answers 302. Rename a project with `vercel project rename`, then redeploy.
+- Transparent PNGs: the image viewer shows transparency as black. Check with PIL (`Image.mode`, alpha extrema) before flattening a logo. A headless Chrome screenshot (`chrome.exe --headless=new --screenshot=...`) is a quick way to preview an SVG or HTML sheet.
 - Windows: Git Bash `/tmp` is not the same directory as Python's `/tmp`; use repo-relative paths. Do not patch files with inline Python containing backslashes through the shell; use the editor tools.
+
+## Verification habits
+
+- Do not trust an assistant's test report (for example from Claude Desktop): it miscounted tools and misdiagnosed a permission failure. Reproduce with a read-only API call using `.env.research` values (never print them) on the test server only.
+- Mutating Discord tools may run only on the disposable Test Server, never on the real community server the bot also sits in. Name test objects `pulse-test-*` and delete them afterwards.
+- Codex CLI (ChatGPT login) accepts only `-m gpt-6-luna -c model_reasoning_effort=medium`; other models are rejected, and its image generation can hit the plan's usage limit.
 
 ## Security (non-negotiable)
 
