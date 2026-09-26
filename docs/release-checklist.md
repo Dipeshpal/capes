@@ -5,13 +5,13 @@ Use this before making the repository public, and before tagging a release. Each
 ## Before going public
 
 - [x] **License:** MIT (`LICENSE`), chosen 2026-09-27.
-- [ ] **Rotate every credential that ever touched a private repo or old deployment** (Discord bot token, Apify token, Gmail app password if used in tests, `MCP_API_KEY`), then update Vercel and redeploy.
-- [ ] **Delete old repositories that held leaked history** (`gh repo delete <owner>/<name>`). GitHub keeps orphaned commits reachable by SHA, so a repo that ever contained a secret must be deleted, not just rewritten.
-- [ ] **Full-history secret scan is clean:** `bash .claude/skills/security-audit/scan.sh --strict` with your real values exported in the shell (it prints counts only).
-- [ ] **Turn on GitHub protections** for the default branch by applying the ruleset and settings in [Governance](governance.md#apply-the-rules-maintainer-once-the-repository-is-public): pull request required, Code Owner review, checks `lint`, `test`, `guard`, no force pushes, squash only. Private repositories need a paid plan; public ones get it free.
-- [ ] **Enable GitHub secret scanning and push protection** (Settings > Code security).
-- [ ] **Enable private vulnerability reporting** (Settings > Code security) so [SECURITY.md](../SECURITY.md) works.
-- [ ] **Discord bot is private** (Developer Portal > Bot > Public Bot off) and its permissions are what you want.
+- [x] **Rotate every credential that ever touched a private repo or old deployment** (Discord bot token, Apify token, Gmail app password if used in tests, `MCP_API_KEY`), then update Vercel and redeploy.
+- [x] **Delete old repositories that held leaked history** (`gh repo delete <owner>/<name>`). GitHub keeps orphaned commits reachable by SHA, so a repo that ever contained a secret must be deleted, not just rewritten.
+- [x] **Full-history secret scan is clean:** `bash .claude/skills/security-audit/scan.sh --strict` with your real values exported in the shell (it prints counts only).
+- [x] **Turn on GitHub protections** for the default branch by applying the ruleset and settings in [Governance](governance.md#apply-the-rules-maintainer-once-the-repository-is-public): pull request required, Code Owner review, checks `lint`, `test`, `guard`, no force pushes, squash only. Private repositories need a paid plan; public ones get it free.
+- [x] **Enable GitHub secret scanning and push protection** (Settings > Code security).
+- [x] **Enable private vulnerability reporting** (Settings > Code security) so [SECURITY.md](../SECURITY.md) works.
+- [x] **Discord bot is private** (Developer Portal > Bot > Public Bot off) and its permissions are what you want.
 - [ ] **Vercel Deployment Protection** and the dashboard sign-in work on the production address ([guide](vercel.md#deployment-protection)).
 - [ ] **Docs read cleanly** from a stranger's point of view: follow the README on a fresh Vercel account and note every place you hesitated.
 - [ ] **The Deploy button URL points at the public repository** and creates a working project.
