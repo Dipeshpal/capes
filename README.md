@@ -92,7 +92,7 @@ About 20 minutes, most of it creating credentials. Skip any service you do not n
 | 1 | Create a free Vercel account and your `MCP_API_KEY` | [Vercel guide](docs/vercel.md) | 3 min |
 | 2 | Get credentials for the services you want | [Discord](docs/discord.md), [Gmail](docs/gmail.md), [Apify](docs/apify.md) guides | 3 to 10 min each |
 | 3 | **Deploy on Vercel** and paste your key and credentials | [Option A](#option-a-deploy-on-vercel-recommended) | 3 min |
-| 4 | Open `/dashboard`, sign in, click **Test connection** on each connector; invite your Discord bot with the link in the Discord guide | your browser | 3 min |
+| 4 | Open `/dashboard`, sign in, click **Test connection** on each connector; invite your Discord bot with **Connectors > Discord > Get invite link** (built from your token, nothing to copy) | your browser | 3 min |
 | 5 | Connect your AI client and ask "List my Discord channels" | Claude, Codex, Cursor | 2 min |
 
 ## Services and credentials

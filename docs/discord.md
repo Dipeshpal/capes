@@ -29,7 +29,9 @@ On the **Bot** tab, switch **Public Bot** off. Otherwise anyone who knows your a
 
 ## 4. Invite the bot with the right permissions
 
-Open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID). The installer prints the finished link for you, and so does the dashboard: **Connectors > Discord > Get invite link** (no Application ID needed).
+The easiest way: after deploying, open the dashboard, go to **Connectors > Discord** and click **Get invite link**, then **Invite bot to a server**. It builds the link from your token, so there is nothing to look up. The installer prints the same link.
+
+To build it by hand, open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID).
 
 ```
 https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1495454313687
@@ -59,7 +61,7 @@ The bot can only manage roles and members that sit **below** its own role. In Di
 
 ## 7. Check that it works
 
-Ask your AI assistant: "List my Discord channels." You should see your server and its channels. Then: "Read the last 3 messages in #general."
+In the dashboard, **Test connection** on the Discord card should say the bot is in your server. Then ask your AI assistant: "List my Discord channels." You should see your server and its channels. Then: "Read the last 3 messages in #general."
 
 To find IDs yourself: Discord **User Settings > Advanced > Developer Mode** on, then right-click a server, channel, user or role and choose **Copy ... ID**.
 
