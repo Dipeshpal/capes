@@ -4,6 +4,7 @@ What the bot can do is decided by Discord, not by this code: see "Discord permis
 """
 
 import asyncio
+import base64
 import json
 import os
 import re
@@ -81,6 +82,10 @@ HINTS = {
     10011: "Unknown role.",
     10013: "Unknown user.",
     20001: "Bots cannot use this endpoint.",
+    50007: "Cannot message this user: they must share a server with the bot and allow direct messages from server members.",
+    50109: "The request body was not valid JSON.",
+    10015: "Unknown webhook.",
+    10006: "Unknown invite.",
 }
 
 _bot_id: str | None = None
@@ -91,7 +96,8 @@ _bot_id: str | None = None
 # --------------------------------------------------------------------------
 
 
-async def call(method: str, path: str, *, json_body: Any = None, params: dict | None = None, reason: str | None = None) -> Any:
+async def call(method: str, path: str, *, json_body: Any = None, params: dict | None = None, reason: str | None = None, data_factory=None) -> Any:
+    """One Discord REST call. `data_factory` builds a fresh multipart body per attempt (a form can only be sent once)."""
     token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
         raise ToolError("DISCORD_BOT_TOKEN is not set on the server")
@@ -102,9 +108,15 @@ async def call(method: str, path: str, *, json_body: Any = None, params: dict | 
         headers["X-Audit-Log-Reason"] = quote(reason)
     async with aiohttp.ClientSession() as session:
         for attempt in range(2):
-            async with session.request(method, f"{API}{path}", json=json_body, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+            data = data_factory() if data_factory else None
+            async with session.request(
+                method, f"{API}{path}", json=json_body, data=data, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=20)
+            ) as resp:
                 text = await resp.text()
-                body = json.loads(text) if text else None
+                try:
+                    body = json.loads(text) if text else None
+                except ValueError:
+                    body = None  # e.g. an HTML error page from a proxy
                 if resp.status == 429 and attempt == 0 and (body or {}).get("retry_after", 99) <= 5:
                     await asyncio.sleep(body["retry_after"])
                     continue
@@ -311,19 +323,22 @@ async def get_channel(args):
     ["channel_id"],
 )
 async def read_channel(args):
-    limit = max(1, min(int(args.get("limit", 50)), 500))
-    before = args.get("before")
+    return await read_messages(str(args["channel_id"]), int(args.get("limit", 50)), args.get("before"))
+
+
+async def read_messages(channel_id: str, limit: int, before: str | None = None) -> dict:
+    limit = max(1, min(limit, 500))
     messages: list = []
     while len(messages) < limit:
         params = {"limit": min(100, limit - len(messages))}
         if before:
             params["before"] = before
-        batch = await call("GET", f"/channels/{args['channel_id']}/messages", params=params)
+        batch = await call("GET", f"/channels/{channel_id}/messages", params=params)
         if not batch:
             break
         messages.extend(batch)
         before = batch[-1]["id"]
-    return {"channel_id": str(args["channel_id"]), "count": len(messages), "messages": [fmt_message(m) for m in messages]}
+    return {"channel_id": channel_id, "count": len(messages), "messages": [fmt_message(m) for m in messages]}
 
 
 @tool("discord_list_pins", "List pinned messages in a channel.", {"channel_id": CHANNEL}, ["channel_id"])
@@ -670,6 +685,7 @@ async def create_invite(args):
         "name": {"type": "string"},
         "message_id": sid("Start the thread from this message (optional)"),
         "content": {"type": "string", "description": "First post text; required for forum channels"},
+        "tag_ids": {"type": "array", "items": {"type": "string", "pattern": SNOWFLAKE}, "description": "Forum tag IDs to apply (see discord_list_forum_tags)"},
         "private": {"type": "boolean", "description": "Private thread (standalone only)"},
         "auto_archive_minutes": {"type": "integer", "enum": [60, 1440, 4320, 10080]},
     },
@@ -689,6 +705,7 @@ async def create_thread(args):
                 "name": args["name"],
                 "auto_archive_duration": archive,
                 "message": {"content": args["content"], "allowed_mentions": {"parse": ["users"]}},
+                **({"applied_tags": [str(t) for t in args["tag_ids"]]} if args.get("tag_ids") else {}),
             },
         )
     else:
@@ -837,3 +854,340 @@ async def moderate_member(args):
     else:
         raise ToolError("action must be kick, ban, unban, timeout or untimeout")
     return {"user_id": str(u), "action": action}
+
+
+# --------------------------------------------------------------------------
+# Messages: single message, who reacted, direct messages, files, polls
+# --------------------------------------------------------------------------
+
+MAX_UPLOAD_BYTES = 3_000_000  # Vercel caps request bodies at 4.5 MB, and base64 adds a third
+FILENAME = r"[A-Za-z0-9._ \-]{1,100}"
+INVITE_CODE = r"[A-Za-z0-9\-]{2,32}"
+
+
+@tool("discord_get_message", "Read one message by ID.", {"channel_id": CHANNEL, "message_id": MESSAGE}, ["channel_id", "message_id"])
+async def get_message(args):
+    return fmt_message(await call("GET", f"/channels/{args['channel_id']}/messages/{args['message_id']}"))
+
+
+@tool(
+    "discord_list_reactions",
+    "List the users who reacted to a message with one emoji (unicode or name:id).",
+    {"channel_id": CHANNEL, "message_id": MESSAGE, "emoji": {"type": "string", "maxLength": 100}, "limit": {"type": "integer", "minimum": 1, "maximum": 100}},
+    ["channel_id", "message_id", "emoji"],
+)
+async def list_reactions(args):
+    users = await call(
+        "GET",
+        f"/channels/{args['channel_id']}/messages/{args['message_id']}/reactions/{quote(args['emoji'], safe='')}",
+        params={"limit": int(args.get("limit", 25))},
+    )
+    return [{"id": u["id"], "username": u["username"]} for u in users]
+
+
+async def dm_channel(user_id: str) -> str:
+    """Open (or fetch) the direct-message channel with a user."""
+    return (await call("POST", "/users/@me/channels", json_body={"recipient_id": str(user_id)}))["id"]
+
+
+@tool(
+    "discord_send_dm",
+    "Send a direct message to a user. They must share a server with the bot and allow DMs from server members. Never pings anyone.",
+    {"user_id": USER, "content": {"type": "string", "maxLength": 2000}, "embed": EMBED},
+    ["user_id"],
+    hint="write",
+)
+async def send_dm(args):
+    if not args.get("content") and not args.get("embed"):
+        raise ToolError("Provide content and/or embed")
+    channel = await dm_channel(args["user_id"])
+    body = clean({"content": args.get("content"), "embeds": [args["embed"]] if args.get("embed") else None, "allowed_mentions": {"parse": []}})
+    m = await call("POST", f"/channels/{channel}/messages", json_body=body)
+    return {"id": m["id"], "channel_id": m["channel_id"], "timestamp": m["timestamp"]}
+
+
+@tool(
+    "discord_read_dm",
+    "Read recent direct messages between the bot and a user (newest first).",
+    {"user_id": USER, "limit": {"type": "integer", "minimum": 1, "maximum": 100}},
+    ["user_id"],
+)
+async def read_dm(args):
+    return await read_messages(await dm_channel(args["user_id"]), int(args.get("limit", 25)))
+
+
+@tool(
+    "discord_send_file",
+    "Upload a file (base64, up to 3 MB) to a channel or thread, with an optional message.",
+    {
+        "channel_id": CHANNEL,
+        "filename": {"type": "string", "pattern": FILENAME, "description": "For example report.pdf"},
+        "content_base64": {"type": "string", "maxLength": 4_100_000, "description": "File bytes, base64 encoded (up to 3 MB of file)"},
+        "mime_type": {"type": "string", "maxLength": 100, "description": "Default application/octet-stream"},
+        "content": {"type": "string", "maxLength": 2000, "description": "Message text to send with the file"},
+    },
+    ["channel_id", "filename", "content_base64"],
+    hint="write",
+)
+async def send_file(args):
+    try:
+        raw = base64.b64decode(args["content_base64"], validate=True)
+    except ValueError as e:
+        raise ToolError("content_base64 is not valid base64") from e
+    if not raw:
+        raise ToolError("The file is empty")
+    if len(raw) > MAX_UPLOAD_BYTES:
+        raise ToolError(f"The file is {len(raw)} bytes; this server accepts up to {MAX_UPLOAD_BYTES}")
+    payload = json.dumps(clean({"content": args.get("content"), "allowed_mentions": {"parse": ["users"]}}))
+
+    def form():
+        f = aiohttp.FormData()
+        f.add_field("payload_json", payload, content_type="application/json")
+        f.add_field("files[0]", raw, filename=args["filename"], content_type=args.get("mime_type") or "application/octet-stream")
+        return f
+
+    m = await call("POST", f"/channels/{args['channel_id']}/messages", data_factory=form)
+    return {"id": m["id"], "channel_id": m["channel_id"], "attachments": [a["url"] for a in m.get("attachments", [])]}
+
+
+@tool(
+    "discord_create_poll",
+    "Post a native Discord poll (2 to 10 answers) in a channel.",
+    {
+        "channel_id": CHANNEL,
+        "question": {"type": "string", "maxLength": 300},
+        "answers": {"type": "array", "items": {"type": "string", "maxLength": 55}, "description": "2 to 10 answer texts"},
+        "duration_hours": {"type": "integer", "minimum": 1, "maximum": 768, "description": "Default 24"},
+        "allow_multiselect": {"type": "boolean"},
+    },
+    ["channel_id", "question", "answers"],
+    hint="write",
+)
+async def create_poll(args):
+    answers = args["answers"]
+    if not 2 <= len(answers) <= 10 or not all(a.strip() for a in answers):
+        raise ToolError("A poll needs 2 to 10 non-empty answers")
+    poll = {
+        "question": {"text": args["question"]},
+        "answers": [{"poll_media": {"text": a}} for a in answers],
+        "duration": int(args.get("duration_hours", 24)),
+        "allow_multiselect": bool(args.get("allow_multiselect")),
+    }
+    m = await call("POST", f"/channels/{args['channel_id']}/messages", json_body={"poll": poll})
+    return {"id": m["id"], "channel_id": m["channel_id"]}
+
+
+# --------------------------------------------------------------------------
+# Forum tags
+# --------------------------------------------------------------------------
+
+FORUM_TYPES = (15, 16)
+
+
+def fmt_tag(t: dict) -> dict:
+    return clean({"id": t["id"], "name": t["name"], "moderated": t.get("moderated") or None, "emoji": t.get("emoji_name")})
+
+
+async def forum_tags(channel_id: str) -> tuple[dict, list]:
+    c = await call("GET", f"/channels/{channel_id}")
+    if c["type"] not in FORUM_TYPES:
+        raise ToolError("That channel is not a forum or media channel")
+    return c, c.get("available_tags", [])
+
+
+@tool("discord_list_forum_tags", "List the tags of a forum channel.", {"channel_id": CHANNEL}, ["channel_id"])
+async def list_forum_tags(args):
+    _, tags = await forum_tags(str(args["channel_id"]))
+    return [fmt_tag(t) for t in tags]
+
+
+@tool(
+    "discord_manage_forum_tag",
+    "Add, rename or remove a tag on a forum channel. Needs Manage Channels. Removing a tag removes it from posts that use it.",
+    {
+        "channel_id": CHANNEL,
+        "action": {"type": "string", "enum": ["add", "rename", "remove"]},
+        "name": {"type": "string", "maxLength": 20, "description": "Tag name (add, rename)"},
+        "tag_id": sid("Tag ID (rename, remove)"),
+        "emoji": {"type": "string", "maxLength": 20, "description": "Unicode emoji for the tag (add, rename), optional"},
+        "moderated": {"type": "boolean", "description": "Only members with Manage Threads can apply it (add)"},
+    },
+    ["channel_id", "action"],
+    hint="destructive",
+)
+async def manage_forum_tag(args):
+    cid, action = str(args["channel_id"]), args["action"]
+    _, tags = await forum_tags(cid)
+    keep = [clean({k: t.get(k) for k in ("id", "name", "moderated", "emoji_id", "emoji_name")}) for t in tags]
+    if action == "add":
+        if not args.get("name"):
+            raise ToolError("name is required to add a tag")
+        keep.append(clean({"name": args["name"], "moderated": bool(args.get("moderated")), "emoji_name": args.get("emoji")}))
+    else:
+        target = next((t for t in keep if t["id"] == str(args.get("tag_id"))), None)
+        if not target:
+            raise ToolError("No tag with that tag_id on this channel (see discord_list_forum_tags)")
+        if action == "remove":
+            keep.remove(target)
+        elif action == "rename":
+            if not args.get("name"):
+                raise ToolError("name is required to rename a tag")
+            target["name"] = args["name"]
+            if args.get("emoji"):
+                target["emoji_name"] = args["emoji"]
+                target.pop("emoji_id", None)
+        else:
+            raise ToolError("action must be add, rename or remove")
+    updated = await call("PATCH", f"/channels/{cid}", json_body={"available_tags": keep}, reason=DEFAULT_REASON)
+    return [fmt_tag(t) for t in updated.get("available_tags", [])]
+
+
+# --------------------------------------------------------------------------
+# Webhooks (the webhook token stays on the server and is never returned)
+# --------------------------------------------------------------------------
+
+
+def fmt_webhook(w: dict) -> dict:
+    return clean(
+        {
+            "id": w["id"],
+            "name": w.get("name"),
+            "channel_id": w.get("channel_id"),
+            "guild_id": w.get("guild_id"),
+            "created_by": (w.get("user") or {}).get("username"),
+        }
+    )
+
+
+@tool(
+    "discord_list_webhooks",
+    "List webhooks of a channel or of a whole server. Tokens are never shown. Needs Manage Webhooks.",
+    {"channel_id": CHANNEL, "guild_id": GUILD},
+)
+async def list_webhooks(args):
+    if args.get("channel_id"):
+        hooks = await call("GET", f"/channels/{args['channel_id']}/webhooks")
+    elif args.get("guild_id"):
+        hooks = await call("GET", f"/guilds/{args['guild_id']}/webhooks")
+    else:
+        raise ToolError("Provide channel_id or guild_id")
+    return [fmt_webhook(w) for w in hooks]
+
+
+@tool(
+    "discord_create_webhook",
+    "Create a webhook in a channel. Returns its ID only; use discord_send_webhook_message to post through it. Needs Manage Webhooks.",
+    {"channel_id": CHANNEL, "name": {"type": "string", "maxLength": 80}},
+    ["channel_id", "name"],
+    hint="write",
+)
+async def create_webhook(args):
+    return fmt_webhook(await call("POST", f"/channels/{args['channel_id']}/webhooks", json_body={"name": args["name"]}, reason=DEFAULT_REASON))
+
+
+@tool(
+    "discord_send_webhook_message",
+    "Post a message through a webhook, optionally under a custom display name. The server looks up the webhook token itself.",
+    {
+        "webhook_id": sid("Webhook ID (from discord_list_webhooks)"),
+        "content": {"type": "string", "maxLength": 2000},
+        "username": {"type": "string", "maxLength": 80, "description": "Display name to post as (optional)"},
+        "embed": EMBED,
+    },
+    ["webhook_id"],
+    hint="write",
+)
+async def send_webhook_message(args):
+    if not args.get("content") and not args.get("embed"):
+        raise ToolError("Provide content and/or embed")
+    hook = await call("GET", f"/webhooks/{args['webhook_id']}")
+    token = hook.get("token")
+    if not token:
+        raise ToolError("This webhook has no token the bot can read (it belongs to another application)")
+    body = clean(
+        {
+            "content": args.get("content"),
+            "username": args.get("username"),
+            "embeds": [args["embed"]] if args.get("embed") else None,
+            "allowed_mentions": {"parse": ["users"]},
+        }
+    )
+    m = await call("POST", f"/webhooks/{args['webhook_id']}/{token}", json_body=body, params={"wait": "true"})
+    return {"id": m["id"], "channel_id": m["channel_id"]}
+
+
+@tool(
+    "discord_delete_webhook",
+    "Delete a webhook permanently. Needs Manage Webhooks.",
+    {"webhook_id": sid("Webhook ID"), "reason": REASON},
+    ["webhook_id"],
+    hint="destructive",
+)
+async def delete_webhook(args):
+    await call("DELETE", f"/webhooks/{args['webhook_id']}", reason=args.get("reason") or DEFAULT_REASON)
+    return {"deleted": str(args["webhook_id"])}
+
+
+# --------------------------------------------------------------------------
+# Invites and audit log
+# --------------------------------------------------------------------------
+
+
+@tool("discord_list_invites", "List a server's active invites. Needs Manage Server.", {"guild_id": GUILD}, ["guild_id"])
+async def list_invites(args):
+    invites = await call("GET", f"/guilds/{args['guild_id']}/invites")
+    return [
+        clean(
+            {
+                "code": i["code"],
+                "channel": (i.get("channel") or {}).get("name"),
+                "inviter": (i.get("inviter") or {}).get("username"),
+                "uses": i.get("uses"),
+                "max_uses": i.get("max_uses") or None,
+                "expires_at": i.get("expires_at"),
+            }
+        )
+        for i in invites
+    ]
+
+
+@tool(
+    "discord_delete_invite",
+    "Revoke an invite link. Needs Manage Server (or Manage Channels for that channel).",
+    {"code": {"type": "string", "pattern": INVITE_CODE}, "reason": REASON},
+    ["code"],
+    hint="destructive",
+)
+async def delete_invite(args):
+    await call("DELETE", f"/invites/{args['code']}", reason=args.get("reason") or DEFAULT_REASON)
+    return {"revoked": args["code"]}
+
+
+@tool(
+    "discord_get_audit_log",
+    "Read a server's audit log (who changed what, newest first). Needs View Audit Log.",
+    {
+        "guild_id": GUILD,
+        "limit": {"type": "integer", "minimum": 1, "maximum": 100, "description": "Default 25"},
+        "user_id": sid("Only actions by this user (optional)"),
+        "action_type": {"type": "integer", "minimum": 1, "maximum": 200, "description": "Discord audit log action type number (optional)"},
+    },
+    ["guild_id"],
+)
+async def get_audit_log(args):
+    params = clean({"limit": int(args.get("limit", 25)), "user_id": args.get("user_id"), "action_type": args.get("action_type")})
+    data = await call("GET", f"/guilds/{args['guild_id']}/audit-logs", params=params)
+    names = {u["id"]: u["username"] for u in data.get("users", [])}
+    return [
+        clean(
+            {
+                "id": e["id"],
+                "action_type": e["action_type"],
+                "by": names.get(e.get("user_id"), e.get("user_id")),
+                "target_id": e.get("target_id"),
+                "reason": e.get("reason"),
+                "changed": [c.get("key") for c in e.get("changes", [])] or None,
+            }
+        )
+        for e in data.get("audit_log_entries", [])
+    ]

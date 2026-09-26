@@ -1,6 +1,6 @@
 # Tool reference
 
-47 tools.
+62 tools.
 
 Generated from the code by `python scripts/gen_tools_doc.py`. Do not edit by hand; change the tool's description or schema in `pulse/` and regenerate.
 
@@ -58,13 +58,28 @@ Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [
 | `discord_set_channel_permission` | write | Set (replace) the permission overwrite for a role or member on a channel. Permissions in neither allow nor deny inherit. Needs Manage Roles. | `channel_id*`, `target_id*`, `target_type*`, `allow`, `deny` |
 | `discord_delete_channel_permission` | destructive | Remove a role's or member's permission overwrite from a channel. | `channel_id*`, `target_id*` |
 | `discord_create_invite` | write | Create an invite link for a channel. | `channel_id*`, `max_age_seconds`, `max_uses`, `temporary` |
-| `discord_create_thread` | write | Create a thread: from an existing message (message_id), as a standalone thread, or as a forum post (content). Edit/archive/delete threads with discord_edit_channel / discord_delete_channel. | `channel_id*`, `name*`, `message_id`, `content`, `private`, `auto_archive_minutes` |
+| `discord_create_thread` | write | Create a thread: from an existing message (message_id), as a standalone thread, or as a forum post (content). Edit/archive/delete threads with discord_edit_channel / discord_delete_channel. | `channel_id*`, `name*`, `message_id`, `content`, `tag_ids`, `private`, `auto_archive_minutes` |
 | `discord_thread_member` | write | Manage thread membership: join/leave (the bot), add/remove a user, or list members. | `thread_id*`, `action*`, `user_id` |
 | `discord_create_role` | write | Create a role. Needs Manage Roles; the bot can only grant permissions it has itself. | `guild_id*`, `name*`, `permissions`, `color`, `hoist`, `mentionable` |
 | `discord_edit_role` | write | Edit a role. Passing permissions replaces the role's whole permission set. | `guild_id*`, `role_id*`, `name`, `permissions`, `color`, `hoist`, `mentionable` |
 | `discord_delete_role` | destructive | Delete a role permanently. | `guild_id*`, `role_id*`, `reason` |
 | `discord_member_role` | write | Give a role to a member, or take it away. The role must be below the bot's highest role. | `guild_id*`, `user_id*`, `role_id*`, `action*` |
 | `discord_moderate_member` | destructive | Moderate a member: kick, ban, unban, timeout (mute for N minutes) or untimeout. Needs Kick/Ban/Moderate Members. Destructive: confirm with the user first. | `guild_id*`, `user_id*`, `action*`, `timeout_minutes`, `delete_message_seconds`, `reason` |
+| `discord_get_message` | read | Read one message by ID. | `channel_id*`, `message_id*` |
+| `discord_list_reactions` | read | List the users who reacted to a message with one emoji (unicode or name:id). | `channel_id*`, `message_id*`, `emoji*`, `limit` |
+| `discord_send_dm` | write | Send a direct message to a user. They must share a server with the bot and allow DMs from server members. Never pings anyone. | `user_id*`, `content`, `embed` |
+| `discord_read_dm` | read | Read recent direct messages between the bot and a user (newest first). | `user_id*`, `limit` |
+| `discord_send_file` | write | Upload a file (base64, up to 3 MB) to a channel or thread, with an optional message. | `channel_id*`, `filename*`, `content_base64*`, `mime_type`, `content` |
+| `discord_create_poll` | write | Post a native Discord poll (2 to 10 answers) in a channel. | `channel_id*`, `question*`, `answers*`, `duration_hours`, `allow_multiselect` |
+| `discord_list_forum_tags` | read | List the tags of a forum channel. | `channel_id*` |
+| `discord_manage_forum_tag` | destructive | Add, rename or remove a tag on a forum channel. Needs Manage Channels. Removing a tag removes it from posts that use it. | `channel_id*`, `action*`, `name`, `tag_id`, `emoji`, `moderated` |
+| `discord_list_webhooks` | read | List webhooks of a channel or of a whole server. Tokens are never shown. Needs Manage Webhooks. | `channel_id`, `guild_id` |
+| `discord_create_webhook` | write | Create a webhook in a channel. Returns its ID only; use discord_send_webhook_message to post through it. Needs Manage Webhooks. | `channel_id*`, `name*` |
+| `discord_send_webhook_message` | write | Post a message through a webhook, optionally under a custom display name. The server looks up the webhook token itself. | `webhook_id*`, `content`, `username`, `embed` |
+| `discord_delete_webhook` | destructive | Delete a webhook permanently. Needs Manage Webhooks. | `webhook_id*`, `reason` |
+| `discord_list_invites` | read | List a server's active invites. Needs Manage Server. | `guild_id*` |
+| `discord_delete_invite` | destructive | Revoke an invite link. Needs Manage Server (or Manage Channels for that channel). | `code*`, `reason` |
+| `discord_get_audit_log` | read | Read a server's audit log (who changed what, newest first). Needs View Audit Log. | `guild_id*`, `limit`, `user_id`, `action_type` |
 
 ## X/Twitter
 

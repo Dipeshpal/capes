@@ -44,6 +44,7 @@ Run before every pull request. None needs credentials.
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_offline.py
 python tests/claude_config.py
 python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
@@ -57,6 +58,7 @@ What they protect:
 - `protocol.py`: the MCP protocol, authentication, argument validation, read-only and disabled-tool enforcement, every tool's schema and safety label, and that the README tool list, the Discord permission number and the environment variables in docs agree with the code.
 - `dashboard.py`: sign-in, cookie flags, rate limiting, tampered and expired sessions, CSRF and origin checks, secrets never leaking, settings and activity through a fake Redis, fail-closed behaviour, security headers and the Content-Security-Policy, and rules for the front-end code (no inline scripts, no `innerHTML`, no outside origins).
 - `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail.
+- `discord_offline.py`: the Discord tools against a fake Discord REST server that records every request, so the exact endpoint, method, payload, headers, multipart upload and retry behaviour of each write tool is checked without touching a real server.
 - `claude_config.py` and `check_claude_config.py`: the guard for assistant and CI configuration, and proof that each attack it exists for is blocked (see [below](#the-guard-for-assistant-and-ci-configuration)).
 - `gen_tools_doc.py --check`: [docs/tools.md](tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
 - `check_docs.py`: every relative link and `#anchor` in the docs resolves.

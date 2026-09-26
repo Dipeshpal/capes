@@ -188,15 +188,17 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 ## Tools
 
-47 tools. The list below is the quick view; [docs/tools.md](docs/tools.md) is the generated reference with every tool's description, kind and arguments.
+62 tools. The list below is the quick view; [docs/tools.md](docs/tools.md) is the generated reference with every tool's description, kind and arguments.
 
 **Gmail**: `gmail_search`, `gmail_get_message`, `gmail_get_thread`, `gmail_get_attachment`, `gmail_list_labels`, `gmail_send_email` (HTML, cc/bcc, attachments), `gmail_reply` (reply-all, quoted original), `gmail_forward`, `gmail_create_draft`, `gmail_list_drafts`, `gmail_send_draft`, `gmail_delete_draft`, `gmail_modify` (read/unread, star, archive, labels), `gmail_trash`, `gmail_mark_spam`, `gmail_create_label`, `gmail_delete_label`
 
-**Discord read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_list_pins`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`
+**Discord read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
 
-**Discord messages**: `discord_send_message` (text, embeds, replies), `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
+**Discord messages**: `discord_send_message` (text, embeds, replies), `discord_send_dm`, `discord_send_file` (base64 upload), `discord_create_poll`, `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
 
-**Discord channels and threads**: `discord_create_channel` (text, voice, category, announcement, stage, forum, private), `discord_edit_channel` (also renames, archives and locks threads), `discord_delete_channel`, `discord_set_channel_permission`, `discord_delete_channel_permission`, `discord_create_invite`, `discord_create_thread` (from a message, standalone, private, or forum post), `discord_thread_member`
+**Discord channels and threads**: `discord_create_channel` (text, voice, category, announcement, stage, forum, private), `discord_edit_channel` (also renames, archives and locks threads), `discord_delete_channel`, `discord_set_channel_permission`, `discord_delete_channel_permission`, `discord_create_invite`, `discord_delete_invite`, `discord_create_thread` (from a message, standalone, private, or forum post with tags), `discord_thread_member`
+
+**Discord forums and webhooks**: `discord_list_forum_tags`, `discord_manage_forum_tag`, `discord_list_webhooks`, `discord_create_webhook`, `discord_send_webhook_message` (the webhook token never leaves the server), `discord_delete_webhook`
 
 **Discord roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_moderate_member` (kick, ban, unban, timeout)
 

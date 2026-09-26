@@ -8,6 +8,7 @@ Run these from the repository root and report pass/fail counts for each. Stop an
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_offline.py
 python tests/claude_config.py
 python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check

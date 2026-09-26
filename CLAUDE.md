@@ -10,7 +10,7 @@ Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by ea
 - `pulse/security.py`: key check, signed session cookies, CSRF, origin checks, security headers. `pulse/store.py`: settings (env + optional Redis), activity log, rate limiting. `pulse/connectors.py`: the 3 connectors and their connection tests. `pulse/dashboard.py` + `dashboard/`: dashboard API and its HTML/CSS/JS.
 - `pulse/discord.py`: Discord over REST only (no gateway). `pulse/gmail.py`: IMAP/SMTP with an app password. `pulse/twitter.py`: Apify.
 - `scripts/pulse.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
-- `tests/`: `protocol.py`, `dashboard.py`, `gmail_offline.py` (fake IMAP), `claude_config.py`, `check_docs.py`, `discord_e2e.py` (opt-in).
+- `tests/`: `protocol.py`, `dashboard.py`, `gmail_offline.py` (fake IMAP), `discord_offline.py` (fake Discord REST server), `claude_config.py`, `check_docs.py`, `discord_e2e.py` (opt-in).
 - `docs/`: guides per service (`vercel`, `discord`, `gmail`, `apify`), `dashboard`, `clients`, `usage`, `architecture` (goals, security model, comparison), `troubleshooting`, `contributing`, `release-checklist`, generated `tools.md`, `assets/` screenshots.
 
 ## Commands
@@ -20,6 +20,7 @@ Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by ea
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_offline.py   # fake Discord server
 python tests/claude_config.py && python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check   # run without --check after tool changes
 python tests/check_docs.py

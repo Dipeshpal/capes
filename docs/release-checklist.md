@@ -27,6 +27,6 @@ Use this before making the repository public, and before tagging a release. Each
 
 ## Known gaps to accept or close
 
-- Discord write tools are covered by argument-validation and error-path tests only; run `tests/discord_e2e.py MODE=full` on a disposable server before advertising them as verified.
+- Discord write tools are verified against a fake Discord REST server (`tests/discord_offline.py`: exact endpoint, method, payload and headers) and live read-only calls, but never against a real server that they can change; run `tests/discord_e2e.py MODE=full` on a disposable server before advertising them as verified.
 - Redis-backed features are tested against a fake server and locally; test them on a real Upstash database after adding the integration.
 - There are no per-client keys; anyone with `MCP_API_KEY` has full access to the connected services.

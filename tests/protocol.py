@@ -288,6 +288,8 @@ wanted = [
     "KICK_MEMBERS",
     "BAN_MEMBERS",
     "MODERATE_MEMBERS",
+    "MANAGE_WEBHOOKS",
+    "VIEW_AUDIT_LOG",
 ]
 integer = str(sum(1 << PERMISSIONS[n] for n in wanted))
 for rel in ("docs/discord.md", "scripts/pulse.mjs"):

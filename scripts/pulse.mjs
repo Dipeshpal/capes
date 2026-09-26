@@ -11,8 +11,8 @@ import { dirname, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 
 const WIN = process.platform === 'win32';
-// View/Send/Threads/Embeds/Attach/History/Reactions + Manage Messages/Channels/Roles/Threads, Invites, Kick/Ban/Timeout
-const DISCORD_PERMISSIONS = '1494917442647';
+// View/Send/Threads/Embeds/Attach/History/Reactions + Manage Messages/Channels/Roles/Threads/Webhooks, Audit Log, Invites, Kick/Ban/Timeout
+const DISCORD_PERMISSIONS = '1495454313687';
 const SAVED = new URL('../.pulse.local.json', import.meta.url);
 const [cmd, ...rest] = process.argv.slice(2);
 const flags = {};

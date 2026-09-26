@@ -32,21 +32,21 @@ On the **Bot** tab, switch **Public Bot** off. Otherwise anyone who knows your a
 Open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID). The installer prints the finished link for you.
 
 ```
-https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1494917442647
+https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1495454313687
 ```
 
 Choose the server, click **Authorize**. Opening the same link again for a server the bot is already in **updates** its permissions.
 
-The number `1494917442647` grants exactly these permissions:
+The number `1495454313687` grants exactly these permissions:
 
 | Area | Permissions |
 |------|-------------|
 | Read and write messages | View Channels, Send Messages, Send Messages in Threads, Embed Links, Attach Files, Read Message History, Add Reactions, Use External Emojis |
 | Threads | Create Public Threads, Create Private Threads, Manage Threads |
-| Manage the server | Manage Channels, Manage Roles, Manage Messages, Create Invite |
+| Manage the server | Manage Channels, Manage Roles, Manage Messages, Manage Webhooks, View Audit Log, Create Invite |
 | Moderation | Kick Members, Ban Members, Timeout Members |
 
-It does not include Administrator. If you do not need moderation or role tools, you can choose a smaller set in the Developer Portal under **OAuth2 > URL Generator** (scope `bot`, tick the permissions, copy the generated link).
+It does not include Administrator, and it does not include **Manage Server**. Only `discord_list_invites` and `discord_delete_invite` need Manage Server; add that permission to the bot's role in Server Settings > Roles if you want them. If you do not need moderation or role tools, you can choose a smaller set in the Developer Portal under **OAuth2 > URL Generator** (scope `bot`, tick the permissions, copy the generated link).
 
 ## 5. Put the bot's role high enough
 
@@ -62,6 +62,21 @@ The bot can only manage roles and members that sit **below** its own role. In Di
 Ask your AI assistant: "List my Discord channels." You should see your server and its channels. Then: "Read the last 3 messages in #general."
 
 To find IDs yourself: Discord **User Settings > Advanced > Developer Mode** on, then right-click a server, channel, user or role and choose **Copy ... ID**.
+
+## Direct messages, files, polls, forums, webhooks, audit log
+
+Beyond channels and roles, the toolkit covers:
+
+| Feature | Tools | Notes |
+|---------|-------|-------|
+| Direct messages | `discord_send_dm`, `discord_read_dm` | The user must share a server with the bot and allow DMs from server members (Discord error 50007 otherwise). DMs never ping anyone. |
+| File upload | `discord_send_file` | Base64 content, up to 3 MB, with an optional message. Files are never fetched from URLs. |
+| Polls | `discord_create_poll` | 2 to 10 answers (55 characters each), 1 to 768 hours, optional multi-select. |
+| Forums | `discord_list_forum_tags`, `discord_manage_forum_tag`, `discord_create_thread` with `tag_ids` | Add, rename and remove tags; post to a forum with tags applied. Managing tags needs Manage Channels. |
+| Webhooks | `discord_list_webhooks`, `discord_create_webhook`, `discord_send_webhook_message`, `discord_delete_webhook` | Needs Manage Webhooks (included in the invite link). The webhook token stays on the server and is never returned. |
+| Audit log | `discord_get_audit_log` | Needs View Audit Log (included in the invite link). |
+| Invites | `discord_list_invites`, `discord_delete_invite` | Need Manage Server, which the invite link does not grant; add it to the bot's role if you want these. |
+| Reading one message, who reacted | `discord_get_message`, `discord_list_reactions` | |
 
 ## What the bot cannot do
 

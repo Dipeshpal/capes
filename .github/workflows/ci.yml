@@ -33,6 +33,7 @@ jobs:
       - run: python tests/protocol.py
       - run: python tests/dashboard.py
       - run: python tests/gmail_offline.py
+      - run: python tests/discord_offline.py
       - run: python tests/claude_config.py
       - run: python scripts/gen_tools_doc.py --check
       - run: python tests/check_docs.py

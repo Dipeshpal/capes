@@ -103,13 +103,13 @@ The dashboard idea was inspired by kebab-mcp. pulse-mcp's implementation is inde
 ## Known limits
 
 - Vercel stops a request after 60 seconds.
-- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](discord.md#what-the-bot-cannot-do). The Discord write tools have been tested for argument handling and error paths only, not against a live server.
+- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](discord.md#what-the-bot-cannot-do). The Discord write tools are verified against a fake Discord server that checks the exact request each one sends, plus live read-only calls; they have not been run against a real server that they can change.
 - Gmail: one account, and Trash/Spam are not searchable. See the [Gmail guide](gmail.md#limits).
 - X search depends on a third-party scraper (Apify); its availability and prices are outside this project.
 
 ## Ideas for later (not promises)
 
-- Missing Discord features: direct messages, file uploads, polls, forum tags, webhooks, audit log.
+- More Discord: application commands, scheduled events, stickers and emoji management, member nickname edits.
 - Gmail through the official API with OAuth, as an option next to the app password.
 - Per-client keys and per-key tool scopes.
 - Multiple accounts per service.
