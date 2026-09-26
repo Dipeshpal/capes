@@ -6,6 +6,7 @@ Shared, committed lessons about this codebase. Keep entries short and factual. N
 - Discord bots cannot create servers (error 20001, endpoint removed for bots). They can edit only their own messages. Bulk delete works only for messages younger than 14 days.
 - A Discord bot token carries no permissions. Abilities come from the invite's permission integer and the bot's role position. A fresh bot usually has only `@everyone` permissions, so manage-style tools fail with 50013 until it is re-authorized with the README invite link.
 - A bot looks up its own membership with `GET /guilds/{id}/members/{bot_user_id}`; `/members/@me` is OAuth-only.
+- Pinning needs the separate **Pin Messages** permission (bit 51) since 2025; Manage Messages alone returns 403 (50013). A bot's user ID equals its application ID, which is how the dashboard builds the invite link.
 - Pins use `/channels/{id}/messages/pins` (the older `/pins` routes are deprecated).
 - The Apify actor `apidojo~tweet-scraper` works on the free plan with input `searchTerms`, `maxItems`, `sort`. The first actor id in the project's history (`nwua9nN8WJjIHDLIJ`) never existed.
 - Gmail over IMAP: All Mail excludes Trash and Spam; `X-GM-RAW` gives full Gmail search syntax; special folders must be found through special-use flags; `imaplib` does not quote mailbox names; app passwords need 2-Step Verification.
@@ -34,3 +35,12 @@ Shared, committed lessons about this codebase. Keep entries short and factual. N
 - Linting: ruff with security rules (`ruff.toml`). `ruff check --fix` plus `ruff format` clean most findings; review the rest by hand.
 - A live test found that Gmail marks drafts with the `\Draft` label in All Mail rather than the IMAP flag; fakes must mimic the real service or tests hide real bugs.
 - A QA report produced by an assistant is not evidence: it once claimed cleanup was done while test mail and a label remained. Verify state directly.
+
+## GitHub and release process
+- Branch rules need a public repo (a private free plan returns 403). Apply the ruleset, then verify: a direct push to `main` is rejected and a PR shows BLOCKED until a code owner approves. The owner merges with `gh pr merge N --squash --admin`.
+- A `gh` token without the `workflow` scope cannot push changes to `.github/workflows/`.
+- Renaming a git-ignored file un-ignores it. `git add -A` then commits a key file; check `git ls-files -o --exclude-standard` first.
+- Dependabot PRs touching `requirements.txt` conflict with each other; `@dependabot rebase` one at a time.
+- Only a Vercel project's automatic production domain is public; manual aliases return 302 (Deployment Protection).
+- A transparent PNG looks black in the image viewer; check the alpha channel before flattening.
+- Codex CLI with a ChatGPT login accepts only `gpt-6-luna`; treat its and Claude Desktop's reports as leads, not evidence.
