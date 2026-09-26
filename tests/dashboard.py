@@ -144,6 +144,7 @@ def mut(c, method, path, body=None, token=True, **headers):
 # ================================================================ login and cookies
 c = fresh_client()
 check("state needs a session", c.get("/dashboard/api/state").status_code == 401)
+check("discord invite needs a session", c.get("/dashboard/api/discord-invite").status_code == 401)
 check("session endpoint reports signed out without leaking", c.get("/dashboard/api/session").json() == {"authenticated": False})
 r = login(c, "wrong-key-wrong-key-wrong-key-1")
 check("wrong key rejected", r.status_code == 403 and not r.cookies)

@@ -36,7 +36,7 @@ from fastapi.testclient import TestClient
 
 from api.index import app, verify_api_key
 from pulse import store
-from pulse.discord import PERMISSIONS
+from pulse.discord import INVITE_PERMISSIONS, PERMISSIONS
 from pulse.mcp import handle_rpc, validate_args
 from pulse.registry import TOOLS, ToolError, tool
 
@@ -322,6 +322,7 @@ wanted = [
     "VIEW_AUDIT_LOG",
 ]
 integer = str(sum(1 << PERMISSIONS[n] for n in wanted))
+check("dashboard invite constant matches permission list", integer == INVITE_PERMISSIONS)
 for rel in ("docs/discord.md", "scripts/pulse.mjs"):
     check(f"permission integer {integer} present in {rel}", integer in (ROOT / rel).read_text(encoding="utf-8"))
 

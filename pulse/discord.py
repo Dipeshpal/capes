@@ -18,6 +18,7 @@ from .registry import ToolError, tool
 
 API = "https://discord.com/api/v10"
 SAFE_PATH = re.compile(r"(?:/[A-Za-z0-9@_.%:\-]+)+")
+INVITE_PERMISSIONS = "1495454313687"  # tests/protocol.py recomputes this from PERMISSIONS
 UA = "DiscordBot (https://github.com/Dipeshpal/pulse-mcp, 3.0)"
 DEFAULT_REASON = "via pulse-mcp"
 

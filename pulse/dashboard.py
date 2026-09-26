@@ -7,6 +7,7 @@ Security notes (details in docs/dashboard.md and docs/architecture.md):
 """
 
 import asyncio
+import re
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
@@ -193,6 +194,23 @@ async def test_connector(request: Request, connector_id: str):
     if connector_id not in connectors.BY_ID:
         raise HTTPException(404, "Unknown connector")
     return json_response(request, await connectors.test_connection(connector_id))
+
+
+@router.get("/dashboard/api/discord-invite")
+async def discord_invite(request: Request):
+    """The bot's invite link, built from the configured token (a bot's user ID is its application ID)."""
+    security.require_session(request)
+    from . import discord
+
+    try:
+        me = await discord.call("GET", "/users/@me")
+    except Exception as e:
+        return json_response(request, {"ok": False, "detail": security.redact(str(e))[:200]})
+    client_id = str(me.get("id", ""))
+    if not re.fullmatch(discord.SNOWFLAKE, client_id):
+        return json_response(request, {"ok": False, "detail": "Discord did not return a valid bot ID"})
+    url = f"https://discord.com/oauth2/authorize?client_id={client_id}&scope=bot&permissions={discord.INVITE_PERMISSIONS}"
+    return json_response(request, {"ok": True, "url": url, "bot": me.get("username")})
 
 
 @router.post("/dashboard/api/run")

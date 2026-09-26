@@ -29,7 +29,7 @@ On the **Bot** tab, switch **Public Bot** off. Otherwise anyone who knows your a
 
 ## 4. Invite the bot with the right permissions
 
-Open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID). The installer prints the finished link for you.
+Open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID). The installer prints the finished link for you, and so does the dashboard: **Connectors > Discord > Get invite link** (no Application ID needed).
 
 ```
 https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1495454313687

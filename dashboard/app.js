@@ -187,9 +187,26 @@
               h('button', { class: 'btn small', type: 'button', disabled: !c.configured, onclick: () => testConnector(c.id) }, 'Test connection'),
               h('a', { class: 'btn small', href: c.guide, target: '_blank', rel: 'noopener noreferrer' }, 'Guide'))),
           result ? h('p', { class: result.ok ? 'small' : 'small error', text: (result.ok ? 'OK: ' : 'Failed: ') + result.detail }) : null,
+          c.id === 'discord' && c.configured ? inviteBlock() : null,
         );
       })),
     );
+  }
+
+  function inviteBlock() {
+    const inv = app.invite;
+    if (!inv) return h('button', { class: 'btn small', type: 'button', onclick: loadInvite }, 'Get invite link');
+    if (!inv.ok) return h('p', { class: 'small error', text: 'Failed: ' + inv.detail });
+    return h('div', { class: 'stack' },
+      h('p', { class: 'small', text: `Open this link as the server owner or an admin to add "${inv.bot}" with the right permissions.` }),
+      h('div', { class: 'row' },
+        h('a', { class: 'btn small', href: inv.url, target: '_blank', rel: 'noopener noreferrer' }, 'Invite bot to a server'),
+        h('button', { class: 'btn small', type: 'button', onclick: () => navigator.clipboard && navigator.clipboard.writeText(inv.url) }, 'Copy link')));
+  }
+
+  async function loadInvite() {
+    try { app.invite = await api('/discord-invite'); } catch (ex) { app.invite = { ok: false, detail: ex.message }; }
+    render();
   }
 
   async function testConnector(id) {
