@@ -2,7 +2,7 @@
 // pulse-mcp installer. No dependencies; needs Node 18+.
 //   node scripts/pulse.mjs install    deploy to your Vercel account, then connect your clients
 //   node scripts/pulse.mjs connect    connect clients to an existing deployment
-// Flags: --name --discord --apify --url --key --clients desktop,claude-code,cursor,codex,none
+// Flags: --name --discord --apify --gmail --gmail-password --url --key --clients desktop,claude-code,cursor,codex,none
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -43,13 +43,15 @@ async function install() {
   log('\nCredentials (press Enter to skip any you do not need yet):');
   const discord = flags.discord ?? (await ask('Discord bot token'));
   const apify = flags.apify ?? (await ask('Apify token (for X/Twitter search)'));
+  const gmail = flags.gmail ?? (await ask('Gmail address (optional)'));
+  const gmailPass = gmail ? (flags['gmail-password'] ?? (await ask('Gmail app password (myaccount.google.com/apppasswords)'))) : '';
   const key = randomBytes(32).toString('base64url');
 
   log('\nLinking Vercel project...');
   const link = vc(['link', '--yes', '--project', name]);
   if (link.status !== 0) throw new Error(`vercel link failed:\n${link.stderr || link.stdout}`);
 
-  const env = { MCP_API_KEY: key, ...(discord && { DISCORD_BOT_TOKEN: discord }), ...(apify && { APIFY_TOKEN: apify }) };
+  const env = { MCP_API_KEY: key, ...(discord && { DISCORD_BOT_TOKEN: discord }), ...(apify && { APIFY_TOKEN: apify }), ...(gmail && gmailPass && { GMAIL_ADDRESS: gmail, GMAIL_APP_PASSWORD: gmailPass }) };
   for (const [k, v] of Object.entries(env)) {
     vc(['env', 'rm', k, 'production', '--yes']);
     const r = vc(['env', 'add', k, 'production'], { input: v });

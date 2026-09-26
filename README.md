@@ -2,13 +2,14 @@
 
 Your personal MCP server for your social accounts. Deploy it once to your own Vercel account, connect your accounts, and let Claude, Codex, Cursor or any MCP client read and act on them for you. Your tokens live only in your own Vercel project.
 
-Today it ships with a complete **Discord** toolkit (read, send, edit, delete, react, threads, channels, roles, permissions, moderation) and **X/Twitter search**. Adding another service is one small Python function (see [Add your own tool](#add-your-own-tool)).
+Today it ships with a complete **Discord** toolkit (read, send, edit, delete, react, threads, channels, roles, permissions, moderation), a full **Gmail** toolkit (search, read, send, reply, forward, drafts, labels, trash) and **X/Twitter search**. Adding another service is one small Python function (see [Add your own tool](#add-your-own-tool)).
 
 - [Prerequisites](#prerequisites)
 - [Install in one command](#install-in-one-command)
 - [Deploy with the Vercel button](#deploy-with-the-vercel-button)
 - [Connect your AI client](#connect-your-ai-client)
 - [Discord setup and permissions](#discord-setup-and-permissions)
+- [Gmail setup](#gmail-setup)
 - [Tools](#tools)
 - [Add your own tool](#add-your-own-tool)
 - [Troubleshooting](#troubleshooting)
@@ -21,6 +22,7 @@ Today it ships with a complete **Discord** toolkit (read, send, edit, delete, re
 | [Node.js 18+](https://nodejs.org) | Runs the installer and the Claude Desktop bridge | Yes |
 | Discord bot token | Discord tools | Optional |
 | [Apify token](https://console.apify.com/settings/integrations) (free plan works) | X/Twitter search | Optional |
+| Gmail address + [app password](https://myaccount.google.com/apppasswords) | Gmail tools (free, see [Gmail setup](#gmail-setup)) | Optional |
 
 Tools without their token return a clear error, so you can start with one service and add the rest later.
 
@@ -35,7 +37,7 @@ node scripts/pulse.mjs install
 The installer will:
 
 1. log you in to Vercel (browser window) if needed,
-2. ask for your Discord and Apify tokens (press Enter to skip),
+2. ask for your Discord token, Apify token and Gmail address + app password (press Enter to skip any),
 3. generate a private API key for your server,
 4. create the Vercel project, set the environment variables and deploy,
 5. check that the server answers,
@@ -46,11 +48,11 @@ Your URL and key are saved to `.pulse.local.json` (git-ignored). Non-interactive
 
 ## Deploy with the Vercel button
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up.%20The%20other%20two%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%23prerequisites&project-name=pulse-mcp&repository-name=pulse-mcp)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up.%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%23prerequisites&project-name=pulse-mcp&repository-name=pulse-mcp)
 
 1. Click the button and sign in to Vercel. It copies the repo to your GitHub and asks for three variables:
    - `MCP_API_KEY`: any long random string. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(32))"` or `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
-   - `DISCORD_BOT_TOKEN` and `APIFY_TOKEN`: leave blank to skip a service.
+   - `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`: leave blank to skip a service.
 2. Deploy. Your server is at `https://<project>.vercel.app`, with the MCP endpoint at `/mcp`.
 3. Connect your client with the URL and your `MCP_API_KEY` (next section).
 
@@ -61,6 +63,8 @@ npm i -g vercel && vercel login && vercel link --yes
 printf '%s' 'YOUR_API_KEY'       | vercel env add MCP_API_KEY production
 printf '%s' 'YOUR_DISCORD_TOKEN' | vercel env add DISCORD_BOT_TOKEN production
 printf '%s' 'YOUR_APIFY_TOKEN'   | vercel env add APIFY_TOKEN production
+printf '%s' 'you@gmail.com'      | vercel env add GMAIL_ADDRESS production
+printf '%s' 'YOUR_APP_PASSWORD'  | vercel env add GMAIL_APP_PASSWORD production
 vercel deploy --prod
 ```
 
@@ -141,7 +145,27 @@ Limits set by Discord, not by this project:
 
 Safety defaults: messages ping users only (`@everyone`, `@here` and role pings are blocked unless the caller asks with `mentions: "all"`); destructive tools are flagged so clients ask before running them; every write is tagged "via pulse-mcp" in the server's audit log.
 
+## Gmail setup
+
+Gmail runs over IMAP/SMTP with a Google **app password**. It is free, needs no Google Cloud project and no OAuth consent screen, and gives the server full control of the mailbox.
+
+1. Turn on 2-Step Verification for the Google account (myaccount.google.com > Security).
+2. Create an app password at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (name it "pulse-mcp"). Google shows 16 letters; spaces are ignored.
+3. Set two variables on Vercel (or answer the installer's prompts): `GMAIL_ADDRESS` (your address) and `GMAIL_APP_PASSWORD`. Redeploy.
+
+Good to know:
+
+- An app password grants full mailbox access. Anyone with your `MCP_API_KEY` can read and send your email through this server, so keep that key secret. Revoke the app password at any time from the same Google page.
+- `gmail_send_email`, `gmail_reply`, `gmail_forward` and `gmail_send_draft` send immediately and cannot be unsent. Ask your assistant to create a draft first if you want to review.
+- Message ids are stable ids in Gmail's All Mail. Search does not cover Trash and Spam.
+- Search uses Gmail's own syntax: `from:alice is:unread newer_than:7d has:attachment label:work`.
+- Attachments: up to about 4 MB when sending, about 2 MB when downloading (base64 in the tool result).
+- One Gmail account per deployment. Google Workspace accounts work only if the admin allows app passwords and IMAP.
+- Not supported: scheduled send, editing an existing draft in place (delete it and create a new one), and reading Trash/Spam.
+
 ## Tools
+
+**Gmail**: `gmail_search`, `gmail_get_message`, `gmail_get_thread`, `gmail_get_attachment`, `gmail_list_labels`, `gmail_send_email` (HTML, cc/bcc, attachments), `gmail_reply` (reply-all, quoted original), `gmail_forward`, `gmail_create_draft`, `gmail_list_drafts`, `gmail_send_draft`, `gmail_delete_draft`, `gmail_modify` (read/unread, star, archive, labels), `gmail_trash`, `gmail_mark_spam`, `gmail_create_label`, `gmail_delete_label`
 
 **Discord read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_list_pins`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`
 
@@ -187,6 +211,9 @@ uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python 
 | `Missing Access` (50001) | The bot is not in that server or cannot see that channel |
 | `discord_list_members` fails | Enable *Server Members Intent* in the Developer Portal |
 | Messages come back with empty `content` | Enable *Message Content Intent* in the Developer Portal |
+| `Gmail login failed` | Use a 16-character app password (not your Google password), with 2-Step Verification on. Recreate it if unsure. |
+| `GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set` | Add both on Vercel and redeploy |
+| Gmail search misses a message | Search covers All Mail only. Trash and Spam are excluded. |
 | Claude Desktop shows the server as failed | Fully quit Claude Desktop (tray icon too) and reopen. Check its logs (`%LOCALAPPDATA%\Claude\Logs\mcp-server-pulse.log` on Windows). Needs Node.js on PATH. |
 
 ## Security notes

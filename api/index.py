@@ -18,7 +18,7 @@ from fastapi.responses import JSONResponse
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from pulse import discord, twitter  # noqa: E402,F401  (importing registers the tools)
+from pulse import discord, gmail, twitter  # noqa: E402,F401  (importing registers the tools)
 from pulse.mcp import handle_rpc, rpc_error  # noqa: E402
 from pulse.registry import TOOLS  # noqa: E402
 
