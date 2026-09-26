@@ -1,42 +1,58 @@
-<p align="center"><img src="docs/assets/logo.png" alt="Capes logo: a purple and pink baseball cap with a lightning bolt" width="180"></p>
+<div align="center">
 
-# Capes
+<img src="docs/assets/social-preview.png" alt="Capes: superpowers for any AI. A free MCP server you own: Gmail, Discord and X in one dashboard." width="100%">
 
-> **Superpowers for any AI.** A free MCP server you own.
+<br>
 
-**Your personal [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) server for Gmail, Discord and X.** Deploy it once to your own Vercel account, add the services you use, and let Claude, Codex, Cursor or any MCP client read and act on them for you. Manage everything from a built-in dashboard. Your credentials live only in your own Vercel project.
+### Give Claude, Codex, Cursor and any MCP client hands: your Gmail, Discord and X, through one private server you own.
 
-![The Capes dashboard: tools available, connectors configured, mode and endpoint](docs/assets/dashboard-overview.png)
+[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-62-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
-- **Gmail:** search, read, send, reply, forward, drafts, labels, archive, trash.
-- **Discord:** read, post, edit, delete, react, threads, channels, roles, permissions, moderation.
-- **X/Twitter:** search tweets (through Apify).
-- **Dashboard:** see what is connected, test credentials, review the tools, try read-only ones, and see recent activity. Limit what assistants can do with simple settings (read-only mode, disabled tools).
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
-## Contents
+<table>
+  <tr>
+    <td align="right"><b>🚀 Start</b></td>
+    <td align="center"><a href="#-quick-start">Quick start</a></td>
+    <td align="center"><a href="#-deploy">Deploy</a></td>
+    <td align="center"><a href="#-connect-your-ai-client">Connect a client</a></td>
+  </tr>
+  <tr>
+    <td align="right"><b>💡 Learn</b></td>
+    <td align="center"><a href="#-what-you-get">What you get</a></td>
+    <td align="center"><a href="#-a-day-with-capes">A day with Capes</a></td>
+    <td align="center"><a href="#-how-it-works">How it works</a></td>
+  </tr>
+  <tr>
+    <td align="right"><b>⚙️ Reference</b></td>
+    <td align="center"><a href="#-services-and-credentials">Services</a></td>
+    <td align="center"><a href="#-the-dashboard">Dashboard</a></td>
+    <td align="center"><a href="#-tools">All 62 tools</a></td>
+  </tr>
+  <tr>
+    <td align="right"><b>🤝 Project</b></td>
+    <td align="center"><a href="#-security">Security</a></td>
+    <td align="center"><a href="#-contributing">Contributing</a></td>
+    <td align="center"><a href="#-documentation">Documentation</a></td>
+  </tr>
+</table>
 
-- [Why it is useful](#why-it-is-useful)
-- [What we are trying to achieve](#what-we-are-trying-to-achieve)
-- [How it works](#how-it-works)
-- [Set up in 5 steps](#set-up-in-5-steps)
-- [Services and credentials](#services-and-credentials)
-- [Deploy](#deploy)
-- [The dashboard](#the-dashboard)
-- [Connect your AI client](#connect-your-ai-client)
-- [Using it](#using-it)
-- [Tools](#tools)
-- [Check that it works](#check-that-it-works)
-- [Contributing](#contributing)
-- [The `.claude` folder](#the-claude-folder)
-- [Security](#security)
-- [All guides](#all-guides)
-- [References](#references)
+</div>
 
-## Why it is useful
+## ✨ What you get
 
-Assistants are good at reading, summarizing and acting, but your real work lives in accounts they cannot reach. Every AI app also wants its own integration for each service, so you set up the same Gmail and Discord access again and again, and each copy holds your credentials somewhere different. Capes is the one door: **one private server, one key, the same tools in every client.**
+AI assistants read, summarise and act well, but your real work lives in accounts they cannot reach. Capes is **one private [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) server** that you deploy to your own Vercel account. Connect it once and the same tools appear in every AI client you use.
 
-### A day with Capes
+| | What it does |
+|---|---|
+| 📧 **Gmail** (17 tools) | Search with Gmail syntax, read, send, reply, forward, drafts, labels, archive, trash. No Google Cloud project, just an app password. |
+| 💬 **Discord** (44 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
+| 🐦 **X / Twitter** (1 tool) | Search tweets through an Apify scraper. |
+| 🖥️ **Dashboard** | Test each service's credentials, browse and try the tools, watch recent activity, copy ready-made client config. |
+| 🛡️ **Limits you control** | Turn a service or a single tool off, or make the whole server read-only. Tools are labelled read, write or destructive. |
+| 🔑 **You own it** | Your credentials live only in your Vercel project. No central service, no account with us, no database. |
+
+## 🎬 A day with Capes
 
 Sam runs a small product and its Discord community, and answers customers from one Gmail inbox. Every morning Sam asks one question in Claude:
 
@@ -58,7 +74,8 @@ That is about five minutes instead of forty, and the assistant never had direct 
 
 *This is an illustration of what the tools make possible, not a recording.*
 
-### Why not just use each app's built-in connectors?
+<details>
+<summary><b>Why not just use each app's built-in connectors?</b></summary>
 
 - **One setup for every client.** The same server works in Claude Desktop, Claude Code, Cursor and Codex, not just one app.
 - **You hold the credentials.** They sit in your own Vercel project, not in a third-party platform.
@@ -67,33 +84,21 @@ That is about five minutes instead of forty, and the assistant never had direct 
 
 Other ways to solve this exist (hosted platforms like Composio, gateways like MetaMCP, single-service MCP servers). A short comparison is in [What Capes is for](docs/project/architecture.md#how-it-compares).
 
-## What we are trying to achieve
+</details>
 
-- **Personal and private:** you deploy your own copy; there is no central service.
-- **Easy to set up:** deploy from your browser, then a click-by-click guide per service. About 20 minutes from nothing.
-- **Complete:** full toolkits for Gmail, Discord and X, not demos.
-- **Safe by default:** tools are labelled read, write or destructive so clients ask before risky calls; sending is always explicit; you can lock the server down with a setting.
-- **Extendable and contributor-friendly:** a new tool is one Python function, and the repo ships its own Claude Code setup and safety checks.
+## 🧭 How it works
 
-The full picture, design decisions and security model: [What Capes is for](docs/project/architecture.md).
-
-## How it works
+<div align="center">
 
 ![Capes architecture: AI clients and the owner reach one server on Vercel; a guard checks every call before the tools reach Gmail, Discord and Apify](docs/diagrams/architecture.png)
 
+</div>
+
+Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key (no database, no accounts). Every call passes a guard that checks the key, validates the arguments and applies your limits before a tool runs. The service credentials (Gmail app password, Discord bot token, Apify token) are Vercel environment variables and never leave your project.
+
 **Interactive diagrams** (pan, zoom, search, trace a path): [architecture](docs/diagrams/architecture.html), [life of a tool call](docs/diagrams/request-lifecycle.html) and [how a change reaches main](docs/diagrams/contribution-flow.html). GitHub shows an HTML file as source, so click the link, choose **Download raw file** (the download icon), and open the file in your browser. It is self-contained and works offline.
 
-The same idea as a sketch:
-
-```
-Claude / Codex / Cursor  --MCP over HTTPS + your key-->  your server on Vercel  -->  Gmail, Discord, X
-                                                                  ^
-                                          you, in a browser -->  /dashboard
-```
-
-Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key (no database, no accounts). The service credentials (Gmail app password, Discord bot token, Apify token) are Vercel environment variables and never leave your project.
-
-## Set up in 5 steps
+## 🚀 Quick start
 
 About 20 minutes, most of it creating credentials. Skip any service you do not need.
 
@@ -101,11 +106,11 @@ About 20 minutes, most of it creating credentials. Skip any service you do not n
 |---|------|-------|------|
 | 1 | Create a free Vercel account and your `MCP_API_KEY` | [Vercel guide](docs/setup/vercel.md) | 3 min |
 | 2 | Get credentials for the services you want | [Discord](docs/setup/discord.md), [Gmail](docs/setup/gmail.md), [Apify](docs/setup/apify.md) guides | 3 to 10 min each |
-| 3 | **Deploy on Vercel** and paste your key and credentials | [Option A](#option-a-deploy-on-vercel-recommended) | 3 min |
+| 3 | **Deploy on Vercel** and paste your key and credentials | [Deploy](#-deploy) | 3 min |
 | 4 | Open `/dashboard`, sign in, click **Test connection** on each connector; invite your Discord bot with **Connectors > Discord > Get invite link** (built from your token, nothing to copy) | your browser | 3 min |
 | 5 | Connect your AI client and ask "List my Discord channels" | Claude, Codex, Cursor | 2 min |
 
-## Services and credentials
+## 🔌 Services and credentials
 
 Click a guide for the exact steps, permissions and limits of each service.
 
@@ -119,7 +124,7 @@ Click a guide for the exact steps, permissions and limits of each service.
 
 Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a clear message instead of failing.
 
-## Deploy
+## ☁️ Deploy
 
 ### Option A: deploy on Vercel (recommended)
 
@@ -149,11 +154,20 @@ Your address and key are saved to `.capes.local.json` (git-ignored). Non-interac
 
 Step by step in the [Vercel guide](docs/setup/vercel.md#option-c-vercel-cli-by-hand).
 
-## The dashboard
+## 🖥️ The dashboard
 
 Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY`.
 
-![Connectors: credentials status, tool counts, enable switch and connection test](docs/assets/dashboard-connectors.png)
+<table>
+  <tr>
+    <td width="50%"><img src="docs/assets/dashboard-overview.png" alt="Overview: tools available, connectors configured, mode and your MCP endpoint"></td>
+    <td width="50%"><img src="docs/assets/dashboard-connectors.png" alt="Connectors: credentials status, tool counts, enable switch, connection test and the Discord invite link"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub><b>Overview</b>: what clients can see and your endpoint</sub></td>
+    <td align="center"><sub><b>Connectors</b>: test credentials, get the Discord invite link</sub></td>
+  </tr>
+</table>
 
 - **Overview, Connectors, Tools:** what is connected and which tools clients can see.
 - **Test connection:** a read-only check of each service's credentials.
@@ -164,7 +178,7 @@ Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY
 
 Full walkthrough and security details: [Dashboard guide](docs/usage/dashboard.md).
 
-## Connect your AI client
+## 🤖 Connect your AI client
 
 Every client needs your address `https://<project>.vercel.app/mcp` and your `MCP_API_KEY` as `Authorization: Bearer <key>`. The dashboard's **Connect a client** tab shows the exact config. Or, from a clone of the repo:
 
@@ -184,7 +198,7 @@ By hand, per client ([client guide](docs/setup/clients.md)):
 
 Restart the client after connecting so it loads the tools.
 
-## Using it
+## 💬 Using it
 
 Once connected, just talk to your assistant and it picks the tools:
 
@@ -196,36 +210,71 @@ Once connected, just talk to your assistant and it picks the tools:
 
 Sending mail and messages cannot be undone, so ask for a draft first when it matters. [Using Capes](docs/usage/usage.md) has more examples and safety habits.
 
-## Tools
+## 🧰 Tools
 
-62 tools. The list below is the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
+62 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
 
-**Gmail**: `gmail_search`, `gmail_get_message`, `gmail_get_thread`, `gmail_get_attachment`, `gmail_list_labels`, `gmail_send_email` (HTML, cc/bcc, attachments), `gmail_reply` (reply-all, quoted original), `gmail_forward`, `gmail_create_draft`, `gmail_list_drafts`, `gmail_send_draft`, `gmail_delete_draft`, `gmail_modify` (read/unread, star, archive, labels), `gmail_trash`, `gmail_mark_spam`, `gmail_create_label`, `gmail_delete_label`
+<details>
+<summary><b>📧 Gmail (17)</b></summary>
 
-**Discord read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
+`gmail_search`, `gmail_get_message`, `gmail_get_thread`, `gmail_get_attachment`, `gmail_list_labels`, `gmail_send_email` (HTML, cc/bcc, attachments), `gmail_reply` (reply-all, quoted original), `gmail_forward`, `gmail_create_draft`, `gmail_list_drafts`, `gmail_send_draft`, `gmail_delete_draft`, `gmail_modify` (read/unread, star, archive, labels), `gmail_trash`, `gmail_mark_spam`, `gmail_create_label`, `gmail_delete_label`
 
-**Discord messages**: `discord_send_message` (text, embeds, replies), `discord_send_dm`, `discord_send_file` (base64 upload), `discord_create_poll`, `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
+</details>
 
-**Discord channels and threads**: `discord_create_channel` (text, voice, category, announcement, stage, forum, private), `discord_edit_channel` (also renames, archives and locks threads), `discord_delete_channel`, `discord_set_channel_permission`, `discord_delete_channel_permission`, `discord_create_invite`, `discord_delete_invite`, `discord_create_thread` (from a message, standalone, private, or forum post with tags), `discord_thread_member`
+<details>
+<summary><b>💬 Discord (44)</b></summary>
 
-**Discord forums and webhooks**: `discord_list_forum_tags`, `discord_manage_forum_tag`, `discord_list_webhooks`, `discord_create_webhook`, `discord_send_webhook_message` (the webhook token never leaves the server), `discord_delete_webhook`
+**Read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
 
-**Discord roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_moderate_member` (kick, ban, unban, timeout)
+**Messages**: `discord_send_message` (text, embeds, replies), `discord_send_dm`, `discord_send_file` (base64 upload), `discord_create_poll`, `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
 
-**X/Twitter**: `twitter_search`
+**Channels and threads**: `discord_create_channel` (text, voice, category, announcement, stage, forum, private), `discord_edit_channel` (also renames, archives and locks threads), `discord_delete_channel`, `discord_set_channel_permission`, `discord_delete_channel_permission`, `discord_create_invite`, `discord_delete_invite`, `discord_create_thread` (from a message, standalone, private, or forum post with tags), `discord_thread_member`
+
+**Forums and webhooks**: `discord_list_forum_tags`, `discord_manage_forum_tag`, `discord_list_webhooks`, `discord_create_webhook`, `discord_send_webhook_message` (the webhook token never leaves the server), `discord_delete_webhook`
+
+**Roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_moderate_member` (kick, ban, unban, timeout)
+
+</details>
+
+<details>
+<summary><b>🐦 X / Twitter (1)</b></summary>
+
+`twitter_search`
+
+</details>
 
 Tools are flagged read, write or destructive so clients can ask before risky calls, and you can switch any of them off in the dashboard. Discord channel and thread IDs are interchangeable wherever a `channel_id` is asked for.
 
-## Check that it works
+## ✅ Check that it works
 
 1. Open `/dashboard`, sign in, and click **Test connection** on each connector.
 2. Or `curl https://<project>.vercel.app/health` returns `"status":"online"`.
 3. In your AI client, ask "List my Discord channels" (Discord), "How many unread emails do I have?" (Gmail) or "Search X for MCP servers" (Apify).
 4. Something wrong? [Troubleshooting](docs/usage/troubleshooting.md) maps every common error to its fix.
 
-## Contributing
+## 🛡️ Security
 
-Anyone can contribute: fix a bug, sharpen a guide, add a tool, or improve the dashboard. Deployment for users is Vercel only, so contributor tooling is kept minimal.
+Capes holds real credentials, so it is built to be strict by default.
+
+| Guarantee | How |
+|-----------|-----|
+| **One key guards everything** | `MCP_API_KEY` (24+ characters, checked in constant time) protects `/mcp` and the dashboard. Anyone who has it can read your email and act through your Discord bot, so keep it secret and rotate it if in doubt ([how](docs/setup/vercel.md#rotating-the-key)). |
+| **Credentials stay in your Vercel project** | Never commit `.env*` or `.capes.local.json` (git-ignored). The dashboard and tool results never show secret values. |
+| **Strict by default** | Arguments are validated before any call, dashboard sessions are signed cookies with CSRF protection, and Redis outages fail closed into read-only mode. |
+| **Contributors cannot slip in behaviour changes unnoticed** | CI blocks hooks, wildcard permissions, hidden text, unapproved dependencies and risky workflows, hash-pins every executable file under `.claude/` and `.github/`, and `CODEOWNERS` routes sensitive paths to the maintainer. Nobody pushes to `main` directly. |
+| **If a token leaks** | Rotate it at the provider (Discord: Reset Token; Apify: regenerate; Google: delete the app password) and update Vercel. |
+
+Details in [SECURITY.md](SECURITY.md) and the [security model](docs/project/architecture.md#security-model).
+
+## 🤝 Contributing
+
+Anyone can contribute: fix a bug, sharpen a guide, add a tool, or improve the dashboard. **Only the maintainer merges.** Nobody pushes to `main`; every change goes through a pull request that passes the checks and gets a code-owner review ([Governance](docs/project/governance.md)).
+
+<div align="center">
+
+![How a change reaches main: fork or branch, open a pull request, CI checks, owner review, squash merge into main; red checks send the change back for a fix](docs/diagrams/contribution-flow.png)
+
+</div>
 
 1. Read [What Capes is for](docs/project/architecture.md) and [Contributing](docs/project/contributing.md).
 2. Fork, branch (`feat/...`, `fix/...`, `docs/...`), make one focused change.
@@ -252,47 +301,40 @@ async def hello(args: dict):
     return {"message": f"Hello {args['name']}"}
 ```
 
-Changes to `.claude/`, `.github/`, `scripts/`, authentication code, `vercel.json` or dependencies always need the maintainer's review (see [Security](#security)).
+Changes to `.claude/`, `.github/`, `scripts/`, authentication code, `vercel.json` or dependencies always need the maintainer's review (see [Security](#-security)).
 
-## The `.claude` folder
+<details>
+<summary><b>🧠 The <code>.claude</code> folder: the repo ships its own Claude Code setup</b></summary>
 
-The repo includes its Claude Code setup so a contributor's assistant knows the project from the first prompt:
+A contributor's assistant knows the project from the first prompt:
 
 | Path | What it gives you |
 |------|-------------------|
 | [`CLAUDE.md`](CLAUDE.md) | Overview, commands, conventions, gotchas and security rules, loaded in every session |
-| [`.claude/rules/`](.claude/rules) | Focused rules that load when you touch matching files (tools, dashboard, Discord, Gmail, installer, docs) plus always-on security rules |
+| [`.claude/rules/`](.claude/rules) | Focused rules that load when you touch matching files (tools, dashboard, Discord, Gmail, installer, docs, GitHub) plus always-on security rules |
 | [`.claude/skills/`](.claude/skills) | Slash commands: `/add-tool`, `/run-tests`, `/deploy`, `/security-audit` |
 | [`.claude/agents/tool-reviewer.md`](.claude/agents/tool-reviewer.md) | A reviewer subagent for tool changes, with shared memory in [`.claude/agent-memory/`](.claude/agent-memory/tool-reviewer/MEMORY.md) |
 | [`.claude/settings.json`](.claude/settings.json) | Shared permissions: safe commands allowed; reading secret files and force pushes denied |
 
 With Claude Code: run `claude` in the repo, then for example `/add-tool slack slack_send_message`, `/run-tests`, and ask `@tool-reviewer` to review your diff. What each file does is in [docs/project/contributing.md](docs/project/contributing.md#the-claude-folder).
 
-## Security
+</details>
 
-- **One key guards everything.** `MCP_API_KEY` (24+ characters, checked in constant time) protects `/mcp` and the dashboard. Anyone who has it can read your email and act through your Discord bot, so keep it secret and rotate it if in doubt ([how](docs/setup/vercel.md#rotating-the-key)).
-- **Credentials stay in your Vercel project.** Never commit `.env*` or `.capes.local.json` (git-ignored). The dashboard and tool results never show secret values.
-- **Strict by default:** arguments are validated before any call, dashboard sessions are signed cookies with CSRF protection, and Redis outages fail closed into read-only mode.
-- **Contributors cannot slip in behaviour changes unnoticed:** CI blocks hooks, wildcard permissions, hidden text, unapproved dependencies and risky workflows, hash-pins every executable file under `.claude/` and `.github/`, and `CODEOWNERS` routes sensitive paths to the maintainer.
-- **If a token leaks,** rotate it at the provider (Discord: Reset Token; Apify: regenerate; Google: delete the app password) and update Vercel.
-
-Details in [SECURITY.md](SECURITY.md) and the [security model](docs/project/architecture.md#security-model).
-
-## All guides
+## 📚 Documentation
 
 Everything is indexed in [docs/README.md](docs/README.md).
 
-**Setup:** [Vercel](docs/setup/vercel.md) | [Discord](docs/setup/discord.md) | [Gmail](docs/setup/gmail.md) | [Apify](docs/setup/apify.md) | [Connect your client](docs/setup/clients.md)
+| | |
+|---|---|
+| **🚀 Setup** | [Vercel](docs/setup/vercel.md) · [Discord](docs/setup/discord.md) · [Gmail](docs/setup/gmail.md) · [Apify](docs/setup/apify.md) · [Connect your client](docs/setup/clients.md) |
+| **📖 Use** | [Dashboard](docs/usage/dashboard.md) · [Using Capes](docs/usage/usage.md) · [Tool reference](docs/usage/tools.md) · [Troubleshooting](docs/usage/troubleshooting.md) |
+| **🤝 Understand and contribute** | [What Capes is for](docs/project/architecture.md) · [Contributing](docs/project/contributing.md) · [Governance: who can merge](docs/project/governance.md) · [Security policy](SECURITY.md) · [Release checklist](docs/project/release-checklist.md) |
 
-**Use:** [Dashboard](docs/usage/dashboard.md) | [Using Capes](docs/usage/usage.md) | [Tool reference](docs/usage/tools.md) | [Troubleshooting](docs/usage/troubleshooting.md)
-
-**Understand and contribute:** [What Capes is for](docs/project/architecture.md) | [Contributing](docs/project/contributing.md) | [Governance: who can merge](docs/project/governance.md) | [Security policy](SECURITY.md) | [Release checklist](docs/project/release-checklist.md)
-
-## License
+## 📄 License
 
 [MIT](LICENSE). Use it, change it and share it; keep the copyright notice. It comes with no warranty, so you are responsible for what your AI assistants do with your mailbox and servers.
 
-## References
+## 🔗 References
 
 - [Model Context Protocol: introduction](https://modelcontextprotocol.io/docs/getting-started/intro) and [connecting Claude Code to MCP servers](https://code.claude.com/docs/en/mcp)
 - [Claude Code directory layout](https://code.claude.com/docs/en/claude-directory), which the `.claude/` folder follows
@@ -300,4 +342,4 @@ Everything is indexed in [docs/README.md](docs/README.md).
 - [Gmail IMAP extensions](https://developers.google.com/workspace/gmail/imap/imap-extensions) (search syntax, labels, threads) and [Google app passwords](https://support.google.com/accounts/answer/185833)
 - [Apify Tweet Scraper](https://apify.com/apidojo/tweet-scraper), the default actor behind `twitter_search`
 - [Vercel Functions](https://vercel.com/docs/functions) and the [Upstash Redis integration](https://vercel.com/marketplace/upstash)
-- Inspiration: [kebab-mcp](https://github.com/Yassinello/kebab-mcp) showed how useful a dashboard on a personal Vercel MCP server can be. Capes's dashboard is an independent implementation written from scratch.
+- Inspiration: [kebab-mcp](https://github.com/Yassinello/kebab-mcp) showed how useful a dashboard on a personal Vercel MCP server can be. Capes's dashboard is an independent implementation written from scratch. The README layout draws on the structure of other well-presented open-source READMEs; the wording and content here are our own.
