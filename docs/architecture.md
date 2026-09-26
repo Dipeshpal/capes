@@ -110,7 +110,6 @@ The dashboard idea was inspired by kebab-mcp. pulse-mcp's implementation is inde
 ## Ideas for later (not promises)
 
 - More Discord: application commands, scheduled events, stickers and emoji management, member nickname edits.
-- Gmail through the official API with OAuth, as an option next to the app password.
 - Per-client keys and per-key tool scopes.
 - Multiple accounts per service.
 
