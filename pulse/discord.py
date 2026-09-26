@@ -391,6 +391,18 @@ async def list_members(args):
     ]
 
 
+@tool(
+    "discord_list_emojis",
+    "List a server's custom emojis, including the name:id value used by discord_add_reaction. The bot must have access to the server.",
+    {"guild_id": GUILD},
+    ["guild_id"],
+    hint="read",
+)
+async def list_emojis(args):
+    emojis = await call("GET", f"/guilds/{args['guild_id']}/emojis")
+    return [{"id": e["id"], "name": e["name"], "animated": e.get("animated", False), "reaction": f"{e['name']}:{e['id']}"} for e in emojis]
+
+
 @tool("discord_list_roles", "List a server's roles with their permissions.", {"guild_id": GUILD}, ["guild_id"])
 async def list_roles(args):
     roles = await call("GET", f"/guilds/{args['guild_id']}/roles")
