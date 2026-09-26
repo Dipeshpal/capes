@@ -2,7 +2,7 @@
 
 Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
 
-Read [What Capes is for](architecture.md) first if you want the big picture. **Who can merge what, and why you cannot push to `master`, is in [Governance](governance.md).** In short: fork, open a pull request, and the maintainer reviews and merges it.
+Read [What Capes is for](architecture.md) first if you want the big picture. **Who can merge what, and why you cannot push to `main`, is in [Governance](governance.md).** In short: fork, open a pull request, and the maintainer reviews and merges it.
 
 ## Ways to contribute
 

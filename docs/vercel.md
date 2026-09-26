@@ -27,7 +27,7 @@ Copy the result into a password manager. You will paste it into Vercel and into 
 
 No install and no terminal. Everything happens in your browser.
 
-1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=capes&repository-name=capes). Vercel copies the repository into your own GitHub account.
+1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fvercel.md&project-name=capes&repository-name=capes). Vercel copies the repository into your own GitHub account.
 2. Paste `MCP_API_KEY`. For each service you want, paste its credential ([Discord](discord.md), [Gmail](gmail.md), [Apify](apify.md)); leave the others empty.
 3. Click **Deploy** and wait for the build (about a minute).
 4. Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY`.

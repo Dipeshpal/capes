@@ -49,7 +49,7 @@ def describe(c: Connector) -> dict:
         "env": list(c.env),
         "missing_env": missing_env(c),
         "configured": not missing_env(c),
-        "guide": f"{REPO_URL}/blob/master/{c.guide}",
+        "guide": f"{REPO_URL}/blob/main/{c.guide}",
         "tools": tools,
         "kinds": {k: sum(1 for n in tools if kind(TOOLS[n]["spec"]) == k) for k in ("read", "write", "destructive")},
     }
