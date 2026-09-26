@@ -174,7 +174,7 @@ check(
 ok, r, reqs = tool("discord_delete_message", channel_id=C, message_id=M, reason="spam & abuse")
 check("audit-log reason header is URL-encoded", reqs[0]["method"] == "DELETE" and reqs[0]["headers"]["X-Audit-Log-Reason"] == "spam%20%26%20abuse")
 ok, r, reqs = tool("discord_delete_message", channel_id=C, message_id=M)
-check("default audit reason says 'via pulse-mcp'", unquote(reqs[0]["headers"]["X-Audit-Log-Reason"]) == "via pulse-mcp")
+check("default audit reason says 'via capes'", unquote(reqs[0]["headers"]["X-Audit-Log-Reason"]) == "via capes")
 ok, r, reqs = tool("discord_send_message", channel_id="990000000000000001", content="retry me")
 check("a short 429 is retried once, then succeeds", ok and len(reqs) == 2 and reqs[0]["path"] == reqs[1]["path"], (ok, r, len(reqs)))
 ok, r, reqs = tool("discord_send_message", channel_id="880000000000000001", content="x")

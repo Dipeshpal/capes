@@ -37,7 +37,7 @@ REQUIRED_DENY = {
     "Read(./.env)",
     "Read(./.env.local)",
     "Read(./.env.production*)",
-    "Read(./.pulse.local.json)",
+    "Read(./.capes.local.json)",
     "Bash(git push --force*)",
     "Bash(git push -f*)",
     "Bash(vercel env pull*)",
@@ -242,7 +242,7 @@ def check_supply_chain() -> None:
         if extra:
             fail(f"vercel.json: {sorted(extra)} not allowed (rewrites/redirects/headers can change what is served)")
     ignore = (ROOT / ".gitignore").read_text(encoding="utf-8") if (ROOT / ".gitignore").exists() else ""
-    for entry in (".env", ".pulse.local.json", ".claude/settings.local.json"):
+    for entry in (".env", ".capes.local.json", ".claude/settings.local.json"):
         if entry not in ignore:
             fail(f".gitignore must contain {entry}")
 

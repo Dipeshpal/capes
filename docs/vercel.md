@@ -27,7 +27,7 @@ Copy the result into a password manager. You will paste it into Vercel and into 
 
 No install and no terminal. Everything happens in your browser.
 
-1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=pulse-mcp&repository-name=pulse-mcp). Vercel copies the repository into your own GitHub account.
+1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=capes&repository-name=capes). Vercel copies the repository into your own GitHub account.
 2. Paste `MCP_API_KEY`. For each service you want, paste its credential ([Discord](discord.md), [Gmail](gmail.md), [Apify](apify.md)); leave the others empty.
 3. Click **Deploy** and wait for the build (about a minute).
 4. Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY`.
@@ -39,9 +39,9 @@ The link works for anyone once the repository is public. Until then, or if you w
 Needs [Node.js 18+](https://nodejs.org) and a clone of the repository. It logs you in, generates a strong key for you, sets the variables, deploys and configures your AI clients:
 
 ```bash
-git clone https://github.com/Dipeshpal/pulse-mcp.git
-cd pulse-mcp
-node scripts/pulse.mjs install
+git clone https://github.com/Dipeshpal/capes.git
+cd capes
+node scripts/capes.mjs install
 ```
 
 ### Option C: Vercel CLI by hand
@@ -66,7 +66,7 @@ When the deploy finishes, your address is `https://<project>.vercel.app`. If tha
 
 ## 5. Optional and advanced: dashboard switches (needs Redis)
 
-**You do not need a database.** pulse-mcp stores nothing on the server: your credentials and limits are environment variables, and the dashboard shows the result. To restrict what assistants can do without any database, set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` (table below) and redeploy.
+**You do not need a database.** Capes stores nothing on the server: your credentials and limits are environment variables, and the dashboard shows the result. To restrict what assistants can do without any database, set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` (table below) and redeploy.
 
 Only if you want to flip switches on the dashboard *without redeploying* (and keep a durable activity log), add a free Redis database:
 
@@ -105,7 +105,7 @@ If your address shows a Vercel login page or answers `401`, Vercel Authenticatio
 
 1. Generate a new key (step 2).
 2. Change `MCP_API_KEY` in **Settings > Environment Variables** (or `vercel env rm MCP_API_KEY production --yes`, then add the new one), then redeploy.
-3. Update the key in every client (`node scripts/pulse.mjs connect --key NEW_KEY`, or edit each config, see [Connect your client](clients.md)).
+3. Update the key in every client (`node scripts/capes.mjs connect --key NEW_KEY`, or edit each config, see [Connect your client](clients.md)).
 
 You never need to rotate the key on a schedule (it is not tied to the dashboard session length). Rotate it only if you think it leaked. Doing so also signs out every dashboard session, because sessions are signed with a key derived from `MCP_API_KEY`.
 

@@ -1,6 +1,6 @@
 # Security policy
 
-pulse-mcp holds real credentials for your email, Discord bot and Apify account, so security reports are taken seriously.
+Capes holds real credentials for your email, Discord bot and Apify account, so security reports are taken seriously.
 
 ## Reporting a vulnerability
 

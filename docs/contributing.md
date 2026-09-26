@@ -2,7 +2,7 @@
 
 Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
 
-Read [What pulse-mcp is for](architecture.md) first if you want the big picture.
+Read [What Capes is for](architecture.md) first if you want the big picture.
 
 ## Ways to contribute
 
@@ -20,7 +20,7 @@ End users deploy to Vercel and never run the server locally. As a contributor yo
 
 ```bash
 git clone <this repo>
-cd pulse-mcp
+cd capes
 cp .env.example .env        # fill in only what you want to test; MCP_API_KEY must be 24+ characters
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
@@ -49,7 +49,7 @@ python tests/claude_config.py
 python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
-node --check scripts/pulse.mjs && node --check dashboard/app.js
+node --check scripts/capes.mjs && node --check dashboard/app.js
 uvx ruff check . && uvx ruff format --check .
 ```
 
@@ -107,7 +107,7 @@ The conventions are in [`CLAUDE.md`](../CLAUDE.md) and `.claude/rules/tools.md`.
 
 1. Create `pulse/<service>.py` with its `@tool` functions. Read credentials with `os.getenv` inside the function, not at import time. Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request.
 2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too). Register the service in `pulse/connectors.py` (name, tool prefix, environment variables, guide, and a read-only connection test) so it appears in the dashboard with a status and a **Test connection** button.
-3. Add the environment variables to `.env.example`, `docs/vercel.md` and the installer prompts in `scripts/pulse.mjs`.
+3. Add the environment variables to `.env.example`, `docs/vercel.md` and the installer prompts in `scripts/capes.mjs`.
 4. Write `docs/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
 5. Add a row to the README services table and a line to `docs/troubleshooting.md`.
 6. Add tests.
@@ -135,7 +135,7 @@ The repo ships its Claude Code setup so every contributor's assistant starts wit
 | Path | Purpose | Loaded |
 |------|---------|--------|
 | `CLAUDE.md` | Project overview, commands, conventions, gotchas, security rules | Every session |
-| `.claude/settings.json` | Shared permissions: allows the safe test and git commands, denies reading `.env*`, `.pulse.local.json`, force pushes and `vercel env pull` | Every session |
+| `.claude/settings.json` | Shared permissions: allows the safe test and git commands, denies reading `.env*`, `.capes.local.json`, force pushes and `vercel env pull` | Every session |
 | `.claude/settings.local.json` | Your personal overrides (git-ignored, never committed) | Every session |
 | `.claude/rules/security.md` | Secret-handling rules | Every session |
 | `.claude/rules/tools.md` | How to write a tool | When you touch `pulse/` or `api/` |

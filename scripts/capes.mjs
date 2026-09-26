@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// pulse-mcp installer. No dependencies; needs Node 18+.
-//   node scripts/pulse.mjs install    deploy to your Vercel account, then connect your clients
-//   node scripts/pulse.mjs connect    connect clients to an existing deployment
+// capes installer. No dependencies; needs Node 18+.
+//   node scripts/capes.mjs install    deploy to your Vercel account, then connect your clients
+//   node scripts/capes.mjs connect    connect clients to an existing deployment
 // Flags: --name --discord --apify --gmail --gmail-password --url --key --clients desktop,claude-code,cursor,codex,none
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -13,7 +13,7 @@ import { createInterface } from 'node:readline/promises';
 const WIN = process.platform === 'win32';
 // View/Send/Threads/Embeds/Attach/History/Reactions + Manage Messages/Pin Messages/Channels/Roles/Threads/Webhooks, Audit Log, Invites, Kick/Ban/Timeout
 const DISCORD_PERMISSIONS = '2253295267998935';
-const SAVED = new URL('../.pulse.local.json', import.meta.url);
+const SAVED = new URL('../.capes.local.json', import.meta.url);
 const [cmd, ...rest] = process.argv.slice(2);
 const flags = {};
 for (let i = 0; i < rest.length; i++) if (rest[i].startsWith('--')) flags[rest[i].slice(2)] = rest[++i];
@@ -33,13 +33,13 @@ async function install() {
   const vercel = has('vercel') ? ['vercel'] : ['npx', '-y', 'vercel'];
   const vc = (args, opts) => run(vercel[0], [...vercel.slice(1), ...args], opts);
 
-  log('\npulse-mcp installer\n');
+  log('\ncapes installer\n');
   if (vc(['whoami']).status !== 0) {
     log('Log in to Vercel (a browser window will open)...');
     if (vc(['login'], { stdio: 'inherit' }).status !== 0) throw new Error('Vercel login failed');
   }
 
-  const name = flags.name ?? (await ask('Vercel project name', 'pulse-mcp'));
+  const name = flags.name ?? (await ask('Vercel project name', 'capes'));
   log('\nCredentials (press Enter to skip any you do not need yet):');
   const discord = flags.discord ?? (await ask('Discord bot token'));
   const apify = flags.apify ?? (await ask('Apify token (for X/Twitter search)'));
@@ -74,7 +74,7 @@ async function install() {
   log(`\nDeployed: ${url}`);
   log(`Dashboard: ${url}/dashboard  (sign in with your MCP API key)`);
   log('Optional, free: run `vercel integration add upstash` then `vercel deploy --prod` so the dashboard can save switches.');
-  log(`Your MCP API key (also saved to .pulse.local.json, which is git-ignored):\n  ${key}\n`);
+  log(`Your MCP API key (also saved to .capes.local.json, which is git-ignored):\n  ${key}\n`);
   if (discord) {
     const seg = discord.split('.')[0];
     const clientId = Buffer.from(seg + '='.repeat((4 - (seg.length % 4)) % 4), 'base64').toString();
@@ -127,7 +127,7 @@ const CLIENTS = {
     const cfg = readJson(p);
     cfg.mcpServers = {
       ...cfg.mcpServers,
-      pulse: {
+      capes: {
         command: 'npx',
         args: ['-y', 'mcp-remote', `${url}/mcp`, '--header', 'Authorization:${AUTH_HEADER}'],
         env: { AUTH_HEADER: `Bearer ${key}` },
@@ -137,25 +137,25 @@ const CLIENTS = {
     return `Claude Desktop: updated ${p}. Fully quit and reopen Claude Desktop.`;
   },
   'claude-code'(url, key) {
-    if (!has('claude')) return 'Claude Code: `claude` not found. Run:\n  claude mcp add --scope user --transport http pulse ' + `${url}/mcp --header "Authorization: Bearer ${key}"`;
-    run('claude', ['mcp', 'remove', 'pulse', '--scope', 'user']);
-    const r = run('claude', ['mcp', 'add', '--scope', 'user', '--transport', 'http', 'pulse', `${url}/mcp`, '--header', q(`Authorization: Bearer ${key}`)]);
-    return r.status === 0 ? 'Claude Code: added "pulse" (user scope).' : `Claude Code: failed\n${r.stderr || r.stdout}`;
+    if (!has('claude')) return 'Claude Code: `claude` not found. Run:\n  claude mcp add --scope user --transport http capes ' + `${url}/mcp --header "Authorization: Bearer ${key}"`;
+    run('claude', ['mcp', 'remove', 'capes', '--scope', 'user']);
+    const r = run('claude', ['mcp', 'add', '--scope', 'user', '--transport', 'http', 'capes', `${url}/mcp`, '--header', q(`Authorization: Bearer ${key}`)]);
+    return r.status === 0 ? 'Claude Code: added "capes" (user scope).' : `Claude Code: failed\n${r.stderr || r.stdout}`;
   },
   cursor(url, key) {
     const p = join(homedir(), '.cursor', 'mcp.json');
     const cfg = readJson(p);
-    cfg.mcpServers = { ...cfg.mcpServers, pulse: { url: `${url}/mcp`, headers: { Authorization: `Bearer ${key}` } } };
+    cfg.mcpServers = { ...cfg.mcpServers, capes: { url: `${url}/mcp`, headers: { Authorization: `Bearer ${key}` } } };
     writeJson(p, cfg);
     return `Cursor: updated ${p}. Reload Cursor.`;
   },
   codex(url, key) {
-    if (!has('codex')) return 'Codex: `codex` not found. Run:\n  codex mcp add pulse --url ' + `${url}/mcp --bearer-token-env-var PULSE_MCP_API_KEY`;
-    run('codex', ['mcp', 'remove', 'pulse']);
-    const r = run('codex', ['mcp', 'add', 'pulse', '--url', `${url}/mcp`, '--bearer-token-env-var', 'PULSE_MCP_API_KEY']);
+    if (!has('codex')) return 'Codex: `codex` not found. Run:\n  codex mcp add capes --url ' + `${url}/mcp --bearer-token-env-var CAPES_MCP_API_KEY`;
+    run('codex', ['mcp', 'remove', 'capes']);
+    const r = run('codex', ['mcp', 'add', 'capes', '--url', `${url}/mcp`, '--bearer-token-env-var', 'CAPES_MCP_API_KEY']);
     if (r.status !== 0) return `Codex: failed\n${r.stderr || r.stdout}`;
-    if (WIN) run('setx', ['PULSE_MCP_API_KEY', key]);
-    return `Codex: added "pulse".` + (WIN ? ' Set PULSE_MCP_API_KEY for your user; open a new terminal.' : `\n  Add to your shell profile:  export PULSE_MCP_API_KEY=${key}`);
+    if (WIN) run('setx', ['CAPES_MCP_API_KEY', key]);
+    return `Codex: added "capes".` + (WIN ? ' Set CAPES_MCP_API_KEY for your user; open a new terminal.' : `\n  Add to your shell profile:  export CAPES_MCP_API_KEY=${key}`);
   },
 };
 
@@ -177,7 +177,7 @@ async function connect(url, key) {
 try {
   if (cmd === 'install') await install();
   else if (cmd === 'connect') await connect(flags.url, flags.key);
-  else log('Usage: node scripts/pulse.mjs <install|connect>');
+  else log('Usage: node scripts/capes.mjs <install|connect>');
 } catch (e) {
   console.error(`\nError: ${e.message}`);
   process.exitCode = 1;

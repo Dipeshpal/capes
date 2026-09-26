@@ -1,4 +1,4 @@
-"""pulse-mcp: your personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed on Vercel.
+"""capes: your personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed on Vercel.
 
 - POST /mcp     MCP over HTTP (JSON-RPC), protected by `Authorization: Bearer <MCP_API_KEY>`
 - /dashboard    owner dashboard (sign in with the same key)
@@ -32,7 +32,7 @@ load_dotenv()
 
 MAX_BODY = 6_000_000  # Vercel itself caps request bodies at 4.5 MB
 
-app = FastAPI(title="pulse-mcp", version="4.0", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="capes", version="4.0", docs_url=None, redoc_url=None, openapi_url=None)
 app.include_router(dashboard_router)
 
 
@@ -79,7 +79,7 @@ async def root(request: Request):
 async def health():
     return {
         "status": "online",
-        "name": "pulse-mcp",
+        "name": "capes",
         "mcp_endpoint": "/mcp",
         "dashboard": "/dashboard",
         "tools": len(TOOLS),

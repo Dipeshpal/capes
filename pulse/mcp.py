@@ -141,7 +141,7 @@ async def handle_rpc(msg: dict, source: str = "mcp") -> dict | None:
         return {
             "jsonrpc": "2.0",
             "id": req_id,
-            "result": {"protocolVersion": version, "capabilities": {"tools": {}}, "serverInfo": {"name": "pulse-mcp", "version": "4.0"}},
+            "result": {"protocolVersion": version, "capabilities": {"tools": {}}, "serverInfo": {"name": "capes", "version": "4.0"}},
         }
     if method == "ping":
         return {"jsonrpc": "2.0", "id": req_id, "result": {}}

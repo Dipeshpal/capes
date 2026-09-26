@@ -21,4 +21,4 @@ If a real secret is in history:
 3. Delete old Vercel deployments or the project if their uploaded source contained the secret.
 4. Re-run this audit and confirm zero hits.
 
-Also confirm: `.gitignore` still covers `.env*` (except the example), `.pulse.local.json` and `.claude/settings.local.json`; `git status` shows nothing sensitive untracked.
+Also confirm: `.gitignore` still covers `.env*` (except the example), `.capes.local.json` and `.claude/settings.local.json`; `git status` shows nothing sensitive untracked.

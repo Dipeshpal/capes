@@ -1,4 +1,4 @@
-"""The services pulse-mcp connects to: what each needs, whether it is configured, and a safe connection test."""
+"""The services capes connects to: what each needs, whether it is configured, and a safe connection test."""
 
 import asyncio
 import os
@@ -9,7 +9,7 @@ import aiohttp
 from .registry import TOOLS, ToolError, kind
 from .security import redact
 
-REPO_URL = os.getenv("PULSE_REPO_URL", "https://github.com/Dipeshpal/pulse-mcp").rstrip("/")
+REPO_URL = os.getenv("PULSE_REPO_URL", "https://github.com/Dipeshpal/capes").rstrip("/")
 
 
 @dataclass(frozen=True)

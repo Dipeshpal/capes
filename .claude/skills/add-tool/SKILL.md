@@ -1,5 +1,5 @@
 ---
-description: Add a new MCP tool, or a whole new service integration, to pulse-mcp following the project conventions
+description: Add a new MCP tool, or a whole new service integration, to Capes following the project conventions
 argument-hint: <service> <tool_name> (for example: slack slack_send_message)
 disable-model-invocation: true
 ---
@@ -10,7 +10,7 @@ Add the tool described by `$ARGUMENTS` to this repository.
 2. If the service is new, create `pulse/<service>.py` from `${CLAUDE_SKILL_DIR}/template.py.txt` and import it in `api/index.py`. If it exists, add the function to its module.
 3. Pick the honest `hint` (`read`, `write`, `destructive`). Write a description a language model can act on, with argument descriptions and enums.
 4. Read secrets with `os.getenv` inside the function. Raise `ToolError` with a fix-it message when a token or permission is missing.
-5. Add the env vars to `.env.example`, and to the installer prompts in `scripts/pulse.mjs` if the service needs credentials.
+5. Add the env vars to `.env.example`, and to the installer prompts in `scripts/capes.mjs` if the service needs credentials.
 6. Add tests: offline where possible (see `tests/gmail_offline.py`, which fakes the remote server), otherwise an opt-in end-to-end script that never runs against real user data by default.
 7. Documentation: run `python scripts/gen_tools_doc.py` to regenerate `docs/tools.md` (never hand-edit it), then `docs/<service>.md` (how to get the credentials and permissions), a row in the README services table, the tool names in the README tool list, and a line in `docs/troubleshooting.md`.
 8. Verify: run `/run-tests`, then `python tests/check_docs.py`, then confirm `tools/list` contains the new tool.

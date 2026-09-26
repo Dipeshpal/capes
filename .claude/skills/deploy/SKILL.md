@@ -1,5 +1,5 @@
 ---
-description: Deploy pulse-mcp to Vercel production and smoke-test the live server without exposing secrets
+description: Deploy Capes to Vercel production and smoke-test the live server without exposing secrets
 disable-model-invocation: true
 ---
 
@@ -11,11 +11,11 @@ Steps:
 
 1. If the working tree has uncommitted changes, ask the user whether to commit first. Do not commit or push unless asked.
 2. Run `/run-tests`. Do not deploy on failures.
-3. `vercel deploy --prod` (the project is linked in `.vercel/`; if not, run `node scripts/pulse.mjs install`).
-4. Smoke test against the live URL from `.pulse.local.json`. Read the URL and key with a command that does not print the key, and never echo the key into the conversation:
+3. `vercel deploy --prod` (the project is linked in `.vercel/`; if not, run `node scripts/capes.mjs install`).
+4. Smoke test against the live URL from `.capes.local.json`. Read the URL and key with a command that does not print the key, and never echo the key into the conversation:
 
    ```bash
-   U=$(node -p "require('./.pulse.local.json').url"); K=$(node -p "require('./.pulse.local.json').key")
+   U=$(node -p "require('./.capes.local.json').url"); K=$(node -p "require('./.capes.local.json').key")
    curl -s "$U/"
    curl -s -X POST "$U/mcp" -H "Authorization: Bearer $K" -H "Content-Type: application/json" \
      -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | python -c "import sys,json; print(len(json.load(sys.stdin)['result']['tools']), 'tools')"

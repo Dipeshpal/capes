@@ -68,7 +68,7 @@ If Redis is configured but unreachable, the server keeps using the last settings
 - The dashboard API never returns secret values, only whether a variable is set.
 - Every response carries `nosniff`, `no-referrer`, `frame-ancestors 'none'` and `no-store` headers, plus HSTS over HTTPS.
 
-The full model is in [What pulse-mcp is for](architecture.md#security-model). Report problems privately as described in [SECURITY.md](../SECURITY.md).
+The full model is in [What Capes is for](architecture.md#security-model). Report problems privately as described in [SECURITY.md](../SECURITY.md).
 
 ## Troubleshooting
 

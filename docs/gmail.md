@@ -16,7 +16,7 @@ App passwords exist only for accounts with 2-Step Verification.
 ## 2. Create the app password
 
 1. Open [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords). If the page says the option is not available, see [When app passwords are missing](#when-app-passwords-are-missing).
-2. Name it `pulse-mcp` and click **Create**.
+2. Name it `capes` and click **Create**.
 3. Google shows 16 letters in groups of four. **Copy them now**; you cannot view them again. Spaces do not matter.
 
 ## 3. Give both values to your server
@@ -52,7 +52,7 @@ Search with Gmail syntax (`from:alice is:unread newer_than:7d has:attachment lab
 
 ## Security
 
-An app password gives full access to the mailbox, including sending as you. Anyone who has your `MCP_API_KEY` can use this server to read and send your email, so keep the key private. Revoke access any time at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (delete the `pulse-mcp` entry); the server then loses access immediately.
+An app password gives full access to the mailbox, including sending as you. Anyone who has your `MCP_API_KEY` can use this server to read and send your email, so keep the key private. Revoke access any time at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (delete the `capes` entry); the server then loses access immediately.
 
 ## When app passwords are missing
 

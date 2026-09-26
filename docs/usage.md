@@ -1,4 +1,4 @@
-# Using pulse-mcp
+# Using Capes
 
 Once your server is deployed and your AI client is connected ([setup steps](../README.md#set-up-in-5-steps)), you just talk to your assistant. It picks the right tools. This page shows what to ask, how to stay safe, and how to test without an AI client.
 
@@ -40,7 +40,7 @@ The exact tools and arguments are in the [tool reference](tools.md).
 - **Read the confirmation prompts.** Tools that delete, ban or bulk-change are flagged, and good clients ask before running them. Do not switch that off for tools you have not used before.
 - **Be specific about targets.** Name the channel, sender or date range. Mail and channel IDs come from search and list calls; let the assistant look them up.
 - **Start read-only.** If you are unsure, give your Discord bot fewer permissions or use a test server first ([Discord guide](discord.md)).
-- **Check the record.** Discord changes made by the bot appear in the server **Audit Log** tagged "via pulse-mcp". Sent mail appears in Gmail's Sent folder.
+- **Check the record.** Discord changes made by the bot appear in the server **Audit Log** tagged "via capes". Sent mail appears in Gmail's Sent folder.
 - **Keep the key private.** Anyone with your `MCP_API_KEY` can act on your accounts.
 
 ## Control what the assistant can do

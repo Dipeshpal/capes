@@ -1,7 +1,7 @@
 # Security rules (always on)
 
 - Never write a real token, key, app password, chat/server ID belonging to a person, or email address into any tracked file, test, doc, screenshot, commit message or example. Use placeholders (`YOUR_API_KEY`, `you@gmail.com`).
-- Never read or print `.env*`, `.pulse.local.json` or Vercel env values into the conversation. To check that a variable exists, use `vercel env ls production` (values are hidden).
+- Never read or print `.env*`, `.capes.local.json` or Vercel env values into the conversation. To check that a variable exists, use `vercel env ls production` (values are hidden).
 - Tool error messages must not echo secrets. Report the upstream service's message and status code only.
 - Do not put tokens in URLs or query strings when a header works (Apify and Discord calls use `Authorization` headers).
 - Compare secrets with `secrets.compare_digest`, never `==`.

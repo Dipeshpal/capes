@@ -6,4 +6,4 @@ scripts
 CLAUDE.md
 README.md
 .env*
-.pulse.local.json
+.capes.local.json

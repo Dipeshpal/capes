@@ -1,4 +1,4 @@
-# pulse-mcp
+# Capes
 
 Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by each user to their own Vercel account, with an owner dashboard. It speaks MCP over HTTP (JSON-RPC at `POST /mcp`) behind a Bearer key (`MCP_API_KEY`, 24+ characters). Clients: Claude Desktop/Code, Cursor, Codex. Deployment for users is **Vercel only** (no Docker, no self-hosting options). User-facing docs are in `README.md` and `docs/`.
 
@@ -9,7 +9,7 @@ Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by ea
 - `pulse/mcp.py`: JSON-RPC handler; validates arguments against each tool's schema (types, enum, `pattern`, length); enforces owner policy (disabled connectors/tools, read-only mode); logs activity.
 - `pulse/security.py`: key check, signed session cookies, CSRF, origin checks, security headers. `pulse/store.py`: settings (env + optional Redis), activity log, rate limiting. `pulse/connectors.py`: the 3 connectors and their connection tests. `pulse/dashboard.py` + `dashboard/`: dashboard API and its HTML/CSS/JS.
 - `pulse/discord.py`: Discord over REST only (no gateway). `pulse/gmail.py`: IMAP/SMTP with an app password. `pulse/twitter.py`: Apify.
-- `scripts/pulse.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
+- `scripts/capes.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
 - `tests/`: `protocol.py`, `dashboard.py`, `gmail_offline.py` (fake IMAP), `discord_offline.py` (fake Discord REST server), `claude_config.py`, `check_docs.py`, `discord_e2e.py` (opt-in).
 - `docs/`: guides per service (`vercel`, `discord`, `gmail`, `apify`), `dashboard`, `clients`, `usage`, `architecture` (goals, security model, comparison), `troubleshooting`, `contributing`, `release-checklist`, generated `tools.md`, `assets/` screenshots.
 
@@ -24,7 +24,7 @@ uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_o
 python tests/claude_config.py && python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check   # run without --check after tool changes
 python tests/check_docs.py
-node --check scripts/pulse.mjs && node --check dashboard/app.js
+node --check scripts/capes.mjs && node --check dashboard/app.js
 uvx ruff check . && uvx ruff format --check .                   # add --fix / drop --check to fix
 
 # contributors only: run locally (needs .env from .env.example; MCP_API_KEY 24+ chars)
@@ -54,7 +54,7 @@ Env vars: `MCP_API_KEY` (required); `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_A
 
 - `vercel.json` may contain only `functions`. A `rewrites` entry breaks `/mcp` (the FastAPI preset already routes everything), and CI blocks it.
 - Vercel function limit is 60 s (`maxDuration`); keep upstream calls under it (Apify sync run uses a 45 s timeout).
-- Discord bots cannot create servers (API error 20001) and can only edit their own messages. Abilities come from the invite permissions and role, not the token. The permission integer in `docs/discord.md` and `scripts/pulse.mjs` must match `tests/protocol.py`.
+- Discord bots cannot create servers (API error 20001) and can only edit their own messages. Abilities come from the invite permissions and role, not the token. The permission integer in `docs/discord.md` and `scripts/capes.mjs` must match `tests/protocol.py`.
 - Gmail ids are IMAP UIDs in All Mail. Trash and Spam are not in All Mail. Drafts carry the `\Draft` label there, not the IMAP flag. Search uses `X-GM-RAW` as an IMAP literal. `imaplib` does not quote mailbox names: use `quote()`, which rejects control characters.
 - The dashboard CSP forbids inline scripts and styles. Never use `innerHTML`; the `h()` helper inserts text only.
 - Settings are cached for 10 s per instance. If Redis is configured but down, use the last known settings, else fail closed (read-only).
@@ -63,7 +63,7 @@ Env vars: `MCP_API_KEY` (required); `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_A
 
 ## Security (non-negotiable)
 
-- Never commit `.env*` (except `.env.example`), `.pulse.local.json`, tokens, keys or app passwords, and never print them in logs, tool results, docs or screenshots. Use placeholders like `YOUR_API_KEY`.
+- Never commit `.env*` (except `.env.example`), `.capes.local.json`, tokens, keys or app passwords, and never print them in logs, tool results, docs or screenshots. Use placeholders like `YOUR_API_KEY`.
 - If a secret is ever committed: rotate it first, then delete and recreate the GitHub repository. Rewriting history is not enough because GitHub keeps orphaned commits fetchable by SHA.
 - Run `/security-audit` before making the repo public or after any suspicious commit.
 - Write tools stay safe by default (for example Discord messages ping users only unless `mentions: "all"`).

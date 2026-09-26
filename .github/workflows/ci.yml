@@ -37,7 +37,7 @@ jobs:
       - run: python tests/claude_config.py
       - run: python scripts/gen_tools_doc.py --check
       - run: python tests/check_docs.py
-      - run: node --check scripts/pulse.mjs
+      - run: node --check scripts/capes.mjs
       - run: node --check dashboard/app.js
 
   guard:

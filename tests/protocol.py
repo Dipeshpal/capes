@@ -324,7 +324,7 @@ wanted = [
 ]
 integer = str(sum(1 << PERMISSIONS[n] for n in wanted))
 check("dashboard invite constant matches permission list", integer == INVITE_PERMISSIONS)
-for rel in ("docs/discord.md", "scripts/pulse.mjs"):
+for rel in ("docs/discord.md", "scripts/capes.mjs"):
     check(f"permission integer {integer} present in {rel}", integer in (ROOT / rel).read_text(encoding="utf-8"))
 
 env_used = set()

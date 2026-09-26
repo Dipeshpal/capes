@@ -56,7 +56,7 @@ logs/
 *.cache
 
 # Local install output (contains your API key)
-.pulse.local.json
+.capes.local.json
 
 .env*
 

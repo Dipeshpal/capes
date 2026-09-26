@@ -15,7 +15,7 @@
       "Read(./.env)",
       "Read(./.env.local)",
       "Read(./.env.production*)",
-      "Read(./.pulse.local.json)",
+      "Read(./.capes.local.json)",
       "Bash(git push --force*)",
       "Bash(git push -f*)",
       "Bash(vercel env pull*)",

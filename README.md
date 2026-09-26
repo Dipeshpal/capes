@@ -1,8 +1,12 @@
-# pulse-mcp
+<p align="center"><img src="docs/assets/logo.png" alt="Capes logo: a purple and pink baseball cap with a lightning bolt" width="180"></p>
+
+# Capes
+
+> **Superpowers for any AI.** A free MCP server you own.
 
 **Your personal [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) server for Gmail, Discord and X.** Deploy it once to your own Vercel account, add the services you use, and let Claude, Codex, Cursor or any MCP client read and act on them for you. Manage everything from a built-in dashboard. Your credentials live only in your own Vercel project.
 
-![The pulse-mcp dashboard: tools available, connectors configured, mode and endpoint](docs/assets/dashboard-overview.png)
+![The Capes dashboard: tools available, connectors configured, mode and endpoint](docs/assets/dashboard-overview.png)
 
 - **Gmail:** search, read, send, reply, forward, drafts, labels, archive, trash.
 - **Discord:** read, post, edit, delete, react, threads, channels, roles, permissions, moderation.
@@ -30,9 +34,9 @@
 
 ## Why it is useful
 
-Assistants are good at reading, summarizing and acting, but your real work lives in accounts they cannot reach. Every AI app also wants its own integration for each service, so you set up the same Gmail and Discord access again and again, and each copy holds your credentials somewhere different. pulse-mcp is the one door: **one private server, one key, the same tools in every client.**
+Assistants are good at reading, summarizing and acting, but your real work lives in accounts they cannot reach. Every AI app also wants its own integration for each service, so you set up the same Gmail and Discord access again and again, and each copy holds your credentials somewhere different. Capes is the one door: **one private server, one key, the same tools in every client.**
 
-### A day with pulse-mcp
+### A day with Capes
 
 Sam runs a small product and its Discord community, and answers customers from one Gmail inbox. Every morning Sam asks one question in Claude:
 
@@ -61,7 +65,7 @@ That is about five minutes instead of forty, and the assistant never had direct 
 - **You set the limits.** Switch connectors and single tools off, or make the whole server read-only, and see what was called.
 - **Free to run** for personal use, and easy to extend with your own tools.
 
-Other ways to solve this exist (hosted platforms like Composio, gateways like MetaMCP, single-service MCP servers). A short comparison is in [What pulse-mcp is for](docs/architecture.md#how-it-compares).
+Other ways to solve this exist (hosted platforms like Composio, gateways like MetaMCP, single-service MCP servers). A short comparison is in [What Capes is for](docs/architecture.md#how-it-compares).
 
 ## What we are trying to achieve
 
@@ -71,7 +75,7 @@ Other ways to solve this exist (hosted platforms like Composio, gateways like Me
 - **Safe by default:** tools are labelled read, write or destructive so clients ask before risky calls; sending is always explicit; you can lock the server down with a setting.
 - **Extendable and contributor-friendly:** a new tool is one Python function, and the repo ships its own Claude Code setup and safety checks.
 
-The full picture, design decisions and security model: [What pulse-mcp is for](docs/architecture.md).
+The full picture, design decisions and security model: [What Capes is for](docs/architecture.md).
 
 ## How it works
 
@@ -115,7 +119,7 @@ Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a c
 
 No install, no terminal.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=pulse-mcp&repository-name=pulse-mcp)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=capes&repository-name=capes)
 
 1. Click the button and sign in to Vercel. It copies the repository into your GitHub account.
 2. Paste your `MCP_API_KEY` ([how to make one](docs/vercel.md#2-create-your-mcp_api_key)) and the credentials for the services you want. Leave the rest empty.
@@ -128,12 +132,12 @@ The button works for anyone once the repository is public. Before that, or from 
 Needs [Node.js 18+](https://nodejs.org). It logs you in to Vercel, generates a strong key, asks for your credentials (Enter skips any), deploys, connects your AI clients and prints your Discord invite link:
 
 ```bash
-git clone https://github.com/Dipeshpal/pulse-mcp.git
-cd pulse-mcp
-node scripts/pulse.mjs install
+git clone https://github.com/Dipeshpal/capes.git
+cd capes
+node scripts/capes.mjs install
 ```
 
-Your address and key are saved to `.pulse.local.json` (git-ignored). Non-interactive: `node scripts/pulse.mjs install --name my-pulse --discord TOKEN --apify TOKEN --gmail you@gmail.com --gmail-password APP_PASSWORD --clients desktop,cursor`.
+Your address and key are saved to `.capes.local.json` (git-ignored). Non-interactive: `node scripts/capes.mjs install --name my-capes --discord TOKEN --apify TOKEN --gmail you@gmail.com --gmail-password APP_PASSWORD --clients desktop,cursor`.
 
 ### Option C: Vercel CLI by hand
 
@@ -159,7 +163,7 @@ Full walkthrough and security details: [Dashboard guide](docs/dashboard.md).
 Every client needs your address `https://<project>.vercel.app/mcp` and your `MCP_API_KEY` as `Authorization: Bearer <key>`. The dashboard's **Connect a client** tab shows the exact config. Or, from a clone of the repo:
 
 ```bash
-node scripts/pulse.mjs connect        # configures Claude Desktop, Claude Code, Cursor, Codex
+node scripts/capes.mjs connect        # configures Claude Desktop, Claude Code, Cursor, Codex
 ```
 
 By hand, per client ([client guide](docs/clients.md)):
@@ -184,7 +188,7 @@ Once connected, just talk to your assistant and it picks the tools:
 - "Post the release notes in #announcements and pin them."
 - "Search X for people talking about MCP servers."
 
-Sending mail and messages cannot be undone, so ask for a draft first when it matters. [Using pulse-mcp](docs/usage.md) has more examples and safety habits.
+Sending mail and messages cannot be undone, so ask for a draft first when it matters. [Using Capes](docs/usage.md) has more examples and safety habits.
 
 ## Tools
 
@@ -217,7 +221,7 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 Anyone can contribute: fix a bug, sharpen a guide, add a tool, or improve the dashboard. Deployment for users is Vercel only, so contributor tooling is kept minimal.
 
-1. Read [What pulse-mcp is for](docs/architecture.md) and [Contributing](docs/contributing.md).
+1. Read [What Capes is for](docs/architecture.md) and [Contributing](docs/contributing.md).
 2. Fork, branch (`feat/...`, `fix/...`, `docs/...`), make one focused change.
 3. Run the checks (no credentials needed; the full list is in [Contributing](docs/contributing.md#checks)):
 
@@ -261,7 +265,7 @@ With Claude Code: run `claude` in the repo, then for example `/add-tool slack sl
 ## Security
 
 - **One key guards everything.** `MCP_API_KEY` (24+ characters, checked in constant time) protects `/mcp` and the dashboard. Anyone who has it can read your email and act through your Discord bot, so keep it secret and rotate it if in doubt ([how](docs/vercel.md#rotating-the-key)).
-- **Credentials stay in your Vercel project.** Never commit `.env*` or `.pulse.local.json` (git-ignored). The dashboard and tool results never show secret values.
+- **Credentials stay in your Vercel project.** Never commit `.env*` or `.capes.local.json` (git-ignored). The dashboard and tool results never show secret values.
 - **Strict by default:** arguments are validated before any call, dashboard sessions are signed cookies with CSRF protection, and Redis outages fail closed into read-only mode.
 - **Contributors cannot slip in behaviour changes unnoticed:** CI blocks hooks, wildcard permissions, hidden text, unapproved dependencies and risky workflows, hash-pins every executable file under `.claude/` and `.github/`, and `CODEOWNERS` routes sensitive paths to the maintainer.
 - **If a token leaks,** rotate it at the provider (Discord: Reset Token; Apify: regenerate; Google: delete the app password) and update Vercel.
@@ -272,9 +276,9 @@ Details in [SECURITY.md](SECURITY.md) and the [security model](docs/architecture
 
 **Setup:** [Vercel](docs/vercel.md) | [Discord](docs/discord.md) | [Gmail](docs/gmail.md) | [Apify](docs/apify.md) | [Connect your client](docs/clients.md)
 
-**Use:** [Dashboard](docs/dashboard.md) | [Using pulse-mcp](docs/usage.md) | [Tool reference](docs/tools.md) | [Troubleshooting](docs/troubleshooting.md)
+**Use:** [Dashboard](docs/dashboard.md) | [Using Capes](docs/usage.md) | [Tool reference](docs/tools.md) | [Troubleshooting](docs/troubleshooting.md)
 
-**Understand and contribute:** [What pulse-mcp is for](docs/architecture.md) | [Contributing](docs/contributing.md) | [Security policy](SECURITY.md) | [Release checklist](docs/release-checklist.md)
+**Understand and contribute:** [What Capes is for](docs/architecture.md) | [Contributing](docs/contributing.md) | [Security policy](SECURITY.md) | [Release checklist](docs/release-checklist.md)
 
 ## License
 
@@ -288,4 +292,4 @@ Details in [SECURITY.md](SECURITY.md) and the [security model](docs/architecture
 - [Gmail IMAP extensions](https://developers.google.com/workspace/gmail/imap/imap-extensions) (search syntax, labels, threads) and [Google app passwords](https://support.google.com/accounts/answer/185833)
 - [Apify Tweet Scraper](https://apify.com/apidojo/tweet-scraper), the default actor behind `twitter_search`
 - [Vercel Functions](https://vercel.com/docs/functions) and the [Upstash Redis integration](https://vercel.com/marketplace/upstash)
-- Inspiration: [kebab-mcp](https://github.com/Yassinello/kebab-mcp) showed how useful a dashboard on a personal Vercel MCP server can be. pulse-mcp's dashboard is an independent implementation written from scratch.
+- Inspiration: [kebab-mcp](https://github.com/Yassinello/kebab-mcp) showed how useful a dashboard on a personal Vercel MCP server can be. Capes's dashboard is an independent implementation written from scratch.

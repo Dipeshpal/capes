@@ -11,7 +11,7 @@ Sign up at [console.apify.com/sign-up](https://console.apify.com/sign-up). The f
 ## 2. Copy your API token
 
 1. Open [Settings > API & Integrations](https://console.apify.com/settings/integrations).
-2. Under **Personal API tokens**, copy the **Default** token (or create one named `pulse-mcp`). It starts with `apify_api_`.
+2. Under **Personal API tokens**, copy the **Default** token (or create one named `capes`). It starts with `apify_api_`.
 
 ## 3. Give it to your server
 

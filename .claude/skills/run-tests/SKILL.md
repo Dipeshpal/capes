@@ -13,7 +13,7 @@ python tests/claude_config.py
 python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
-node --check scripts/pulse.mjs && node --check dashboard/app.js
+node --check scripts/capes.mjs && node --check dashboard/app.js
 uvx ruff check . && uvx ruff format --check .
 ```
 

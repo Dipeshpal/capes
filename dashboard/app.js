@@ -270,15 +270,15 @@
 
   function connect() {
     const url = app.data.server.mcp_url;
-    const desktop = JSON.stringify({ mcpServers: { pulse: { command: 'npx', args: ['-y', 'mcp-remote', url, '--header', 'Authorization:${AUTH_HEADER}'], env: { AUTH_HEADER: 'Bearer YOUR_MCP_API_KEY' } } } }, null, 2);
-    const cursor = JSON.stringify({ mcpServers: { pulse: { url, headers: { Authorization: 'Bearer YOUR_MCP_API_KEY' } } } }, null, 2);
+    const desktop = JSON.stringify({ mcpServers: { capes: { command: 'npx', args: ['-y', 'mcp-remote', url, '--header', 'Authorization:${AUTH_HEADER}'], env: { AUTH_HEADER: 'Bearer YOUR_MCP_API_KEY' } } } }, null, 2);
+    const cursor = JSON.stringify({ mcpServers: { capes: { url, headers: { Authorization: 'Bearer YOUR_MCP_API_KEY' } } } }, null, 2);
     return h('div', { class: 'stack' },
       h('div', { class: 'section-head' }, h('h1', { text: 'Connect a client' })),
       h('p', { class: 'muted', text: 'Replace YOUR_MCP_API_KEY with your key. The dashboard never displays it. Restart the client afterwards.' }),
-      snippet('Claude Code', `claude mcp add --scope user --transport http pulse ${url} --header "Authorization: Bearer YOUR_MCP_API_KEY"`),
+      snippet('Claude Code', `claude mcp add --scope user --transport http capes ${url} --header "Authorization: Bearer YOUR_MCP_API_KEY"`),
       snippet('Claude Desktop (claude_desktop_config.json, needs Node.js)', desktop),
       snippet('Cursor (~/.cursor/mcp.json)', cursor),
-      snippet('Codex', `codex mcp add pulse --url ${url} --bearer-token-env-var PULSE_MCP_API_KEY`),
+      snippet('Codex', `codex mcp add capes --url ${url} --bearer-token-env-var CAPES_MCP_API_KEY`),
     );
   }
 

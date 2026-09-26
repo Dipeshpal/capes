@@ -49,7 +49,7 @@ More in the [Dashboard guide](dashboard.md#troubleshooting).
 | `vercel link failed` | Run `vercel login` first, and check you are in the repo folder. |
 | `Server did not become healthy in time` | Run `vercel logs` for the error. Confirm `MCP_API_KEY` exists with `vercel env ls production`. |
 | `Got 401: turn off Vercel Deployment Protection` | See [Vercel setup](vercel.md#deployment-protection). |
-| It configured a client you did not want | Choose clients explicitly with `--clients desktop,cursor` (or `--clients none`). Remove the `pulse` entry by hand ([clients](clients.md)). |
+| It configured a client you did not want | Choose clients explicitly with `--clients desktop,cursor` (or `--clients none`). Remove the `capes` entry by hand ([clients](clients.md)). |
 
 ## Still stuck
 

@@ -68,8 +68,8 @@ if FULL:
     print("== mutating tools (test server only)")
     made = []
     general = text
-    m1 = call("discord_send_message", channel_id=general, content="hello from pulse-mcp e2e")
-    m2 = call("discord_send_message", channel_id=general, content="embed test", embed={"title": "Pulse", "description": "embed body", "color": 5793266})
+    m1 = call("discord_send_message", channel_id=general, content="hello from capes e2e")
+    m2 = call("discord_send_message", channel_id=general, content="embed test", embed={"title": "Capes", "description": "embed body", "color": 5793266})
     call("discord_send_message", channel_id=general, content="a reply", reply_to_message_id=m1["id"])
     call("discord_edit_message", channel_id=general, message_id=m1["id"], content="hello (edited)")
     call("discord_add_reaction", channel_id=general, message_id=m1["id"], emoji="👍")

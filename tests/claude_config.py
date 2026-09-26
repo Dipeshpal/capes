@@ -159,7 +159,7 @@ blocks(
 # ---- Trojan Source: invisible or bidirectional characters in ordinary source files
 blocks("bidirectional override hidden in Python source", lambda t: append(t / "pulse/mcp.py", "\n# access" + chr(0x202E) + " granted\n"), "Trojan Source")
 blocks("zero-width space in JavaScript", lambda t: append(t / "dashboard/app.js", "\nconst a" + chr(0x200B) + "b = 1;\n"), "Trojan Source")
-blocks("byte order mark inside a script", lambda t: append(t / "scripts/pulse.mjs", "\n// " + chr(0xFEFF) + "x\n"), "Trojan Source")
+blocks("byte order mark inside a script", lambda t: append(t / "scripts/capes.mjs", "\n// " + chr(0xFEFF) + "x\n"), "Trojan Source")
 blocks("invisible character in a workflow", lambda t: append(t / ".github/workflows/ci.yml", "\n# " + chr(0x2066) + "x\n"), "Trojan Source")
 
 # ---- CI and supply chain

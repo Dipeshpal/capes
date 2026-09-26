@@ -7,7 +7,7 @@ You need a Discord **bot**. Its token goes into `DISCORD_BOT_TOKEN`. What the bo
 ## 1. Create the application and bot
 
 1. Open the [Discord Developer Portal](https://discord.com/developers/applications) and sign in.
-2. Click **New Application**, name it (for example "pulse"), accept the terms, **Create**.
+2. Click **New Application**, name it (for example "Capes"), accept the terms, **Create**.
 3. Open the **Bot** tab on the left.
 4. Click **Reset Token**, confirm, and **copy the token**. Discord shows it only once. This is your `DISCORD_BOT_TOKEN`. Treat it like a password.
 
@@ -94,7 +94,7 @@ These are Discord's rules, not limits of this project:
 
 - Messages ping users only. `@everyone`, `@here` and role pings are blocked unless the request sets `mentions` to `all`.
 - Destructive tools (delete, bulk delete, remove reactions, moderation) are marked so clients ask before running them.
-- Changes are tagged "via pulse-mcp" in the server's **Audit Log**.
+- Changes are tagged "via capes" in the server's **Audit Log**.
 
 ## Rotating or revoking
 

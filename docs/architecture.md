@@ -1,8 +1,8 @@
-# What pulse-mcp is for, and how it works
+# What Capes is for, and how it works
 
 ## The goal
 
-AI assistants are good at reading, summarizing and acting, but your real work lives in accounts they cannot reach: your inbox, your community chat, your social feeds. pulse-mcp is a small server that gives an assistant controlled access to **your own** accounts through one standard door (the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro)), so the same setup works in Claude, Codex, Cursor and any other MCP client.
+AI assistants are good at reading, summarizing and acting, but your real work lives in accounts they cannot reach: your inbox, your community chat, your social feeds. Capes is a small server that gives an assistant controlled access to **your own** accounts through one standard door (the [Model Context Protocol](https://modelcontextprotocol.io/docs/getting-started/intro)), so the same setup works in Claude, Codex, Cursor and any other MCP client.
 
 What we are trying to achieve:
 
@@ -48,7 +48,7 @@ Each call is independent (stateless). The server holds no data between calls exc
 | `pulse/connectors.py` | The three services: what each needs, whether it is configured, connection tests |
 | `pulse/dashboard.py`, `dashboard/` | The dashboard API and its HTML, CSS and JavaScript |
 | `pulse/gmail.py`, `discord.py`, `twitter.py` | The integrations |
-| `scripts/pulse.mjs` | Optional installer: deploys to Vercel and wires up your AI clients |
+| `scripts/capes.mjs` | Optional installer: deploys to Vercel and wires up your AI clients |
 | `scripts/gen_tools_doc.py`, `scripts/check_claude_config.py` | Doc generator; guard for assistant and CI configuration |
 | `tests/` | Offline tests plus an opt-in Discord end-to-end script |
 
@@ -89,16 +89,16 @@ Each call is independent (stateless). The server holds no data between calls exc
 
 ## How it compares
 
-Nothing here is the first of its kind. Searching GitHub in September 2026 found overlapping projects; what pulse-mcp offers is a particular combination.
+Nothing here is the first of its kind. Searching GitHub in September 2026 found overlapping projects; what Capes offers is a particular combination.
 
-| Project | What it is | Where it differs from pulse-mcp |
+| Project | What it is | Where it differs from Capes |
 |---------|------------|---------------------------------|
-| [kebab-mcp](https://github.com/Yassinello/kebab-mcp) | Personal MCP framework on Vercel with a dashboard, 97+ tools (Google Workspace, Slack, Notion, GitHub and more) | Broader connectors and a richer dashboard; needs a key-value store; no Discord or X in its README; AGPL. pulse-mcp is narrower (Gmail, Discord, X) with free Gmail that needs no Google Cloud project. |
+| [kebab-mcp](https://github.com/Yassinello/kebab-mcp) | Personal MCP framework on Vercel with a dashboard, 97+ tools (Google Workspace, Slack, Notion, GitHub and more) | Broader connectors and a richer dashboard; needs a key-value store; no Discord or X in its README; AGPL. Capes is narrower (Gmail, Discord, X) with free Gmail that needs no Google Cloud project. |
 | Single-service MCP servers (for example Gmail with OAuth, Discord on Cloudflare Workers with 59 tools) | One service each, often local, sometimes hosted | Deeper in one service (the Discord one has more tools than ours); you install and secure one server per service |
 | Aggregators such as MetaMCP and MCPHub | Combine existing MCP servers behind one endpoint | They route to servers you still have to find, configure and host |
 | Hosted platforms such as Composio | Managed sign-in and hundreds of toolkits | Much broader; your credentials and calls pass through a third party |
 
-The dashboard idea was inspired by kebab-mcp. pulse-mcp's implementation is independent and written from scratch.
+The dashboard idea was inspired by kebab-mcp. Capes's implementation is independent and written from scratch.
 
 ## Known limits
 
