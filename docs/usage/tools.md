@@ -1,6 +1,6 @@
 # Tool reference
 
-62 tools.
+63 tools.
 
 Generated from the code by `python scripts/gen_tools_doc.py`. Do not edit by hand; change the tool's description or schema in `pulse/` and regenerate.
 
@@ -43,6 +43,7 @@ Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [
 | `discord_read_channel` | read | Read recent messages from a channel or thread (newest first). | `channel_id*`, `limit`, `before` |
 | `discord_list_pins` | read | List pinned messages in a channel. | `channel_id*` |
 | `discord_list_members` | read | List server members, or search by name with `query`. Needs the 'Server Members Intent' enabled in the Discord Developer Portal (Bot tab). | `guild_id*`, `query`, `limit` |
+| `discord_list_scheduled_events` | read | List a server's scheduled events with times, channel or external location, status and interested user count. The bot must have access to the server. | `guild_id*` |
 | `discord_list_roles` | read | List a server's roles with their permissions. | `guild_id*` |
 | `discord_list_threads` | read | List active threads in a server, or archived public threads of one channel when channel_id is given. | `guild_id`, `channel_id` |
 | `discord_send_message` | write | Send a message to a channel or thread. Provide content and/or an embed. | `channel_id*`, `content`, `embed`, `reply_to_message_id`, `mentions` |

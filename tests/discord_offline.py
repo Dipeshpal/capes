@@ -79,6 +79,34 @@ def respond(method: str, path: str, query: dict, body):
     if "770000000000000001" in path:
         return 502, None  # not JSON
     routes = [
+        ("GET", r"/guilds/600000000000000001/scheduled-events", lambda: []),
+        (
+            "GET",
+            r"/guilds/\d+/scheduled-events",
+            lambda: [
+                {
+                    "id": "500000000000000001",
+                    "name": "Voice meetup",
+                    "scheduled_start_time": "2026-10-01T10:00:00Z",
+                    "scheduled_end_time": None,
+                    "channel_id": "100000000000000001",
+                    "entity_metadata": None,
+                    "status": 1,
+                    "user_count": 0,
+                    "creator": {"username": "private"},
+                },
+                {
+                    "id": "500000000000000002",
+                    "name": "External meetup",
+                    "scheduled_start_time": "2026-10-02T10:00:00Z",
+                    "scheduled_end_time": "2026-10-02T11:00:00Z",
+                    "channel_id": None,
+                    "entity_metadata": {"location": "Community hall"},
+                    "status": 2,
+                    "user_count": 12,
+                },
+            ],
+        ),
         ("GET", r"/users/@me", lambda: {"id": "111111111111111111", "username": "pulsebot"}),
         ("POST", r"/users/@me/channels", lambda: {"id": "800000000000000001", "type": 1}),
         ("GET", r"/users/@me/guilds", lambda: [{"id": "200000000000000001", "name": "G"}]),
@@ -163,6 +191,38 @@ def tool(tool_name, /, **args):
 
 
 G, C, M, U, R = "200000000000000001", "100000000000000001", "300000000000000001", "900000000000000001", "500000000000000001"
+
+ok, r, reqs = tool("discord_list_scheduled_events", guild_id=G)
+check(
+    "scheduled events return compact channel and external event fields",
+    ok
+    and r
+    == [
+        {"id": R, "name": "Voice meetup", "scheduled_start_time": "2026-10-01T10:00:00Z", "channel_id": C, "status": "scheduled", "user_count": 0},
+        {
+            "id": "500000000000000002",
+            "name": "External meetup",
+            "scheduled_start_time": "2026-10-02T10:00:00Z",
+            "scheduled_end_time": "2026-10-02T11:00:00Z",
+            "location": "Community hall",
+            "status": "active",
+            "user_count": 12,
+        },
+    ],
+)
+check(
+    "scheduled events request interested counts with no payload",
+    len(reqs) == 1
+    and reqs[0]["method"] == "GET"
+    and reqs[0]["path"] == f"/guilds/{G}/scheduled-events"
+    and reqs[0]["json"] is None
+    and reqs[0]["query"] == {"with_user_count": "true"},
+)
+ok, r, reqs = tool("discord_list_scheduled_events", guild_id="600000000000000001")
+check("empty scheduled events", ok and r == [])
+for arguments in ({}, {"guild_id": "../bad"}, {"guild_id": True}):
+    ok, r, reqs = tool("discord_list_scheduled_events", **arguments)
+    check("invalid scheduled event guild ID makes no request", not ok and not reqs)
 
 # ================================================================ transport behaviour
 ok, r, reqs = tool("discord_get_message", channel_id=C, message_id=M)

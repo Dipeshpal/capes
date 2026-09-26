@@ -111,3 +111,5 @@ These are Discord's rules, not limits of this project:
 | Empty message text | Turn on Message Content Intent (step 2). |
 | `discord_list_members` fails | Turn on Server Members Intent (step 2). |
 | `401 Unauthorized` from Discord | The token is wrong or was reset. Copy the new one. |
+
+Use `discord_list_scheduled_events` with a server ID to read event times, status and interested counts. Channel events include a channel ID; external events include their location. This tool does not create, edit or join events.
