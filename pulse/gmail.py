@@ -6,6 +6,7 @@ All Mail, so search does not cover them.
 
 import asyncio
 import base64
+import contextlib
 import email
 import imaplib
 import os
@@ -17,7 +18,6 @@ from email import policy
 from email.message import EmailMessage
 from email.utils import formatdate, getaddresses, make_msgid
 from html.parser import HTMLParser
-from typing import Optional
 
 from .registry import ToolError, tool
 
@@ -30,6 +30,7 @@ MAX_ATTACHMENT_BYTES = 2_000_000
 # Connection
 # --------------------------------------------------------------------------
 
+
 def credentials() -> tuple[str, str]:
     address, password = os.getenv("GMAIL_ADDRESS"), os.getenv("GMAIL_APP_PASSWORD")
     if not address or not password:
@@ -38,10 +39,13 @@ def credentials() -> tuple[str, str]:
 
 
 def quote(name: str) -> str:
+    """Quote a mailbox or label name for an IMAP command. Control characters could inject extra commands, so refuse them."""
+    if re.search(r"[\x00-\x1f\x7f]", name):
+        raise ToolError("Names must not contain control characters")
     return '"' + name.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def parse_list_line(line: str) -> Optional[tuple[list[str], str]]:
+def parse_list_line(line: str) -> tuple[list[str], str] | None:
     m = re.match(r'\((?P<attrs>[^)]*)\)\s+(?:"(?P<sep>[^"]*)"|NIL)\s+(?P<name>.+)$', line)
     if not m:
         return None
@@ -66,20 +70,18 @@ class Mailbox:
                     "Gmail login failed. Use a 16-character app password (Google Account > Security > 2-Step Verification > App passwords), not your normal password."
                 ) from e
             raise
-        self._folders: Optional[dict] = None
+        self._folders: dict | None = None
         return self
 
     def __exit__(self, *exc):
-        try:
+        with contextlib.suppress(Exception):
             self.m.logout()
-        except Exception:  # noqa: BLE001
-            pass
 
     @property
     def folders(self) -> dict:
         """Special-use folders by role (all, drafts, sent, trash, junk), found via IMAP special-use flags so it works in any language."""
         if self._folders is None:
-            typ, data = self.m.list()
+            _, data = self.m.list()
             found = {}
             roles = {"\\All": "all", "\\Drafts": "drafts", "\\Sent": "sent", "\\Trash": "trash", "\\Junk": "junk", "\\Flagged": "starred"}
             for raw in data or []:
@@ -104,6 +106,7 @@ class Mailbox:
 # --------------------------------------------------------------------------
 # IMAP parsing helpers
 # --------------------------------------------------------------------------
+
 
 def parse_labels(prefix: str) -> list[str]:
     start = prefix.find("X-GM-LABELS (")
@@ -193,7 +196,8 @@ def one_message(mb: Mailbox, uid: int) -> tuple[dict, EmailMessage]:
 # Message formatting
 # --------------------------------------------------------------------------
 
-def summarize(row: dict, msg: Optional[EmailMessage] = None) -> dict:
+
+def summarize(row: dict, msg: EmailMessage | None = None) -> dict:
     h = msg if msg is not None else email.message_from_bytes(row["body"], policy=policy.default)
     return {
         "id": row["uid"],
@@ -204,12 +208,12 @@ def summarize(row: dict, msg: Optional[EmailMessage] = None) -> dict:
         "date": str(h["date"] or ""),
         "unread": "\\Seen" not in row["flags"],
         "starred": "\\Flagged" in row["flags"],
-        "labels": [l for l in row["labels"] if l not in ("\\Important",)],
+        "labels": [label for label in row["labels"] if label != "\\Important"],
     }
 
 
 class _Strip(HTMLParser):
-    BLOCK = {"p", "div", "br", "tr", "li", "h1", "h2", "h3", "h4", "table"}
+    BLOCK = frozenset({"p", "div", "br", "tr", "li", "h1", "h2", "h3", "h4", "table"})
 
     def __init__(self):
         super().__init__()
@@ -273,6 +277,7 @@ def full_view(row: dict, msg: EmailMessage, max_chars: int) -> dict:
 # Composing and sending
 # --------------------------------------------------------------------------
 
+
 def addrs(value) -> list[str]:
     if not value:
         return []
@@ -280,7 +285,7 @@ def addrs(value) -> list[str]:
     return [a for _, a in getaddresses([str(i) for i in items]) if a]
 
 
-def build_message(sender: str, args: dict, *, in_reply_to: Optional[str] = None, references: Optional[str] = None, require_recipient: bool = True) -> EmailMessage:
+def build_message(sender: str, args: dict, *, in_reply_to: str | None = None, references: str | None = None, require_recipient: bool = True) -> EmailMessage:
     to, cc, bcc = addrs(args.get("to")), addrs(args.get("cc")), addrs(args.get("bcc"))
     if require_recipient and not (to or cc or bcc):
         raise ToolError("At least one recipient (to, cc or bcc) is required")
@@ -307,7 +312,7 @@ def build_message(sender: str, args: dict, *, in_reply_to: Optional[str] = None,
     for att in args.get("attachments") or []:
         try:
             data = base64.b64decode(att["content_base64"], validate=True)
-        except Exception as e:  # noqa: BLE001
+        except Exception as e:
             raise ToolError(f"Attachment '{att.get('filename')}' has invalid base64 content") from e
         if len(data) > MAX_ATTACHMENT_BYTES * 2:
             raise ToolError("Attachment too large for this server (max ~4 MB)")
@@ -329,7 +334,7 @@ def smtp_send(msg: EmailMessage) -> list[str]:
     return recipients
 
 
-def find_by_message_id(mb: Mailbox, message_id: str, role: str = "all") -> Optional[int]:
+def find_by_message_id(mb: Mailbox, message_id: str, role: str = "all") -> int | None:
     mb.select(role, readonly=True)
     for _ in range(4):
         mb.m.literal = message_id.encode()
@@ -394,6 +399,7 @@ COMPOSE = {
 # Tools: read
 # --------------------------------------------------------------------------
 
+
 @tool(
     "gmail_list_labels",
     "List Gmail labels/folders and the unread count of the inbox.",
@@ -424,7 +430,7 @@ async def gmail_list_labels(args):
     "gmail_search",
     "Search email with Gmail search syntax (from:, to:, subject:, is:unread, has:attachment, label:, newer_than:2d, after:2026/01/01...). Covers All Mail (not Trash/Spam). Newest first.",
     {
-        "query": {"type": "string", "description": "Gmail search query. Default 'in:inbox'. Use '' for everything."},
+        "query": {"type": "string", "description": "Gmail search query. Default 'in:inbox'. Use '' for everything.", "maxLength": 1000},
         "limit": {"type": "integer", "description": "1-100 (default 20)"},
         "before_id": {"type": "integer", "description": "Only messages with id lower than this (pagination)"},
     },
@@ -486,7 +492,11 @@ async def gmail_get_thread(args):
             uids = sorted(int(x) for x in (data[0] or b"").split())[:30] if typ == "OK" else []
             rows = fetch(mb.m, uids, "BODY.PEEK[]") if uids else []
         rows.sort(key=lambda r: r["uid"])
-        return {"thread_id": tid, "count": len(rows), "messages": [full_view(r, email.message_from_bytes(r["body"], policy=policy.default), 4000) for r in rows]}
+        return {
+            "thread_id": tid,
+            "count": len(rows),
+            "messages": [full_view(r, email.message_from_bytes(r["body"], policy=policy.default), 4000) for r in rows],
+        }
 
     return await run(work, args)
 
@@ -515,6 +525,7 @@ async def gmail_get_attachment(args):
 # --------------------------------------------------------------------------
 # Tools: send and drafts
 # --------------------------------------------------------------------------
+
 
 @tool(
     "gmail_send_email",
@@ -568,7 +579,12 @@ async def gmail_reply(args):
             text, _ = body_text(orig)
             quoted = "\n".join("> " + line for line in text.splitlines()[:200])
             body += f"\n\nOn {orig['date']}, {orig['from']} wrote:\n{quoted}"
-        msg = build_message(address, {"to": to, "cc": cc, "subject": subject, "body": body, "html": a.get("html"), "attachments": a.get("attachments")}, in_reply_to=msgid, references=refs)
+        msg = build_message(
+            address,
+            {"to": to, "cc": cc, "subject": subject, "body": body, "html": a.get("html"), "attachments": a.get("attachments")},
+            in_reply_to=msgid,
+            references=refs,
+        )
         recipients = smtp_send(msg)
         return {"sent": True, "to": recipients, "subject": subject}
 
@@ -588,7 +604,15 @@ async def gmail_forward(args):
         with Mailbox() as mb:
             _, orig = one_message(mb, int(a["id"]))
         subject = str(orig["subject"] or "")
-        msg = build_message(address, {"to": a["to"], "cc": a.get("cc"), "subject": subject if subject.lower().startswith("fwd:") else f"Fwd: {subject}", "body": a.get("note") or "Forwarded message attached."})
+        msg = build_message(
+            address,
+            {
+                "to": a["to"],
+                "cc": a.get("cc"),
+                "subject": subject if subject.lower().startswith("fwd:") else f"Fwd: {subject}",
+                "body": a.get("note") or "Forwarded message attached.",
+            },
+        )
         msg.add_attachment(orig, filename="forwarded-message.eml")
         recipients = smtp_send(msg)
         return {"sent": True, "to": recipients}
@@ -654,6 +678,7 @@ async def gmail_delete_draft(args):
 # Tools: organize
 # --------------------------------------------------------------------------
 
+
 @tool(
     "gmail_modify",
     "Change messages: mark read/unread, star/unstar, archive (remove from inbox), add or remove labels. New labels are created automatically.",
@@ -690,9 +715,9 @@ async def gmail_modify(args):
             for op, key in (("+X-GM-LABELS", "add_labels"), ("-X-GM-LABELS", "remove_labels")):
                 labels = a.get(key) or []
                 if labels:
-                    if not all(l.isascii() for l in labels):
+                    if not all(name.isascii() for name in labels):
                         raise ToolError("Label names must be ASCII")
-                    store(op, f"{key}:{labels}", "(" + " ".join(quote(l) for l in labels) + ")")
+                    store(op, f"{key}:{labels}", "(" + " ".join(quote(name) for name in labels) + ")")
         if not changes:
             raise ToolError("Nothing to change: pass read, starred, archive, add_labels or remove_labels")
         return {"ids": [int(u) for u in uids.split(",")], "applied": changes}

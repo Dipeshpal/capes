@@ -2,7 +2,11 @@
 
 Every client needs two things: your server address `https://<project>.vercel.app/mcp` (note the `/mcp`) and your `MCP_API_KEY`, sent as the header `Authorization: Bearer <MCP_API_KEY>`. Below, `URL` means `https://<project>.vercel.app` and `KEY` means your `MCP_API_KEY`.
 
-## Fastest: the connect script
+## Easiest: copy from the dashboard
+
+Sign in to `https://<project>.vercel.app/dashboard` and open **Connect a client**. It shows ready-to-copy config for Claude Code, Claude Desktop, Cursor and Codex, already filled in with your address. Replace `YOUR_MCP_API_KEY` with your key (the dashboard never displays it).
+
+## Or: the connect script
 
 From a clone of this repo (Node 18+):
 

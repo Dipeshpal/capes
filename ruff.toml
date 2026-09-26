@@ -1,0 +1,20 @@
+target-version = "py312"
+line-length = 160
+extend-exclude = [".claude", ".vercel", "*.md"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "C4", "SIM", "RUF"]
+ignore = [
+  "E501",    # long lines are formatted by ruff format, not linted
+  "S101",    # assert is fine in tests
+  "SIM108",  # ternary is not always clearer
+  "RUF001", "RUF002", "RUF003",  # emoji and typographic characters in test data and docs strings
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["S105", "S106", "S107", "S110", "S310", "S311", "S603", "S607", "B011", "E402", "E701", "E702", "RUF012", "SIM117", "S113"]
+"scripts/*" = ["S603", "S607", "S310"]
+"api/index.py" = ["E402"]
+
+[format]
+quote-style = "double"

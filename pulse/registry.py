@@ -1,6 +1,7 @@
 """Tool registry: decorate an async function with @tool(...) and it is served over MCP."""
 
-from typing import Any, Awaitable, Callable, Optional
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 ToolFn = Callable[[dict], Awaitable[Any]]
 TOOLS: dict[str, dict] = {}
@@ -16,7 +17,7 @@ class ToolError(Exception):
     """Expected failure; shown to the model as a tool error, not a crash."""
 
 
-def tool(name: str, description: str, properties: dict, required: Optional[list] = None, hint: str = "read"):
+def tool(name: str, description: str, properties: dict, required: list | None = None, hint: str = "read"):
     def register(fn: ToolFn) -> ToolFn:
         TOOLS[name] = {
             "fn": fn,
@@ -30,3 +31,11 @@ def tool(name: str, description: str, properties: dict, required: Optional[list]
         return fn
 
     return register
+
+
+def kind(spec: dict) -> str:
+    """'read', 'write' or 'destructive' for a tool spec."""
+    a = spec["annotations"]
+    if a.get("readOnlyHint"):
+        return "read"
+    return "destructive" if a.get("destructiveHint") else "write"

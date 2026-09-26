@@ -1,0 +1,20 @@
+# Changes to anything that steers assistants, CI, deployment or authentication need the maintainer's review.
+# Enable "Require review from Code Owners" in branch protection so this is enforced.
+
+*                          @Dipeshpal
+
+/.claude/                  @Dipeshpal
+/CLAUDE.md                 @Dipeshpal
+/.github/                  @Dipeshpal
+/scripts/                  @Dipeshpal
+/api/                      @Dipeshpal
+/pulse/security.py         @Dipeshpal
+/pulse/store.py            @Dipeshpal
+/pulse/mcp.py              @Dipeshpal
+/pulse/dashboard.py        @Dipeshpal
+/dashboard/                @Dipeshpal
+/vercel.json               @Dipeshpal
+/requirements.txt          @Dipeshpal
+/.vercelignore             @Dipeshpal
+/.gitignore                @Dipeshpal
+/SECURITY.md               @Dipeshpal

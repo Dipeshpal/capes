@@ -10,7 +10,10 @@
 
 Example:  GUILD=123 MODE=read python tests/discord_e2e.py
 """
-import json, os, sys, time, urllib.request
+
+import json
+import os
+import urllib.request
 
 URL = os.environ.get("URL", "http://localhost:8000") + "/mcp"
 KEY = os.environ.get("KEY", "localtestkey")
@@ -82,14 +85,26 @@ if FULL:
     call("discord_bulk_delete_messages", channel_id=general, message_ids=extra)
     call("discord_delete_message", channel_id=general, message_id=m2["id"])
 
-    cat = call("discord_create_channel", guild_id=G, name="pulse-category", type="category"); made.append(cat["id"])
-    ch = call("discord_create_channel", guild_id=G, name="pulse-text", topic="made by e2e", parent_id=cat["id"], slowmode_seconds=5); made.append(ch["id"])
+    cat = call("discord_create_channel", guild_id=G, name="pulse-category", type="category")
+    made.append(cat["id"])
+    ch = call("discord_create_channel", guild_id=G, name="pulse-text", topic="made by e2e", parent_id=cat["id"], slowmode_seconds=5)
+    made.append(ch["id"])
     made.append(call("discord_create_channel", guild_id=G, name="pulse-voice", type="voice", parent_id=cat["id"])["id"])
     made.append(call("discord_create_channel", guild_id=G, name="pulse-forum", type="forum")["id"])
-    priv = call("discord_create_channel", guild_id=G, name="pulse-private", private=True); made.append(priv["id"])
+    priv = call("discord_create_channel", guild_id=G, name="pulse-private", private=True)
+    made.append(priv["id"])
     call("discord_edit_channel", channel_id=ch["id"], name="pulse-text-renamed", topic="edited topic")
-    role = call("discord_create_role", guild_id=G, name="pulse-mod", permissions=["MANAGE_MESSAGES", "KICK_MEMBERS"], color="#ff8800", hoist=True, mentionable=True)
-    call("discord_set_channel_permission", channel_id=priv["id"], target_id=role["id"], target_type="role", allow=["VIEW_CHANNEL", "SEND_MESSAGES"], deny=["ADD_REACTIONS"])
+    role = call(
+        "discord_create_role", guild_id=G, name="pulse-mod", permissions=["MANAGE_MESSAGES", "KICK_MEMBERS"], color="#ff8800", hoist=True, mentionable=True
+    )
+    call(
+        "discord_set_channel_permission",
+        channel_id=priv["id"],
+        target_id=role["id"],
+        target_type="role",
+        allow=["VIEW_CHANNEL", "SEND_MESSAGES"],
+        deny=["ADD_REACTIONS"],
+    )
     got = call("discord_get_channel", channel_id=priv["id"])
     print("     overwrites:", [(o["type"], o["allow"], o["deny"]) for o in got["permission_overwrites"]])
     call("discord_delete_channel_permission", channel_id=priv["id"], target_id=role["id"])

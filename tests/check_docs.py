@@ -2,6 +2,7 @@
 
 Run from the repo root:  python tests/check_docs.py
 """
+
 import re
 import sys
 from pathlib import Path

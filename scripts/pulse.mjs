@@ -70,8 +70,10 @@ async function install() {
 
   log(`Waiting for ${url} ...`);
   await verify(url, key);
-  writeFileSync(SAVED, JSON.stringify({ url, key }, null, 2));
+  writeFileSync(SAVED, JSON.stringify({ url, key }, null, 2), { mode: 0o600 });
   log(`\nDeployed: ${url}`);
+  log(`Dashboard: ${url}/dashboard  (sign in with your MCP API key)`);
+  log('Optional, free: run `vercel integration add upstash` then `vercel deploy --prod` so the dashboard can save switches.');
   log(`Your MCP API key (also saved to .pulse.local.json, which is git-ignored):\n  ${key}\n`);
   if (discord) {
     const seg = discord.split('.')[0];

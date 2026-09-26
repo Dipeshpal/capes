@@ -14,16 +14,18 @@ Read [What pulse-mcp is for](architecture.md) first if you want the big picture.
 | Add a whole service (Calendar, Slack, ...) | Open an issue first with the feature template: the service's API, how a user gets credentials, whether it is free, and which tools you plan. Then follow [Add a service](#add-a-service). |
 | Improve tests | Add cases to `tests/`. A test that reproduces a real bug is especially welcome. |
 
-## Set up
+## Set up (contributors only)
+
+End users deploy to Vercel and never run the server locally. As a contributor you can run it to try changes:
 
 ```bash
 git clone <this repo>
 cd pulse-mcp
-cp .env.example .env        # fill in only what you want to test
+cp .env.example .env        # fill in only what you want to test; MCP_API_KEY must be 24+ characters
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
 
-The server listens on `http://127.0.0.1:8000`. Set `MCP_API_KEY` in `.env`, then call `POST /mcp` with `Authorization: Bearer <key>` (examples in [Usage](usage.md#calling-the-server-without-an-ai-client)), or point an MCP client at it.
+The server listens on `http://127.0.0.1:8000`: the dashboard is at `/dashboard`, and `POST /mcp` takes `Authorization: Bearer <key>` (examples in [Usage](usage.md#calling-the-server-without-an-ai-client)). Most work needs no credentials at all because the tests fake the outside world.
 
 ## Workflow
 
@@ -40,22 +42,43 @@ Run before every pull request. None needs credentials.
 
 ```bash
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
+uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+python tests/claude_config.py
+python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
-node --check scripts/pulse.mjs
+node --check scripts/pulse.mjs && node --check dashboard/app.js
+uvx ruff check . && uvx ruff format --check .
 ```
 
 What they protect:
 
-- `protocol.py`: the MCP protocol and auth, every tool's schema and safety label, and that the README tool list, the Discord permission number and the environment variables in docs agree with the code.
+- `protocol.py`: the MCP protocol, authentication, argument validation, read-only and disabled-tool enforcement, every tool's schema and safety label, and that the README tool list, the Discord permission number and the environment variables in docs agree with the code.
+- `dashboard.py`: sign-in, cookie flags, rate limiting, tampered and expired sessions, CSRF and origin checks, secrets never leaking, settings and activity through a fake Redis, fail-closed behaviour, security headers and the Content-Security-Policy, and rules for the front-end code (no inline scripts, no `innerHTML`, no outside origins).
 - `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail.
+- `claude_config.py` and `check_claude_config.py`: the guard for assistant and CI configuration, and proof that each attack it exists for is blocked (see [below](#the-guard-for-assistant-and-ci-configuration)).
 - `gen_tools_doc.py --check`: [docs/tools.md](tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
 - `check_docs.py`: every relative link and `#anchor` in the docs resolves.
+- `ruff`: lint (including security rules) and formatting. `uvx ruff check . --fix && uvx ruff format .` fixes most findings.
 
 `tests/discord_e2e.py` runs against a live server and a real Discord server. Use `MODE=read` anywhere. Use `MODE=full` only on a disposable test server, because it posts messages and creates and deletes channels, roles and threads. The file header lists its variables.
 
 The same checks run in GitHub Actions on every push and pull request, together with a scan of the whole git history for secrets.
+
+## The guard for assistant and CI configuration
+
+Files that steer AI assistants and CI decide what runs on every contributor's machine and in the pipeline, so `scripts/check_claude_config.py` polices them. It fails a pull request that:
+
+- adds hooks, environment variables, MCP servers or a helper command to `.claude/settings.json`, or adds a permission that is not on its approved list, or removes a required deny rule;
+- adds a `.mcp.json`, a hooks folder, slash commands or any `.claude/` entry outside `agents`, `rules`, `skills`, `agent-memory` and `settings.json`;
+- puts hidden text in assistant files (zero-width or bidirectional characters, HTML comments), prompt-injection wording, links to unapproved hosts, network or remote-execution commands, or shell injections outside an approved list;
+- gives an agent tools beyond `Read`, `Grep`, `Glob` and `Bash`, or adds `allowed-tools`, `model` or `hooks` frontmatter;
+- adds a workflow with `pull_request_target`, write permissions, repository secrets, third-party actions or untrusted event data in a shell command;
+- adds a dependency to `requirements.txt` that is not approved, or anything but `functions` to `vercel.json`;
+- changes any executable or configuration file under `.claude/` or `.github/` without re-pinning its hash.
+
+If your change is legitimate, CI failing is expected: describe why in the pull request. A maintainer reviews it, updates the approved lists in the script if appropriate, and re-pins with `python scripts/check_claude_config.py --update`. On pull requests CI runs the base branch's copy of the guard, so a pull request cannot loosen its own check. `CODEOWNERS` sends these paths, the guard, authentication code and the dashboard to the maintainer for review.
 
 ## Add a tool
 
@@ -69,8 +92,7 @@ The same checks run in GitHub Actions on every push and pull request, together w
        ["id", "until"],
        hint="write",
    )
-   async def gmail_snooze(args: dict):
-       ...
+   async def gmail_snooze(args: dict): ...
    ```
 
 2. Choose the honest `hint`: `read` (no side effects), `write` (creates or changes things), `destructive` (deletes or is hard to undo).
@@ -82,7 +104,7 @@ The conventions are in [`CLAUDE.md`](../CLAUDE.md) and `.claude/rules/tools.md`.
 ## Add a service
 
 1. Create `pulse/<service>.py` with its `@tool` functions. Read credentials with `os.getenv` inside the function, not at import time. Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request.
-2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too).
+2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too). Register the service in `pulse/connectors.py` (name, tool prefix, environment variables, guide, and a read-only connection test) so it appears in the dashboard with a status and a **Test connection** button.
 3. Add the environment variables to `.env.example`, `docs/vercel.md` and the installer prompts in `scripts/pulse.mjs`.
 4. Write `docs/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
 5. Add a row to the README services table and a line to `docs/troubleshooting.md`.
@@ -115,6 +137,7 @@ The repo ships its Claude Code setup so every contributor's assistant starts wit
 | `.claude/settings.local.json` | Your personal overrides (git-ignored, never committed) | Every session |
 | `.claude/rules/security.md` | Secret-handling rules | Every session |
 | `.claude/rules/tools.md` | How to write a tool | When you touch `pulse/` or `api/` |
+| `.claude/rules/dashboard.md` | Front-end and dashboard security rules | When you touch `dashboard/` or `pulse/dashboard.py`, `pulse/security.py`, `pulse/store.py` |
 | `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its guide |
 | `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its guide or its test |
 | `.claude/rules/installer.md` | Installer conventions | When you touch `scripts/` |

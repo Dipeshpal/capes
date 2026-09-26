@@ -1,6 +1,6 @@
 # Using pulse-mcp
 
-Once your server is deployed and your AI client is connected ([setup steps](../README.md#set-up-in-6-steps)), you just talk to your assistant. It picks the right tools. This page shows what to ask, how to stay safe, and how to test without an AI client.
+Once your server is deployed and your AI client is connected ([setup steps](../README.md#set-up-in-5-steps)), you just talk to your assistant. It picks the right tools. This page shows what to ask, how to stay safe, and how to test without an AI client.
 
 The exact tools and arguments are in the [tool reference](tools.md).
 
@@ -42,6 +42,17 @@ The exact tools and arguments are in the [tool reference](tools.md).
 - **Start read-only.** If you are unsure, give your Discord bot fewer permissions or use a test server first ([Discord guide](discord.md)).
 - **Check the record.** Discord changes made by the bot appear in the server **Audit Log** tagged "via pulse-mcp". Sent mail appears in Gmail's Sent folder.
 - **Keep the key private.** Anyone with your `MCP_API_KEY` can act on your accounts.
+
+## Control what the assistant can do
+
+Open your [dashboard](dashboard.md) at `https://<project>.vercel.app/dashboard` to shape what assistants may do:
+
+- **Read-only mode** (`PULSE_READ_ONLY=1`) hides every tool that sends, changes or deletes. Use it when you only want summaries and search.
+- **Connector switch** turns a whole service off (for example Discord while you are away).
+- **Tool switches** turn single tools off, such as `gmail_trash` or `discord_moderate_member`.
+- **Activity** shows what was called and whether it worked.
+
+No database is needed: set the same limits with the `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` and `PULSE_DISABLED_TOOLS` environment variables on Vercel. (An optional free Redis add-on lets you flip switches on the dashboard without redeploying.) Details: [Dashboard guide](dashboard.md#switches-read-only-mode-and-where-settings-are-stored).
 
 ## Good to know
 

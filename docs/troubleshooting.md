@@ -14,12 +14,29 @@ Find your symptom, apply the fix, retry. Service-specific problems also have a t
 | `ENOTFOUND` in the Claude Desktop log right after you deployed | A brand-new address was not resolvable yet. Restart Claude Desktop. |
 | New tools do not appear | Redeploy, then restart the client. Clients read the tool list when they start. |
 
+## Dashboard
+
+| Symptom | Fix |
+|---------|-----|
+| "That key is not correct" | Use the current value of `MCP_API_KEY` from Vercel; check for stray spaces. |
+| "Too many attempts" | Sign-in is blocked for 15 minutes after 10 wrong tries. |
+| Server error mentioning "at least 24 characters" | Your `MCP_API_KEY` is too short. Set a longer one ([how](vercel.md#2-create-your-mcp_api_key)) and redeploy. |
+| Switches are greyed out | Normal without Redis (no database is needed): set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel and redeploy ([details](dashboard.md#switches-read-only-mode-and-where-settings-are-stored)). |
+| Banner says settings storage is unreachable | The server is using the last known settings, or read-only mode if none. Check the Redis integration in Vercel **Storage**. |
+| A client still sees a tool you switched off | Wait about 10 seconds and restart the client. |
+| Signed out again | Sessions last 8 hours by default (`PULSE_SESSION_HOURS`). Sign in again; the key does not need rotating. |
+| Test connection fails | The message comes from the service. See that service's guide. |
+
+More in the [Dashboard guide](dashboard.md#troubleshooting).
+
 ## Tools
 
 | Symptom | Fix |
 |---------|-----|
 | `... is not set on the server` | The service's variable is missing. Add it on Vercel and redeploy. Variables only apply to new deployments. |
 | `Missing required argument(s): ...` | The client sent a call without a required argument. Rephrase the request or provide the value. |
+| `'channel_id' has an invalid format` | Discord IDs are 5 to 25 digits. Copy the ID with Developer Mode on ([how](discord.md#7-check-that-it-works)). |
+| `This tool is disabled by the server owner` or `...read-only mode...` | You (or environment variables) switched it off. Change it in the [dashboard](dashboard.md) or your `PULSE_*` variables. |
 | `Discord ... Missing Permissions` | Re-authorize the bot and raise its role ([Discord guide](discord.md#5-put-the-bots-role-high-enough)). |
 | `Gmail login failed` | Use the app password ([Gmail guide](gmail.md#2-create-the-app-password)). |
 | `Apify API ...` | See the table in the [Apify guide](apify.md#common-problems). |

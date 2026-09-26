@@ -6,8 +6,9 @@ What the bot can do is decided by Discord, not by this code: see "Discord permis
 import asyncio
 import json
 import os
-from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+import re
+from datetime import UTC, datetime, timedelta
+from typing import Any
 from urllib.parse import quote
 
 import aiohttp
@@ -15,19 +16,56 @@ import aiohttp
 from .registry import ToolError, tool
 
 API = "https://discord.com/api/v10"
+SAFE_PATH = re.compile(r"(?:/[A-Za-z0-9@_.%:\-]+)+")
 UA = "DiscordBot (https://github.com/Dipeshpal/pulse-mcp, 3.0)"
 DEFAULT_REASON = "via pulse-mcp"
 
 PERMISSIONS = {
     name: bit
     for bit, name in enumerate(
-        """CREATE_INSTANT_INVITE KICK_MEMBERS BAN_MEMBERS ADMINISTRATOR MANAGE_CHANNELS MANAGE_GUILD ADD_REACTIONS
-        VIEW_AUDIT_LOG PRIORITY_SPEAKER STREAM VIEW_CHANNEL SEND_MESSAGES SEND_TTS_MESSAGES MANAGE_MESSAGES EMBED_LINKS
-        ATTACH_FILES READ_MESSAGE_HISTORY MENTION_EVERYONE USE_EXTERNAL_EMOJIS VIEW_GUILD_INSIGHTS CONNECT SPEAK
-        MUTE_MEMBERS DEAFEN_MEMBERS MOVE_MEMBERS USE_VAD CHANGE_NICKNAME MANAGE_NICKNAMES MANAGE_ROLES MANAGE_WEBHOOKS
-        MANAGE_GUILD_EXPRESSIONS USE_APPLICATION_COMMANDS REQUEST_TO_SPEAK MANAGE_EVENTS MANAGE_THREADS
-        CREATE_PUBLIC_THREADS CREATE_PRIVATE_THREADS USE_EXTERNAL_STICKERS SEND_MESSAGES_IN_THREADS
-        USE_EMBEDDED_ACTIVITIES MODERATE_MEMBERS""".split()
+        [
+            "CREATE_INSTANT_INVITE",
+            "KICK_MEMBERS",
+            "BAN_MEMBERS",
+            "ADMINISTRATOR",
+            "MANAGE_CHANNELS",
+            "MANAGE_GUILD",
+            "ADD_REACTIONS",
+            "VIEW_AUDIT_LOG",
+            "PRIORITY_SPEAKER",
+            "STREAM",
+            "VIEW_CHANNEL",
+            "SEND_MESSAGES",
+            "SEND_TTS_MESSAGES",
+            "MANAGE_MESSAGES",
+            "EMBED_LINKS",
+            "ATTACH_FILES",
+            "READ_MESSAGE_HISTORY",
+            "MENTION_EVERYONE",
+            "USE_EXTERNAL_EMOJIS",
+            "VIEW_GUILD_INSIGHTS",
+            "CONNECT",
+            "SPEAK",
+            "MUTE_MEMBERS",
+            "DEAFEN_MEMBERS",
+            "MOVE_MEMBERS",
+            "USE_VAD",
+            "CHANGE_NICKNAME",
+            "MANAGE_NICKNAMES",
+            "MANAGE_ROLES",
+            "MANAGE_WEBHOOKS",
+            "MANAGE_GUILD_EXPRESSIONS",
+            "USE_APPLICATION_COMMANDS",
+            "REQUEST_TO_SPEAK",
+            "MANAGE_EVENTS",
+            "MANAGE_THREADS",
+            "CREATE_PUBLIC_THREADS",
+            "CREATE_PRIVATE_THREADS",
+            "USE_EXTERNAL_STICKERS",
+            "SEND_MESSAGES_IN_THREADS",
+            "USE_EMBEDDED_ACTIVITIES",
+            "MODERATE_MEMBERS",
+        ]
     )
 }
 CHANNEL_TYPES = {"text": 0, "voice": 2, "category": 4, "announcement": 5, "stage": 13, "forum": 15}
@@ -45,25 +83,26 @@ HINTS = {
     20001: "Bots cannot use this endpoint.",
 }
 
-_bot_id: Optional[str] = None
+_bot_id: str | None = None
 
 
 # --------------------------------------------------------------------------
 # HTTP helper
 # --------------------------------------------------------------------------
 
-async def call(method: str, path: str, *, json_body: Any = None, params: Optional[dict] = None, reason: Optional[str] = None) -> Any:
+
+async def call(method: str, path: str, *, json_body: Any = None, params: dict | None = None, reason: str | None = None) -> Any:
     token = os.getenv("DISCORD_BOT_TOKEN")
     if not token:
         raise ToolError("DISCORD_BOT_TOKEN is not set on the server")
+    if not SAFE_PATH.fullmatch(path) or ".." in path:
+        raise ToolError("Refusing an unsafe Discord API path")
     headers = {"Authorization": f"Bot {token}", "User-Agent": UA}
     if reason:
         headers["X-Audit-Log-Reason"] = quote(reason)
     async with aiohttp.ClientSession() as session:
         for attempt in range(2):
-            async with session.request(
-                method, f"{API}{path}", json=json_body, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=20)
-            ) as resp:
+            async with session.request(method, f"{API}{path}", json=json_body, params=params, headers=headers, timeout=aiohttp.ClientTimeout(total=20)) as resp:
                 text = await resp.text()
                 body = json.loads(text) if text else None
                 if resp.status == 429 and attempt == 0 and (body or {}).get("retry_after", 99) <= 5:
@@ -88,6 +127,7 @@ async def bot_user_id() -> str:
 # --------------------------------------------------------------------------
 # Helpers
 # --------------------------------------------------------------------------
+
 
 def clean(d: dict) -> dict:
     return {k: v for k, v in d.items() if v is not None}
@@ -170,12 +210,16 @@ def fmt_overwrite(o: dict) -> dict:
     }
 
 
-def allowed_mentions(mode: Optional[str]) -> dict:
+def allowed_mentions(mode: str | None) -> dict:
     return {"none": {"parse": []}, "all": {"parse": ["users", "roles", "everyone"]}}.get(mode or "users", {"parse": ["users"]})
 
 
+SNOWFLAKE = r"\d{5,25}"
+
+
 def sid(description: str) -> dict:
-    return {"type": "string", "description": description}
+    """A Discord ID (snowflake). The pattern is enforced by pulse/mcp.py so an ID can never smuggle extra URL path."""
+    return {"type": "string", "description": description, "pattern": SNOWFLAKE}
 
 
 GUILD = sid("Server (guild) ID")
@@ -203,6 +247,7 @@ MENTIONS = {
 # --------------------------------------------------------------------------
 # Servers, channels, members, roles (read)
 # --------------------------------------------------------------------------
+
 
 @tool("discord_list_guilds", "List the Discord servers the bot is in.", {})
 async def list_guilds(args):
@@ -261,7 +306,7 @@ async def get_channel(args):
     {
         "channel_id": CHANNEL,
         "limit": {"type": "integer", "description": "Messages to fetch, 1-500 (default 50)"},
-        "before": {"type": "string", "description": "Only messages before this message ID (optional)"},
+        "before": {"type": "string", "description": "Only messages before this message ID (optional)", "pattern": SNOWFLAKE},
     },
     ["channel_id"],
 )
@@ -304,7 +349,17 @@ async def list_members(args):
     else:
         members = await call("GET", f"/guilds/{args['guild_id']}/members", params={"limit": limit})
     return [
-        clean({"user_id": m["user"]["id"], "username": m["user"]["username"], "nick": m.get("nick"), "bot": m["user"].get("bot") or None, "roles": m["roles"], "joined_at": m.get("joined_at"), "timeout_until": m.get("communication_disabled_until")})
+        clean(
+            {
+                "user_id": m["user"]["id"],
+                "username": m["user"]["username"],
+                "nick": m.get("nick"),
+                "bot": m["user"].get("bot") or None,
+                "roles": m["roles"],
+                "joined_at": m.get("joined_at"),
+                "timeout_until": m.get("communication_disabled_until"),
+            }
+        )
         for m in members
     ]
 
@@ -334,12 +389,13 @@ async def list_threads(args):
 # Messages
 # --------------------------------------------------------------------------
 
+
 @tool(
     "discord_send_message",
     "Send a message to a channel or thread. Provide content and/or an embed.",
     {
         "channel_id": CHANNEL,
-        "content": {"type": "string", "description": "Message text (max 2000 chars)"},
+        "content": {"type": "string", "description": "Message text (max 2000 chars)", "maxLength": 2000},
         "embed": EMBED,
         "reply_to_message_id": sid("Reply to this message (optional)"),
         "mentions": MENTIONS,
@@ -365,12 +421,14 @@ async def send_message(args):
 @tool(
     "discord_edit_message",
     "Edit a message. Discord only lets the bot edit its own messages.",
-    {"channel_id": CHANNEL, "message_id": MESSAGE, "content": {"type": "string"}, "embed": EMBED, "mentions": MENTIONS},
+    {"channel_id": CHANNEL, "message_id": MESSAGE, "content": {"type": "string", "maxLength": 2000}, "embed": EMBED, "mentions": MENTIONS},
     ["channel_id", "message_id"],
     hint="write",
 )
 async def edit_message(args):
-    body = clean({"content": args.get("content"), "embeds": [args["embed"]] if args.get("embed") else None, "allowed_mentions": allowed_mentions(args.get("mentions"))})
+    body = clean(
+        {"content": args.get("content"), "embeds": [args["embed"]] if args.get("embed") else None, "allowed_mentions": allowed_mentions(args.get("mentions"))}
+    )
     m = await call("PATCH", f"/channels/{args['channel_id']}/messages/{args['message_id']}", json_body=body)
     return {"id": m["id"], "edited": m.get("edited_timestamp")}
 
@@ -390,7 +448,11 @@ async def delete_message(args):
 @tool(
     "discord_bulk_delete_messages",
     "Delete 2-100 messages at once (must be newer than 14 days). Needs Manage Messages.",
-    {"channel_id": CHANNEL, "message_ids": {"type": "array", "items": {"type": "string"}, "description": "2-100 message IDs"}, "reason": REASON},
+    {
+        "channel_id": CHANNEL,
+        "message_ids": {"type": "array", "items": {"type": "string", "pattern": SNOWFLAKE}, "description": "2-100 message IDs"},
+        "reason": REASON,
+    },
     ["channel_id", "message_ids"],
     hint="destructive",
 )
@@ -418,7 +480,7 @@ async def pin_message(args):
 @tool(
     "discord_add_reaction",
     "React to a message. emoji is a unicode emoji (👍) or a custom emoji as name:id.",
-    {"channel_id": CHANNEL, "message_id": MESSAGE, "emoji": {"type": "string"}},
+    {"channel_id": CHANNEL, "message_id": MESSAGE, "emoji": {"type": "string", "maxLength": 100}},
     ["channel_id", "message_id", "emoji"],
     hint="write",
 )
@@ -433,7 +495,7 @@ async def add_reaction(args):
     {
         "channel_id": CHANNEL,
         "message_id": MESSAGE,
-        "emoji": {"type": "string", "description": "Unicode or name:id. Not needed with clear_all."},
+        "emoji": {"type": "string", "maxLength": 100, "description": "Unicode or name:id. Not needed with clear_all."},
         "user_id": sid("Remove this user's reaction instead of the bot's"),
         "clear_all": {"type": "boolean", "description": "Remove every reaction from the message"},
     },
@@ -454,6 +516,7 @@ async def remove_reaction(args):
 # --------------------------------------------------------------------------
 # Channels and permissions
 # --------------------------------------------------------------------------
+
 
 @tool(
     "discord_create_channel",
@@ -598,6 +661,7 @@ async def create_invite(args):
 # Threads
 # --------------------------------------------------------------------------
 
+
 @tool(
     "discord_create_thread",
     "Create a thread: from an existing message (message_id), as a standalone thread, or as a forum post (content). Edit/archive/delete threads with discord_edit_channel / discord_delete_channel.",
@@ -618,16 +682,30 @@ async def create_thread(args):
     if args.get("message_id"):
         t = await call("POST", f"/channels/{cid}/messages/{args['message_id']}/threads", json_body={"name": args["name"], "auto_archive_duration": archive})
     elif args.get("content"):
-        t = await call("POST", f"/channels/{cid}/threads", json_body={"name": args["name"], "auto_archive_duration": archive, "message": {"content": args["content"], "allowed_mentions": {"parse": ["users"]}}})
+        t = await call(
+            "POST",
+            f"/channels/{cid}/threads",
+            json_body={
+                "name": args["name"],
+                "auto_archive_duration": archive,
+                "message": {"content": args["content"], "allowed_mentions": {"parse": ["users"]}},
+            },
+        )
     else:
-        t = await call("POST", f"/channels/{cid}/threads", json_body={"name": args["name"], "auto_archive_duration": archive, "type": 12 if args.get("private") else 11})
+        t = await call(
+            "POST", f"/channels/{cid}/threads", json_body={"name": args["name"], "auto_archive_duration": archive, "type": 12 if args.get("private") else 11}
+        )
     return fmt_channel(t)
 
 
 @tool(
     "discord_thread_member",
     "Manage thread membership: join/leave (the bot), add/remove a user, or list members.",
-    {"thread_id": sid("Thread ID"), "action": {"type": "string", "enum": ["join", "leave", "add", "remove", "list"]}, "user_id": sid("Required for add/remove")},
+    {
+        "thread_id": sid("Thread ID"),
+        "action": {"type": "string", "enum": ["join", "leave", "add", "remove", "list"]},
+        "user_id": sid("Required for add/remove"),
+    },
     ["thread_id", "action"],
     hint="write",
 )
@@ -645,6 +723,7 @@ async def thread_member(args):
 # --------------------------------------------------------------------------
 # Roles and moderation
 # --------------------------------------------------------------------------
+
 
 @tool(
     "discord_create_role",
@@ -676,7 +755,15 @@ async def create_role(args):
 @tool(
     "discord_edit_role",
     "Edit a role. Passing permissions replaces the role's whole permission set.",
-    {"guild_id": GUILD, "role_id": ROLE, "name": {"type": "string"}, "permissions": PERM_LIST, "color": {"type": "string", "description": "Hex like #ff8800"}, "hoist": {"type": "boolean"}, "mentionable": {"type": "boolean"}},
+    {
+        "guild_id": GUILD,
+        "role_id": ROLE,
+        "name": {"type": "string"},
+        "permissions": PERM_LIST,
+        "color": {"type": "string", "description": "Hex like #ff8800"},
+        "hoist": {"type": "boolean"},
+        "mentionable": {"type": "boolean"},
+    },
     ["guild_id", "role_id"],
     hint="write",
 )
@@ -711,7 +798,9 @@ async def delete_role(args):
 async def member_role(args):
     if args["action"] not in ("add", "remove"):
         raise ToolError("action must be add or remove")
-    await call("PUT" if args["action"] == "add" else "DELETE", f"/guilds/{args['guild_id']}/members/{args['user_id']}/roles/{args['role_id']}", reason=DEFAULT_REASON)
+    await call(
+        "PUT" if args["action"] == "add" else "DELETE", f"/guilds/{args['guild_id']}/members/{args['user_id']}/roles/{args['role_id']}", reason=DEFAULT_REASON
+    )
     return {"user_id": str(args["user_id"]), "role_id": str(args["role_id"]), "action": args["action"]}
 
 
@@ -743,7 +832,7 @@ async def moderate_member(args):
             minutes = int(args.get("timeout_minutes", 10))
             if not 1 <= minutes <= 40320:
                 raise ToolError("timeout_minutes must be 1-40320")
-            until = (datetime.now(timezone.utc) + timedelta(minutes=minutes)).isoformat()
+            until = (datetime.now(UTC) + timedelta(minutes=minutes)).isoformat()
         await call("PATCH", f"/guilds/{g}/members/{u}", json_body={"communication_disabled_until": until}, reason=reason)
     else:
         raise ToolError("action must be kick, ban, unban, timeout or untimeout")

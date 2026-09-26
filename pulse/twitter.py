@@ -13,7 +13,7 @@ ACTOR = os.getenv("APIFY_TWEET_ACTOR", "apidojo~tweet-scraper")
     "twitter_search",
     "Search tweets on X/Twitter via Apify (needs APIFY_TOKEN).",
     {
-        "query": {"type": "string", "description": "Search query"},
+        "query": {"type": "string", "description": "Search query", "maxLength": 500},
         "limit": {"type": "integer", "description": "Max tweets, 1-500 (default 50)"},
     },
     ["query"],
@@ -24,17 +24,19 @@ async def twitter_search(args: dict):
         raise ToolError("APIFY_TOKEN is not set on the server")
     limit = max(1, min(int(args.get("limit", 50)), 500))
     payload = {"searchTerms": [args["query"]], "maxItems": limit, "sort": "Latest"}
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
+    async with (
+        aiohttp.ClientSession() as session,
+        session.post(
             f"https://api.apify.com/v2/acts/{ACTOR}/run-sync-get-dataset-items",
             params={"timeout": 45},
             json=payload,
             headers={"Authorization": f"Bearer {token}"},
             timeout=aiohttp.ClientTimeout(total=55),
-        ) as resp:
-            body = await resp.json(content_type=None)
-            if resp.status not in (200, 201):
-                raise ToolError(f"Apify API {resp.status}: {body}")
+        ) as resp,
+    ):
+        body = await resp.json(content_type=None)
+        if resp.status not in (200, 201):
+            raise ToolError(f"Apify API {resp.status}: {body}")
     tweets = [
         {
             "url": t.get("url"),

@@ -6,10 +6,14 @@ Run these from the repository root and report pass/fail counts for each. Stop an
 
 ```bash
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
+uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
+python tests/claude_config.py
+python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
 python tests/check_docs.py
-node --check scripts/pulse.mjs
+node --check scripts/pulse.mjs && node --check dashboard/app.js
+uvx ruff check . && uvx ruff format --check .
 ```
 
 Optional, only if the user asks and provides a disposable Discord test server (never a real community server):

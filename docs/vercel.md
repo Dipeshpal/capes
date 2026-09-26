@@ -1,59 +1,81 @@
 # Vercel setup (hosting, required)
 
-Vercel hosts your server. The free Hobby plan is enough. You also create your own server password here, `MCP_API_KEY`, which is the only thing protecting your server from the internet.
+Vercel hosts your server and its dashboard. The free Hobby plan is enough. You also create your own server password here, `MCP_API_KEY`. It is the only thing protecting your server from the internet.
 
 **Time:** about 5 minutes. **Cost:** free.
 
 ## 1. Create a Vercel account
 
-1. Go to [vercel.com/signup](https://vercel.com/signup) and sign up (GitHub login is easiest). Choose the **Hobby** plan.
-2. Install [Node.js 18 or newer](https://nodejs.org) if you do not have it. Check with `node -v`.
+Go to [vercel.com/signup](https://vercel.com/signup) and sign up (GitHub login is easiest). Choose the **Hobby** plan. Nothing to install for the recommended path below.
 
 ## 2. Create your `MCP_API_KEY`
 
-This is a long random string you make up. Anything that connects to your server must send it.
+This is a long random string you make up. Anything that connects to your server, and the dashboard login, uses it. It must be **at least 24 characters**; the server refuses shorter keys. Generate 32 random bytes (44 characters):
 
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"
-```
+| Where | Command |
+|-------|---------|
+| Windows PowerShell | `$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); [Convert]::ToBase64String($b)` |
+| macOS, Linux, Git Bash | `openssl rand -base64 32` |
+| Node.js | `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
+| No terminal | a password manager's generator: 32+ random characters |
 
-Copy the output somewhere safe (a password manager). You will paste it into Vercel and into your AI client. Do not commit it or share it.
+Copy the result into a password manager. You will paste it into Vercel and into your AI client, and use it to sign in to the dashboard. Do not commit it or share it.
 
 ## 3. Deploy
 
-Pick one:
+### Option A: deploy on Vercel (recommended)
 
-- **One command (recommended):** from a clone of this repo run `node scripts/pulse.mjs install`. It logs you in, generates the key for you, sets the environment variables, deploys and connects your clients.
-- **Vercel button:** see the button in the [README](../README.md#option-b-deploy-with-the-vercel-button). Vercel copies the repo to your GitHub and asks for the environment variables.
-- **Manual CLI:**
+No install and no terminal. Everything happens in your browser.
 
-  ```bash
-  npm i -g vercel
-  vercel login
-  vercel link --yes                       # run inside the repo; creates the project
-  printf '%s' 'YOUR_MCP_API_KEY' | vercel env add MCP_API_KEY production
-  vercel deploy --prod
-  ```
+1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%2Fblob%2Fmaster%2Fdocs%2Fvercel.md&project-name=pulse-mcp&repository-name=pulse-mcp). Vercel copies the repository into your own GitHub account.
+2. Paste `MCP_API_KEY`. For each service you want, paste its credential ([Discord](discord.md), [Gmail](gmail.md), [Apify](apify.md)); leave the others empty.
+3. Click **Deploy** and wait for the build (about a minute).
+4. Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY`.
 
-  Add the other variables the same way (see [Environment variables](#environment-variables)).
+The link works for anyone once the repository is public. Until then, or if you work from your own fork, use **Vercel > Add New > Project > Import Git Repository** and pick the repo, then add the same environment variables on the setup screen.
 
-When the deploy finishes, your server address is `https://<project>.vercel.app`. If that name was taken, Vercel adds a suffix; `vercel inspect <deployment-url>` lists the real alias, and so does the project's **Domains** page in the dashboard.
+### Option B: one command from your computer
+
+Needs [Node.js 18+](https://nodejs.org) and a clone of the repository. It logs you in, generates a strong key for you, sets the variables, deploys and configures your AI clients:
+
+```bash
+git clone https://github.com/Dipeshpal/pulse-mcp.git
+cd pulse-mcp
+node scripts/pulse.mjs install
+```
+
+### Option C: Vercel CLI by hand
+
+```bash
+npm i -g vercel
+vercel login
+vercel link --yes                       # inside the repo; creates the project
+printf '%s' 'YOUR_MCP_API_KEY' | vercel env add MCP_API_KEY production
+vercel deploy --prod
+```
+
+Add other variables the same way ([table below](#environment-variables)).
+
+When the deploy finishes, your address is `https://<project>.vercel.app`. If that name was taken, Vercel adds a suffix; the project's **Domains** page in the dashboard shows the real one.
 
 ## 4. Check that it works
 
+- Open `https://<project>.vercel.app/dashboard`, sign in, and look at **Overview**: your tool count and which connectors are configured.
+- Or from a terminal: `curl https://<project>.vercel.app/health` should answer `"status":"online"`.
+- Then connect an AI client ([guide](clients.md)) and ask "List my Discord channels".
+
+## 5. Optional and advanced: dashboard switches (needs Redis)
+
+**You do not need a database.** pulse-mcp stores nothing on the server: your credentials and limits are environment variables, and the dashboard shows the result. To restrict what assistants can do without any database, set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` (table below) and redeploy.
+
+Only if you want to flip switches on the dashboard *without redeploying* (and keep a durable activity log), add a free Redis database:
+
 ```bash
-curl https://<project>.vercel.app/
+vercel integration add upstash
+vercel deploy --prod
 ```
 
-You should see `{"status":"online","name":"pulse-mcp", ...}`. Then check the protected endpoint (replace `KEY`):
-
-```bash
-curl -s -X POST https://<project>.vercel.app/mcp \
-  -H "Authorization: Bearer KEY" -H "Content-Type: application/json" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
-```
-
-A JSON list of tools means it works. `401` or `403` means the key is missing or wrong (see [Troubleshooting](troubleshooting.md)).
+Or in the Vercel dashboard: **your project > Storage > Create > Upstash for Redis** (free plan). The integration sets `KV_REST_API_URL` and `KV_REST_API_TOKEN` for you. Details and what the switches do: [Dashboard guide](dashboard.md). Adding Redis means accepting Upstash's terms in Vercel; it is optional.
 
 ## Environment variables
 
@@ -61,23 +83,31 @@ Set these under **Project > Settings > Environment Variables** (Production), or 
 
 | Variable | Required | Where it comes from |
 |----------|----------|---------------------|
-| `MCP_API_KEY` | Yes | You generate it (step 2) |
+| `MCP_API_KEY` | Yes | You generate it (step 2). At least 24 characters. |
 | `DISCORD_BOT_TOKEN` | For Discord | [Discord guide](discord.md) |
 | `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) |
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) |
-| `APIFY_TWEET_ACTOR` | No | Overrides the default Apify actor, see the [Apify guide](apify.md) |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | For dashboard switches | Set by `vercel integration add upstash` (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` also work) |
+| `PULSE_SESSION_HOURS` | No | How long a dashboard sign-in lasts, 1 to 168 hours (default 8). Then you sign in again with your key. |
+| `PULSE_READ_ONLY` | No | `1` hides every tool that changes anything. Cannot be undone from the dashboard. |
+| `PULSE_DISABLED_CONNECTORS` | No | Comma list, for example `discord,apify`. Always applies. |
+| `PULSE_DISABLED_TOOLS` | No | Comma list, for example `gmail_trash,discord_delete_channel`. Always applies. |
+| `APIFY_TWEET_ACTOR` | No | Different Apify actor for X search, see the [Apify guide](apify.md) |
+| `PULSE_REPO_URL` | No | Where the dashboard "Guide" links point (set it if you forked the repo) |
 
-Environment variable changes only apply to **new** deployments. After changing one, run `vercel deploy --prod` (or **Redeploy** in the dashboard).
+Environment variable changes only apply to **new** deployments. After changing one, run `vercel deploy --prod` (or **Redeploy** in the Vercel dashboard).
 
 ## Deployment Protection
 
-If your server address shows a Vercel login page or answers `401`, Vercel Authentication is protecting it. MCP clients cannot log in. Use the short project address (`https://<project>.vercel.app`), not the long per-deployment address. If the short address is also protected, open **Project > Settings > Deployment Protection** and turn **Vercel Authentication** off for production. Your `MCP_API_KEY` still protects the server.
+If your address shows a Vercel login page or answers `401`, Vercel Authentication is protecting it. MCP clients cannot log in there. Use the short project address (`https://<project>.vercel.app`), not the long per-deployment address. If the short address is also protected, open **Project > Settings > Deployment Protection** and turn **Vercel Authentication** off for production. Your `MCP_API_KEY` still protects the server and the dashboard.
 
 ## Rotating the key
 
 1. Generate a new key (step 2).
-2. `vercel env rm MCP_API_KEY production --yes`, then add the new value, then `vercel deploy --prod`.
+2. Change `MCP_API_KEY` in **Settings > Environment Variables** (or `vercel env rm MCP_API_KEY production --yes`, then add the new one), then redeploy.
 3. Update the key in every client (`node scripts/pulse.mjs connect --key NEW_KEY`, or edit each config, see [Connect your client](clients.md)).
+
+You never need to rotate the key on a schedule (it is not tied to the dashboard session length). Rotate it only if you think it leaked. Doing so also signs out every dashboard session, because sessions are signed with a key derived from `MCP_API_KEY`.
 
 ## Limits to know (Hobby plan)
 

@@ -25,3 +25,12 @@ Shared, committed lessons about this codebase. Keep entries short and factual. N
 - Helper functions in test scripts must not take a parameter named `name` positionally: many tool arguments are called `name`. Use `def call(tool, /, **args)`.
 - Do not test mutating Discord tools on a real community server; use a disposable one.
 - Quoted heredocs and backslashes get mangled by the shell tool on Windows; edit files with the editor tools instead of inline Python patch scripts.
+
+## Dashboard, validation and guardrails
+- Tool arguments are validated centrally in `pulse/mcp.py` against each tool's schema. A Discord ID without the `sid()` snowflake pattern is a security bug: an ID like `123/../../users/@me` would otherwise change the API path.
+- Policy (disabled connectors/tools, read-only mode) is enforced in `pulse/mcp.py` for `tools/list` and `tools/call`; environment variables (`PULSE_*`) lock settings so the dashboard cannot loosen them. If Redis is configured but unreachable, use the last known settings, else fail closed.
+- Dashboard front end: no inline scripts/styles, no `innerHTML`, no browser storage, nothing from other origins. `tests/dashboard.py` greps for these.
+- The guard (`scripts/check_claude_config.py`) hash-pins executable/config files under `.claude/` and `.github/`. After a reviewed change, re-pin with `--update`. On pull requests CI runs the base branch's copy of the guard so a PR cannot weaken it.
+- Linting: ruff with security rules (`ruff.toml`). `ruff check --fix` plus `ruff format` clean most findings; review the rest by hand.
+- A live test found that Gmail marks drafts with the `\Draft` label in All Mail rather than the IMAP flag; fakes must mimic the real service or tests hide real bugs.
+- A QA report produced by an assistant is not evidence: it once claimed cleanup was done while test mail and a label remained. Verify state directly.

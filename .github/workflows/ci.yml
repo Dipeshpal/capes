@@ -4,7 +4,21 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
+
   test:
     runs-on: ubuntu-latest
     steps:
@@ -17,15 +31,31 @@ jobs:
           node-version: "20"
       - run: pip install fastapi aiohttp python-dotenv httpx
       - run: python tests/protocol.py
+      - run: python tests/dashboard.py
       - run: python tests/gmail_offline.py
+      - run: python tests/claude_config.py
       - run: python scripts/gen_tools_doc.py --check
       - run: python tests/check_docs.py
       - run: node --check scripts/pulse.mjs
+      - run: node --check dashboard/app.js
 
-  secrets:
+  guard:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: bash .claude/skills/security-audit/scan.sh --strict
+      - name: Assistant and CI configuration guard
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.base_ref }}
+        run: |
+          # On pull requests use the base branch's copy of the guard, so a PR cannot weaken its own check.
+          if [ "$EVENT" = "pull_request" ]; then
+            git show "origin/$BASE:scripts/check_claude_config.py" > "$RUNNER_TEMP/guard.py"
+            python "$RUNNER_TEMP/guard.py" "$GITHUB_WORKSPACE"
+          else
+            python scripts/check_claude_config.py
+          fi
+      - name: Secret scan over the whole history
+        run: bash .claude/skills/security-audit/scan.sh --strict
