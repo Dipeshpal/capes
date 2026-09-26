@@ -1,0 +1,9 @@
+.claude
+.github
+docs
+tests
+scripts
+CLAUDE.md
+README.md
+.env*
+.pulse.local.json

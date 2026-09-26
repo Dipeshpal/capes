@@ -1,0 +1,35 @@
+"""<Service> tools. Requires <SERVICE_TOKEN>."""
+
+import os
+
+import aiohttp
+
+from .registry import ToolError, tool
+
+API = "https://api.example.com/v1"
+
+
+async def call(method: str, path: str, **kwargs):
+    token = os.getenv("SERVICE_TOKEN")
+    if not token:
+        raise ToolError("SERVICE_TOKEN is not set on the server (see docs/<service>.md)")
+    async with aiohttp.ClientSession() as session:
+        async with session.request(
+            method, f"{API}{path}", headers={"Authorization": f"Bearer {token}"}, timeout=aiohttp.ClientTimeout(total=20), **kwargs
+        ) as resp:
+            body = await resp.json(content_type=None)
+            if resp.status >= 400:
+                raise ToolError(f"<Service> {resp.status}: {body.get('message', body)}")
+            return body
+
+
+@tool(
+    "service_list_things",
+    "List things in <Service>. Needs SERVICE_TOKEN.",
+    {"limit": {"type": "integer", "description": "1-100 (default 20)"}},
+    hint="read",
+)
+async def list_things(args: dict):
+    limit = max(1, min(int(args.get("limit", 20)), 100))
+    data = await call("GET", "/things", params={"limit": limit})
+    return [{"id": str(t["id"]), "name": t["name"]} for t in data["items"]]

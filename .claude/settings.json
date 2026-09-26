@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check *)",
+      "Bash(uv run *)",
+      "Bash(python tests/*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(vercel env ls*)",
+      "Bash(vercel inspect*)",
+      "Bash(vercel logs*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production*)",
+      "Read(./.pulse.local.json)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(vercel env pull*)",
+      "Bash(rm -rf *)"
+    ]
+  }
+}

@@ -59,3 +59,7 @@ logs/
 .pulse.local.json
 
 .env*
+
+# Claude Code personal files
+.claude/settings.local.json
+.claude/agent-memory-local/
