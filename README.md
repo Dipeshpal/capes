@@ -1,63 +1,97 @@
-# research-tools-mcp
+# pulse-mcp
 
-A personal [MCP](https://modelcontextprotocol.io) server you deploy to your own Vercel account and connect to Claude Desktop, Claude Code, Cursor or Codex. Your tokens live only in your Vercel environment variables. Nothing is shared.
+Your personal MCP server for your social accounts. Deploy it once to your own Vercel account, connect your accounts, and let Claude, Codex, Cursor or any MCP client read and act on them for you. Your tokens live only in your own Vercel project.
 
-**Tools**
+Today it ships with a complete **Discord** toolkit (read, send, edit, delete, react, threads, channels, roles, permissions, moderation) and **X/Twitter search**. Adding another service is one small Python function (see [Add your own tool](#add-your-own-tool)).
 
-| Tool | What it does | Needs |
-|------|--------------|-------|
-| `discord_list_channels` | Lists servers and text channels your bot can see | `DISCORD_BOT_TOKEN` |
-| `discord_read_channel` | Reads recent messages from a channel | `DISCORD_BOT_TOKEN` |
-| `twitter_search` | Searches tweets on X (via Apify) | `APIFY_TOKEN` |
+- [Prerequisites](#prerequisites)
+- [Install in one command](#install-in-one-command)
+- [Deploy with the Vercel button](#deploy-with-the-vercel-button)
+- [Connect your AI client](#connect-your-ai-client)
+- [Discord setup and permissions](#discord-setup-and-permissions)
+- [Tools](#tools)
+- [Add your own tool](#add-your-own-tool)
+- [Troubleshooting](#troubleshooting)
 
-The server speaks MCP over HTTP at `POST /mcp` and requires `Authorization: Bearer <RESEARCH_API_KEY>`.
+## Prerequisites
 
-## 1. Get your credentials
+| You need | Why | Required |
+|----------|-----|----------|
+| [Vercel account](https://vercel.com/signup) (free) | Hosts your server | Yes |
+| [Node.js 18+](https://nodejs.org) | Runs the installer and the Claude Desktop bridge | Yes |
+| Discord bot token | Discord tools | Optional |
+| [Apify token](https://console.apify.com/settings/integrations) (free plan works) | X/Twitter search | Optional |
 
-- **Discord bot token**: [Developer Portal](https://discord.com/developers/applications) > New Application > Bot > Reset Token. Turn on **Message Content Intent**, then invite the bot to your server (OAuth2 > URL Generator > `bot`, permissions *View Channels* + *Read Message History*).
-- **Apify token**: [apify.com](https://apify.com) > Settings > API & Integrations. The free plan works.
-- **Your API key** (protects your server; make one up):
-  ```bash
-  python -c "import secrets; print(secrets.token_urlsafe(32))"
-  ```
+Tools without their token return a clear error, so you can start with one service and add the rest later.
 
-Both Discord and Apify are optional. A tool without its token returns a clear error.
-
-## 2. Deploy to Vercel
-
-Fork or clone this repo, then:
+## Install in one command
 
 ```bash
-npm i -g vercel
-vercel login
-vercel link --yes            # run inside the repo
+git clone https://github.com/Dipeshpal/pulse-mcp.git
+cd pulse-mcp
+node scripts/pulse.mjs install
+```
 
-printf '%s' 'YOUR_DISCORD_BOT_TOKEN' | vercel env add DISCORD_BOT_TOKEN production
-printf '%s' 'YOUR_APIFY_TOKEN'       | vercel env add APIFY_TOKEN production
-printf '%s' 'YOUR_API_KEY'           | vercel env add RESEARCH_API_KEY production
+The installer will:
 
+1. log you in to Vercel (browser window) if needed,
+2. ask for your Discord and Apify tokens (press Enter to skip),
+3. generate a private API key for your server,
+4. create the Vercel project, set the environment variables and deploy,
+5. check that the server answers,
+6. connect your AI clients (Claude Desktop and Claude Code by default),
+7. print your Discord invite link with all the permissions the tools need.
+
+Your URL and key are saved to `.pulse.local.json` (git-ignored). Non-interactive use: `node scripts/pulse.mjs install --name my-pulse --discord TOKEN --apify TOKEN --clients desktop,cursor`.
+
+## Deploy with the Vercel button
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up.%20The%20other%20two%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fpulse-mcp%23prerequisites&project-name=pulse-mcp&repository-name=pulse-mcp)
+
+1. Click the button and sign in to Vercel. It copies the repo to your GitHub and asks for three variables:
+   - `MCP_API_KEY`: any long random string. Generate one with `python -c "import secrets; print(secrets.token_urlsafe(32))"` or `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`.
+   - `DISCORD_BOT_TOKEN` and `APIFY_TOKEN`: leave blank to skip a service.
+2. Deploy. Your server is at `https://<project>.vercel.app`, with the MCP endpoint at `/mcp`.
+3. Connect your client with the URL and your `MCP_API_KEY` (next section).
+
+Manual CLI deploy, if you prefer:
+
+```bash
+npm i -g vercel && vercel login && vercel link --yes
+printf '%s' 'YOUR_API_KEY'       | vercel env add MCP_API_KEY production
+printf '%s' 'YOUR_DISCORD_TOKEN' | vercel env add DISCORD_BOT_TOKEN production
+printf '%s' 'YOUR_APIFY_TOKEN'   | vercel env add APIFY_TOKEN production
 vercel deploy --prod
 ```
 
-(Or import the repo in the Vercel dashboard and add the three variables under Settings > Environment Variables.)
+Check it: `curl https://<project>.vercel.app/` should return `"status":"online"`.
 
-Check it:
+## Connect your AI client
 
-```bash
-curl https://YOUR-PROJECT.vercel.app/
-```
+The server speaks MCP over HTTP at `https://<project>.vercel.app/mcp` and needs the header `Authorization: Bearer <MCP_API_KEY>`.
 
-Disable Vercel "Deployment Protection" for production (Settings > Deployment Protection) or the endpoint will answer with a login page instead of MCP.
+**Fastest:** `node scripts/pulse.mjs connect` (uses the saved install, or asks for URL and key). Flags: `--clients desktop,claude-code,cursor,codex`.
 
-## 3. Connect a client
-
-Replace `https://YOUR-PROJECT.vercel.app` and `YOUR_API_KEY` below.
+Or do it by hand. Replace `URL` and `KEY`.
 
 **Claude Code**
 
 ```bash
-claude mcp add --transport http research https://YOUR-PROJECT.vercel.app/mcp \
-  --header "Authorization: Bearer YOUR_API_KEY"
+claude mcp add --scope user --transport http pulse URL/mcp --header "Authorization: Bearer KEY"
+```
+
+**Claude Desktop** (Desktop only launches local commands, so [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) bridges to your URL). Edit `claude_desktop_config.json` (`%APPDATA%\Claude\` on Windows, `~/Library/Application Support/Claude/` on macOS), then fully quit and reopen Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "pulse": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "URL/mcp", "--header", "Authorization:${AUTH_HEADER}"],
+      "env": { "AUTH_HEADER": "Bearer KEY" }
+    }
+  }
+}
 ```
 
 **Cursor** (`~/.cursor/mcp.json`)
@@ -65,70 +99,99 @@ claude mcp add --transport http research https://YOUR-PROJECT.vercel.app/mcp \
 ```json
 {
   "mcpServers": {
-    "research": {
-      "url": "https://YOUR-PROJECT.vercel.app/mcp",
-      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
-    }
+    "pulse": { "url": "URL/mcp", "headers": { "Authorization": "Bearer KEY" } }
   }
 }
 ```
 
-**Claude Desktop** (`claude_desktop_config.json`; Desktop only launches local commands, so [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) bridges to the URL. Needs Node.js.)
+**Codex**
 
-```json
-{
-  "mcpServers": {
-    "research": {
-      "command": "npx",
-      "args": [
-        "-y", "mcp-remote",
-        "https://YOUR-PROJECT.vercel.app/mcp",
-        "--header", "Authorization:${AUTH_HEADER}"
-      ],
-      "env": { "AUTH_HEADER": "Bearer YOUR_API_KEY" }
-    }
-  }
-}
+```bash
+codex mcp add pulse --url URL/mcp --bearer-token-env-var PULSE_MCP_API_KEY
 ```
 
-Fully quit and reopen Claude Desktop afterwards. The config file is at `%APPDATA%\Claude\` on Windows and `~/Library/Application Support/Claude/` on macOS.
+then set `PULSE_MCP_API_KEY=KEY` in your environment (`setx PULSE_MCP_API_KEY KEY` on Windows, or `export` in your shell profile).
 
-**Codex** (`~/.codex/config.toml`)
+**Any other MCP client** that supports streamable HTTP: point it at `URL/mcp` with the Bearer header. Clients that only support local commands can use `npx -y mcp-remote URL/mcp --header "Authorization:${AUTH_HEADER}"`.
 
-```toml
-[mcp_servers.research]
-url = "https://YOUR-PROJECT.vercel.app/mcp"
-bearer_token_env_var = "RESEARCH_API_KEY"
-```
+Then ask: *"List my Discord channels"*, *"Post 'standup in 5' in #general"*, or *"Search X for MCP servers"*.
 
-Then try: *"List my Discord channels"* or *"Search Twitter for MCP servers"*.
+## Discord setup and permissions
+
+A bot token does not carry permissions by itself. What the bot may do is decided by the permissions it was invited with and by its role in each server. To use every tool:
+
+1. **Create the bot**: [Developer Portal](https://discord.com/developers/applications) > New Application > Bot > Reset Token (this is your `DISCORD_BOT_TOKEN`).
+2. **Turn on intents** (Bot tab > Privileged Gateway Intents): *Message Content Intent* (to read message text) and *Server Members Intent* (to list members).
+3. **Turn off Public Bot** (Bot tab), so nobody else can add your bot to their servers.
+4. **Invite it with the full permission set.** Open this link as the server owner (replace `CLIENT_ID` with your Application ID; the installer prints the finished link for you):
+
+   ```
+   https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1494917442647
+   ```
+
+   That set is: View Channels, Send Messages (and in threads), Embed Links, Attach Files, Read Message History, Add Reactions, Use External Emojis, Manage Messages, Manage Channels, Manage Roles, Manage Threads, Create Public/Private Threads, Create Invites, Kick Members, Ban Members, Timeout Members. Re-running the link on a server the bot is already in updates its permissions.
+5. **Mind the role order.** The bot can only manage roles and members positioned *below* its own role. In Server Settings > Roles, drag the bot's role above the roles you want it to manage.
+
+Limits set by Discord, not by this project:
+
+- Bots cannot create servers (Discord removed that endpoint for bots). Create the server yourself and invite the bot; it can then create channels, roles and threads.
+- Bots can only edit their own messages. They can delete others' messages with Manage Messages.
+- Bulk delete works only on messages younger than 14 days.
+- A bot cannot grant a permission it does not hold itself.
+
+Safety defaults: messages ping users only (`@everyone`, `@here` and role pings are blocked unless the caller asks with `mentions: "all"`); destructive tools are flagged so clients ask before running them; every write is tagged "via pulse-mcp" in the server's audit log.
+
+## Tools
+
+**Discord read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_list_pins`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_threads`
+
+**Discord messages**: `discord_send_message` (text, embeds, replies), `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
+
+**Discord channels and threads**: `discord_create_channel` (text, voice, category, announcement, stage, forum, private), `discord_edit_channel` (also renames, archives and locks threads), `discord_delete_channel`, `discord_set_channel_permission`, `discord_delete_channel_permission`, `discord_create_invite`, `discord_create_thread` (from a message, standalone, private, or forum post), `discord_thread_member`
+
+**Discord roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_moderate_member` (kick, ban, unban, timeout)
+
+**X/Twitter**: `twitter_search`
+
+Channel and thread IDs are interchangeable wherever a `channel_id` is asked for.
 
 ## Add your own tool
 
-Everything is in [`api/index.py`](api/index.py). Register an async function:
+Tools live in [`pulse/`](pulse). Create a file, register an async function, import it in [`api/index.py`](api/index.py):
 
 ```python
-@tool(
-    "my_tool",
-    "What it does",
-    {"query": {"type": "string", "description": "Search text"}},
-    ["query"],
-)
-async def my_tool(args: dict):
-    return {"echo": args["query"]}
+# pulse/hello.py
+from .registry import tool
+
+@tool("hello", "Say hello", {"name": {"type": "string"}}, ["name"], hint="read")
+async def hello(args: dict):
+    return {"message": f"Hello {args['name']}"}
 ```
 
-Redeploy and it shows up in every connected client.
+`hint` is `read`, `write` or `destructive`; clients use it to decide when to ask for confirmation. Raise `ToolError("...")` for expected failures. Redeploy and the tool appears in every connected client.
 
-## Run locally
+Run locally:
 
 ```bash
-cp .env.example .env         # fill in values
+cp .env.example .env    # fill in values
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
 
+## Troubleshooting
+
+| Symptom | Fix |
+|---------|-----|
+| `401` from the server, or a Vercel login page | Turn off Deployment Protection for production (Vercel project > Settings > Deployment Protection) |
+| `403 Invalid API key` | The key in your client differs from `MCP_API_KEY` on Vercel. Redeploy after changing it. |
+| `Missing Permissions` (Discord 50013) | Re-authorize the bot with the link above, and move its role higher in Server Settings > Roles |
+| `Missing Access` (50001) | The bot is not in that server or cannot see that channel |
+| `discord_list_members` fails | Enable *Server Members Intent* in the Developer Portal |
+| Messages come back with empty `content` | Enable *Message Content Intent* in the Developer Portal |
+| Claude Desktop shows the server as failed | Fully quit Claude Desktop (tray icon too) and reopen. Check its logs (`%LOCALAPPDATA%\Claude\Logs\mcp-server-pulse.log` on Windows). Needs Node.js on PATH. |
+
 ## Security notes
 
-- Never commit `.env*` files (they are git-ignored; only `.env.example` is tracked).
-- If a token leaks, rotate it at the provider and update the Vercel variable. Rotate `RESEARCH_API_KEY` by setting a new value and redeploying.
-- The Discord bot can read every channel it has been given access to, so grant it only what you need.
+- Never commit `.env*` or `.pulse.local.json` (git-ignored). Only `.env.example` is tracked.
+- Your `MCP_API_KEY` is the only thing between the internet and your bot. Keep it secret. To rotate it, set a new value on Vercel, redeploy, and update your clients.
+- If a token leaks, rotate it at the provider (Discord: Reset Token; Apify: regenerate) and update Vercel.
+- Grant the bot only what you need. The permission link above is generous by design; drop what you do not use.
