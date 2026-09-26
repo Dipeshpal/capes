@@ -81,6 +81,8 @@ The full picture, design decisions and security model: [What Capes is for](docs/
 
 ![Capes architecture: AI clients and the owner reach one server on Vercel; a guard checks every call before the tools reach Gmail, Discord and Apify](docs/diagrams/architecture.png)
 
+**Interactive diagrams** (pan, zoom, search, trace a path): [architecture](docs/diagrams/architecture.html), [life of a tool call](docs/diagrams/request-lifecycle.html) and [how a change reaches main](docs/diagrams/contribution-flow.html). GitHub shows an HTML file as source, so click the link, choose **Download raw file** (the download icon), and open the file in your browser. It is self-contained and works offline.
+
 The same idea as a sketch:
 
 ```

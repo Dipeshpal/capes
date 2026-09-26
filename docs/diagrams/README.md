@@ -6,7 +6,7 @@
 | Life of a tool call | What happens between an assistant's request and its answer | [request-lifecycle.png](request-lifecycle.png) | [request-lifecycle.html](request-lifecycle.html) |
 | How a change reaches main | Fork, pull request, checks, review, squash merge | [contribution-flow.png](contribution-flow.png) | [contribution-flow.html](contribution-flow.html) |
 
-The `.html` files are self-contained: download one and open it in a browser to pan, zoom, search and trace paths. GitHub shows the source of an HTML file rather than running it, so the PNGs are what the docs embed.
+The `.html` files are self-contained: download one (open it on GitHub and use **Download raw file**) and open it in a browser to pan, zoom, search and trace paths. It works offline. GitHub shows the source of an HTML file rather than running it, so the PNGs are what the docs embed.
 
 ## Editing a diagram
 
