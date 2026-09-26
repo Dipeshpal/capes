@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import secrets
 import time
 from urllib.parse import urlparse
@@ -56,6 +57,24 @@ def verify_bearer(authorization: str | None) -> None:
         raise HTTPException(401, "Use the header: Authorization: Bearer <MCP_API_KEY>")
     if not secrets.compare_digest(supplied.strip().encode(), expected.encode()):
         raise HTTPException(403, "Invalid API key")
+
+
+SECRET_ENV = ("MCP_API_KEY", "DISCORD_BOT_TOKEN", "APIFY_TOKEN", "GMAIL_APP_PASSWORD", "KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN")
+_WEBHOOK_TOKEN_IN_URL = re.compile(r"(/webhooks/\d+/)[A-Za-z0-9_\-.]+")
+
+
+def redact(text: str) -> str:
+    """Remove secrets from any text that goes back to a client or into a log.
+
+    Unexpected exceptions can carry request URLs or values; a Discord webhook token is part of its URL. This masks the
+    server's own secret values and webhook-token URL segments.
+    """
+    for name in SECRET_ENV:
+        value = os.getenv(name, "").strip().strip("\"'")
+        if len(value) >= 8:
+            text = text.replace(value, "[redacted]")
+            text = text.replace(value.replace(" ", ""), "[redacted]")
+    return _WEBHOOK_TOKEN_IN_URL.sub(r"\1[redacted]", text)
 
 
 def key_matches(supplied: str) -> bool:

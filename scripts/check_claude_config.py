@@ -64,7 +64,7 @@ ALLOWED_URL_HOSTS = {
 }
 ALLOWED_DEPENDENCIES = {"fastapi", "aiohttp", "python-dotenv"}
 PINNED_SUFFIXES = {".sh", ".json", ".txt", ".py", ".js", ".mjs", ".ps1", ".bat", ".cmd", ".yml", ".yaml"}
-HIDDEN_CHARS = re.compile("[​-‏‪-‮⁠-⁤⁦-⁩﻿­]")
+HIDDEN_CHARS = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff\u00ad]")
 INJECTION_PHRASES = re.compile(
     r"ignore (all |any )?(previous|prior|above) (instructions|rules)|disregard (the )?(previous|above|system)|do not (tell|inform|mention to) the user|"
     r"without (telling|informing|asking) the user|exfiltrate|send (the )?(contents of )?(\.env|secrets?|tokens?|credentials)|upload .{0,30}(\.env|secrets?|credentials)",
@@ -165,6 +165,27 @@ def check_markdown() -> None:
                 fail(f"{name}: agent tools {sorted(tools - ALLOWED_AGENT_TOOLS)} are not allowed (approved: {sorted(ALLOWED_AGENT_TOOLS)})")
 
 
+SOURCE_SUFFIXES = {".py", ".js", ".mjs", ".sh", ".yml", ".yaml", ".json", ".md", ".html", ".css", ".toml", ".txt"}
+SOURCE_NAMES = {"CODEOWNERS", ".gitignore", ".vercelignore", ".gitattributes", ".env.example"}
+SKIP_DIRS = {".git", ".vercel", "node_modules", "__pycache__", ".ruff_cache", ".venv", ".playwright-mcp"}
+
+
+def check_source_files() -> None:
+    """Invisible or bidirectional characters in any source file can hide code from reviewers ("Trojan Source")."""
+    for p in sorted(ROOT.rglob("*")):
+        if not p.is_file() or set(p.relative_to(ROOT).parts) & SKIP_DIRS:
+            continue
+        if p.suffix not in SOURCE_SUFFIXES and p.name not in SOURCE_NAMES:
+            continue
+        try:
+            text = p.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            fail(f"{rel(p)}: not valid UTF-8 text")
+            continue
+        if HIDDEN_CHARS.search(text):
+            fail(f"{rel(p)}: contains invisible or bidirectional characters; write them as escape sequences instead (Trojan Source)")
+
+
 def pin_targets() -> list[Path]:
     targets = []
     for base in (ROOT / ".claude", ROOT / ".github"):
@@ -240,6 +261,7 @@ def main() -> int:
         return 0
     check_claude_dir()
     check_markdown()
+    check_source_files()
     check_workflows()
     check_supply_chain()
     check_pins()

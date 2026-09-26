@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import aiohttp
 
 from .registry import TOOLS, ToolError, kind
+from .security import redact
 
 REPO_URL = os.getenv("PULSE_REPO_URL", "https://github.com/Dipeshpal/pulse-mcp").rstrip("/")
 
@@ -93,7 +94,7 @@ async def test_connection(connector_id: str) -> dict:
             data = body.get("data", {})
             return {"ok": True, "detail": f"Apify account '{data.get('username')}' ({(data.get('plan') or {}).get('id', 'plan unknown')})."}
     except ToolError as e:
-        return {"ok": False, "detail": str(e)[:300]}
+        return {"ok": False, "detail": redact(str(e))[:300]}
     except Exception as e:
-        return {"ok": False, "detail": f"{type(e).__name__}: {str(e)[:200]}"}
+        return {"ok": False, "detail": redact(f"{type(e).__name__}: {e!s}")[:200]}
     return {"ok": False, "detail": "No test available"}

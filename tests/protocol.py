@@ -6,6 +6,7 @@ Run from the repo root:
 
 import asyncio
 import importlib.util
+import json
 import os
 import re
 import sys
@@ -94,6 +95,35 @@ async def _boom(args):
 r = call("zz_boom")
 check("unexpected exception becomes tool error", r["result"]["isError"] and "kaboom" in r["result"]["content"][0]["text"])
 del TOOLS["zz_boom"]
+
+# ---------------------------------------------------------------- secrets never leave in error text
+os.environ["APIFY_TOKEN"] = "apify-secret-value-1234567890"
+os.environ["GMAIL_APP_PASSWORD"] = "abcdefghijklmnop"
+WEBHOOK_URL_ERROR = "connection reset for https://discord.com/api/v10/webhooks/123456789012345678/whTok-EN_secret.value123?wait=true"
+
+
+@tool("zz_leaky", "test only", {}, hint="read")
+async def _leaky(args):
+    raise RuntimeError(f"upstream said no to token {os.environ['APIFY_TOKEN']} and password abcd efgh ijkl mnop {WEBHOOK_URL_ERROR}")
+
+
+@tool("zz_leaky_toolerror", "test only", {}, hint="read")
+async def _leaky_toolerror(args):
+    raise ToolError(f"bad credentials {os.environ['APIFY_TOKEN']}")
+
+
+for leaky in ("zz_leaky", "zz_leaky_toolerror"):
+    text = call(leaky)["result"]["content"][0]["text"]
+    check(
+        f"{leaky}: error text has no token, password or webhook token",
+        "apify-secret-value" not in text and "abcdefghijklmnop" not in text and "whTok-EN_secret" not in text and "[redacted]" in text,
+        text,
+    )
+check("the URL shape is kept so the error stays useful", "/webhooks/123456789012345678/[redacted]" in call("zz_leaky")["result"]["content"][0]["text"])
+acts = run(store.recent_activity(5))[0]
+check("activity log errors are redacted too", all("apify-secret-value" not in json.dumps(a) and "whTok-EN" not in json.dumps(a) for a in acts))
+del TOOLS["zz_leaky"], TOOLS["zz_leaky_toolerror"]
+del os.environ["APIFY_TOKEN"], os.environ["GMAIL_APP_PASSWORD"]
 
 # ---------------------------------------------------------------- argument validation
 schema = TOOLS["discord_read_channel"]["spec"]["inputSchema"]

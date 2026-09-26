@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 from . import store
 from .connectors import connector_of
 from .registry import TOOLS, ToolError, kind
+from .security import redact
 
 SUPPORTED_PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"]
 MAX_STRING = 1_000_000
@@ -107,9 +108,9 @@ async def run_tool(name: str, arguments, source: str = "mcp") -> tuple[bool, str
         result = await entry["fn"](args)
         ok, text = True, json.dumps(result, ensure_ascii=False, indent=2)
     except ToolError as e:
-        text = str(e)
+        text = redact(str(e))
     except Exception as e:
-        text = f"{type(e).__name__}: {e}"
+        text = redact(f"{type(e).__name__}: {e}")
     await store.record_activity(
         {
             "ts": datetime.now(UTC).isoformat(timespec="seconds"),

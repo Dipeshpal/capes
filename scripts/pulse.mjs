@@ -108,7 +108,7 @@ async function verify(url, key) {
 }
 
 // ---------------------------------------------------------------- connect
-const readJson = (p) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8').replace(/^﻿/, '')) : {});
+const readJson = (p) => (existsSync(p) ? JSON.parse(readFileSync(p, 'utf8').replace(/^\ufeff/, '')) : {});
 function writeJson(p, obj) {
   mkdirSync(dirname(p), { recursive: true });
   writeFileSync(p, JSON.stringify(obj, null, 2) + '\n');
