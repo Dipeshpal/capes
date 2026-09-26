@@ -278,7 +278,7 @@ Details in [SECURITY.md](SECURITY.md) and the [security model](docs/architecture
 
 **Use:** [Dashboard](docs/dashboard.md) | [Using Capes](docs/usage.md) | [Tool reference](docs/tools.md) | [Troubleshooting](docs/troubleshooting.md)
 
-**Understand and contribute:** [What Capes is for](docs/architecture.md) | [Contributing](docs/contributing.md) | [Security policy](SECURITY.md) | [Release checklist](docs/release-checklist.md)
+**Understand and contribute:** [What Capes is for](docs/architecture.md) | [Contributing](docs/contributing.md) | [Governance: who can merge](docs/governance.md) | [Security policy](SECURITY.md) | [Release checklist](docs/release-checklist.md)
 
 ## License
 

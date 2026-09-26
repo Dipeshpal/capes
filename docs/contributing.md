@@ -2,7 +2,7 @@
 
 Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
 
-Read [What Capes is for](architecture.md) first if you want the big picture.
+Read [What Capes is for](architecture.md) first if you want the big picture. **Who can merge what, and why you cannot push to `master`, is in [Governance](governance.md).** In short: fork, open a pull request, and the maintainer reviews and merges it.
 
 ## Ways to contribute
 
@@ -34,7 +34,7 @@ The server listens on `http://127.0.0.1:8000`: the dashboard is at `/dashboard`,
 3. Run the checks below until they pass.
 4. Commit with an imperative subject line and a short body that says **why**, for example `Fix draft deletion: Gmail marks drafts with a label, not a flag`.
 5. Open a pull request using the template. Say what you tested and, honestly, what you could not test (for example "no access to a real Discord server").
-6. Respond to review. CI must be green.
+6. Respond to review. CI must be green. Only a code owner can approve and merge; see [Governance](governance.md).
 
 ## Checks
 

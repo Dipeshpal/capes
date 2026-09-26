@@ -1,5 +1,5 @@
 # Changes to anything that steers assistants, CI, deployment or authentication need the maintainer's review.
-# Enable "Require review from Code Owners" in branch protection so this is enforced.
+# Enforced by .github/rulesets/protect-default-branch.json (see docs/governance.md).
 
 *                          @Dipeshpal
 
