@@ -10,5 +10,5 @@
 
 - [ ] `tests/protocol.py`, `tests/gmail_offline.py`, `scripts/gen_tools_doc.py --check`, `tests/check_docs.py` and `node --check scripts/capes.mjs` pass
 - [ ] New or changed tools have an honest `hint` (`read`, `write`, `destructive`) and a test
-- [ ] README tool list, `docs/tools.md`, the service guide, `.env.example` and installer prompts are updated where relevant
+- [ ] README tool list, `docs/usage/tools.md`, the service guide, `.env.example` and installer prompts are updated where relevant
 - [ ] No secrets, tokens, real IDs or message content anywhere in the diff

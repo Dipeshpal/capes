@@ -24,10 +24,12 @@ class Connector:
 
 CONNECTORS = (
     Connector(
-        "gmail", "Gmail", "gmail_", ("GMAIL_ADDRESS", "GMAIL_APP_PASSWORD"), "docs/gmail.md", "Search, read, send, reply, forward, drafts, labels, trash."
+        "gmail", "Gmail", "gmail_", ("GMAIL_ADDRESS", "GMAIL_APP_PASSWORD"), "docs/setup/gmail.md", "Search, read, send, reply, forward, drafts, labels, trash."
     ),
-    Connector("discord", "Discord", "discord_", ("DISCORD_BOT_TOKEN",), "docs/discord.md", "Read and manage servers, channels, threads, roles and messages."),
-    Connector("apify", "Apify (X/Twitter search)", "twitter_", ("APIFY_TOKEN",), "docs/apify.md", "Search tweets through an Apify scraper."),
+    Connector(
+        "discord", "Discord", "discord_", ("DISCORD_BOT_TOKEN",), "docs/setup/discord.md", "Read and manage servers, channels, threads, roles and messages."
+    ),
+    Connector("apify", "Apify (X/Twitter search)", "twitter_", ("APIFY_TOKEN",), "docs/setup/apify.md", "Search tweets through an Apify scraper."),
 )
 BY_ID = {c.id: c for c in CONNECTORS}
 

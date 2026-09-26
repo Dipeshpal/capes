@@ -17,6 +17,14 @@ Not goals: a multi-user SaaS, storing your data anywhere, replacing the official
 
 ## How a request flows
 
+![Capes architecture: AI clients and the owner reach one server on Vercel; a guard checks every call before the tools reach Gmail, Discord and Apify](../diagrams/architecture.png)
+
+The interactive version (pan, zoom, trace paths) is [architecture.html](../diagrams/architecture.html); download it and open it in a browser.
+
+![Life of a tool call: the client calls /mcp with a key, the guard checks it, the tool calls the service with your token, and the result comes back redacted](../diagrams/request-lifecycle.png)
+
+Interactive: [request-lifecycle.html](../diagrams/request-lifecycle.html). The same flow as text:
+
 ```
  AI client (Claude, Codex, Cursor)                     you, in a browser
         |  MCP over HTTPS                                     |  HTTPS, session cookie
@@ -103,8 +111,8 @@ The dashboard idea was inspired by kebab-mcp. Capes's implementation is independ
 ## Known limits
 
 - Vercel stops a request after 60 seconds.
-- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](discord.md#what-the-bot-cannot-do). The Discord write tools are verified against a fake Discord server that checks the exact request each one sends, plus live read-only calls; they have not been run against a real server that they can change.
-- Gmail: one account, and Trash/Spam are not searchable. See the [Gmail guide](gmail.md#limits).
+- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](../setup/discord.md#what-the-bot-cannot-do). The Discord write tools are verified against a fake Discord server that checks the exact request each one sends, plus live read-only calls; they have not been run against a real server that they can change.
+- Gmail: one account, and Trash/Spam are not searchable. See the [Gmail guide](../setup/gmail.md#limits).
 - X search depends on a third-party scraper (Apify); its availability and prices are outside this project.
 
 ## Ideas for later (not promises)

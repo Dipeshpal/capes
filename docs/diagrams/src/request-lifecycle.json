@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Life of a tool call",
+    "output": "request-lifecycle.html",
+    "viewBox": [1080, 560],
+    "column_fit": "spread",
+    "quality_profile": "showcase"
+  },
+  "participants": [
+    { "id": "client", "type": "external", "label": "AI client", "sublabel": "Claude, Codex, Cursor" },
+    { "id": "mcp", "type": "backend", "label": "POST /mcp", "sublabel": "JSON-RPC handler" },
+    { "id": "guard", "type": "security", "label": "Guard", "sublabel": "key, schema, policy" },
+    { "id": "tool", "type": "backend", "label": "Tool", "sublabel": "Gmail, Discord, X" },
+    { "id": "service", "type": "external", "label": "Service", "sublabel": "upstream API" },
+    { "id": "log", "type": "database", "label": "Activity log", "sublabel": "names and results only" }
+  ],
+  "segments": [
+    { "from": 150, "to": 240, "label": "Check" },
+    { "from": 246, "to": 372, "label": "Run" },
+    { "from": 380, "to": 448, "label": "Return" }
+  ],
+  "messages": [
+    { "id": "call", "from": "client", "to": "mcp", "y": 165, "label": "tools/call + Bearer key", "variant": "emphasis" },
+    { "id": "check", "from": "mcp", "to": "guard", "y": 196, "label": "key, arguments, policy", "variant": "security" },
+    { "id": "verdict", "from": "guard", "to": "mcp", "y": 227, "label": "allowed or refused", "variant": "return" },
+    { "id": "run", "from": "mcp", "to": "tool", "y": 268, "label": "run the tool" },
+    { "id": "upstream", "from": "tool", "to": "service", "y": 299, "label": "call with your token" },
+    { "id": "reply", "from": "service", "to": "tool", "y": 330, "label": "reply", "variant": "return" },
+    { "id": "compact", "from": "tool", "to": "mcp", "y": 361, "label": "compact result", "variant": "return" },
+    { "id": "record", "from": "mcp", "to": "log", "y": 402, "label": "tool, ok, ms", "variant": "dashed" },
+    { "id": "answer", "from": "mcp", "to": "client", "y": 433, "label": "result, secrets redacted", "variant": "return" }
+  ],
+  "activations": [
+    { "participant": "mcp", "from": 160, "to": 438, "type": "backend" },
+    { "participant": "guard", "from": 191, "to": 232, "type": "security" },
+    { "participant": "tool", "from": 263, "to": 366, "type": "backend" },
+    { "participant": "service", "from": 294, "to": 335, "type": "external" },
+    { "participant": "log", "from": 397, "to": 408, "type": "database" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Check first", "items": ["A wrong key stops at the door", "Bad arguments never reach a service", "Disabled tools and read-only mode refuse writes"] },
+    { "dot": "emerald", "title": "Run with your token", "items": ["The token is read from Vercel env vars", "Results are trimmed to the useful fields"] },
+    { "dot": "rose", "title": "Leave no secrets", "items": ["Errors and results are redacted", "The log keeps names and outcomes, not content"] }
+  ]
+}

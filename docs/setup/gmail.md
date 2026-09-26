@@ -38,7 +38,7 @@ Ask your AI assistant: "How many unread emails do I have?" (uses `gmail_list_lab
 
 ## What it can do
 
-Search with Gmail syntax (`from:alice is:unread newer_than:7d has:attachment label:work`), read messages, threads and attachments, send, reply and reply-all, forward, create, list, send and delete drafts, mark read/unread, star, archive, add and remove labels, create and delete labels, move to Trash or Spam. The full list is in the [README](../README.md#tools).
+Search with Gmail syntax (`from:alice is:unread newer_than:7d has:attachment label:work`), read messages, threads and attachments, send, reply and reply-all, forward, create, list, send and delete drafts, mark read/unread, star, archive, add and remove labels, create and delete labels, move to Trash or Spam. The full list is in the [README](../../README.md#tools).
 
 ## Limits
 

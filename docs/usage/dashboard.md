@@ -2,7 +2,7 @@
 
 Every deployment includes a web dashboard at `https://<project>.vercel.app/dashboard`. Use it to see what is connected, test your credentials, switch connectors and tools on or off, run read-only tools, watch recent activity, and copy the config for your AI client. There is nothing to install and no build step; it is served by your own server.
 
-![Overview: tools available, connectors configured, mode, and your MCP endpoint](assets/dashboard-overview.png)
+![Overview: tools available, connectors configured, mode, and your MCP endpoint](../assets/dashboard-overview.png)
 
 ## Signing in
 
@@ -12,7 +12,7 @@ Open `/dashboard` (browsers opening the plain address are sent there) and enter 
 - After that you simply sign in again with the same key. **You never need to rotate the key on a schedule.** Change it only if you think it leaked; doing so also ends every session.
 - Sessions end when you click **Sign out** or when the time is up.
 - After 10 wrong attempts from one address, sign-in is blocked for 15 minutes.
-- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. Set a stronger one ([how](vercel.md#2-create-your-mcp_api_key)).
+- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. Set a stronger one ([how](../setup/vercel.md#2-create-your-mcp_api_key)).
 
 ## What each tab does
 
@@ -25,9 +25,9 @@ Open `/dashboard` (browsers opening the plain address are sent there) and enter 
 | **Connect a client** | Ready-to-copy config for Claude Code, Claude Desktop, Cursor and Codex, filled in with your endpoint address. The key is never shown; you replace `YOUR_MCP_API_KEY` yourself. |
 | **Settings** | Read-only mode, the state of settings storage, and sign out. |
 
-![Connectors: credentials status, tool counts, enable switch, connection test](assets/dashboard-connectors.png)
+![Connectors: credentials status, tool counts, enable switch, connection test](../assets/dashboard-connectors.png)
 
-![Tools: filter, switch on and off, try read-only tools](assets/dashboard-tools.png)
+![Tools: filter, switch on and off, try read-only tools](../assets/dashboard-tools.png)
 
 ### Test connection
 
@@ -68,7 +68,7 @@ If Redis is configured but unreachable, the server keeps using the last settings
 - The dashboard API never returns secret values, only whether a variable is set.
 - Every response carries `nosniff`, `no-referrer`, `frame-ancestors 'none'` and `no-store` headers, plus HSTS over HTTPS.
 
-The full model is in [What Capes is for](architecture.md#security-model). Report problems privately as described in [SECURITY.md](../SECURITY.md).
+The full model is in [What Capes is for](../project/architecture.md#security-model). Report problems privately as described in [SECURITY.md](../../SECURITY.md).
 
 ## Troubleshooting
 
@@ -81,8 +81,8 @@ The full model is in [What Capes is for](architecture.md#security-model). Report
 | Saved a switch but a client still sees the tool | Wait about 10 seconds, then restart the client so it re-reads the tool list. |
 | Signed out again | Sessions last 8 hours by default (`PULSE_SESSION_HOURS`), and end early only if `MCP_API_KEY` was changed. Just sign in again. |
 | Test connection fails | Read the message: it comes from the service (wrong token, missing permission). See that service's guide. |
-| Dashboard shows a Vercel login page | Deployment Protection is on ([fix](vercel.md#deployment-protection)). |
+| Dashboard shows a Vercel login page | Deployment Protection is on ([fix](../setup/vercel.md#deployment-protection)). |
 
 ## For contributors
 
-The dashboard is plain HTML, CSS and JavaScript in [`dashboard/`](../dashboard), served by `pulse/dashboard.py`. Rules to keep it secure are in `.claude/rules/dashboard.md` and enforced by `tests/dashboard.py`: no inline scripts or styles, no `innerHTML`, nothing loaded from other origins, no browser storage. A new connector appears in the dashboard automatically once it is listed in `pulse/connectors.py`.
+The dashboard is plain HTML, CSS and JavaScript in [`dashboard/`](../../dashboard), served by `pulse/dashboard.py`. Rules to keep it secure are in `.claude/rules/dashboard.md` and enforced by `tests/dashboard.py`: no inline scripts or styles, no `innerHTML`, nothing loaded from other origins, no browser storage. A new connector appears in the dashboard automatically once it is listed in `pulse/connectors.py`.

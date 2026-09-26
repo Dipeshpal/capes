@@ -34,7 +34,7 @@ MAX_ATTACHMENT_BYTES = 2_000_000
 def credentials() -> tuple[str, str]:
     address, password = os.getenv("GMAIL_ADDRESS"), os.getenv("GMAIL_APP_PASSWORD")
     if not address or not password:
-        raise ToolError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set on the server (see docs/gmail.md)")
+        raise ToolError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set on the server (see docs/setup/gmail.md)")
     return address.strip().strip("\"'"), password.strip().strip("\"'").replace(" ", "")
 
 

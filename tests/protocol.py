@@ -324,7 +324,7 @@ wanted = [
 ]
 integer = str(sum(1 << PERMISSIONS[n] for n in wanted))
 check("dashboard invite constant matches permission list", integer == INVITE_PERMISSIONS)
-for rel in ("docs/discord.md", "scripts/capes.mjs"):
+for rel in ("docs/setup/discord.md", "scripts/capes.mjs"):
     check(f"permission integer {integer} present in {rel}", integer in (ROOT / rel).read_text(encoding="utf-8"))
 
 env_used = set()
@@ -336,13 +336,13 @@ _spec = importlib.util.spec_from_file_location("gen_tools_doc", ROOT / "scripts"
 _gen = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_gen)
 check(
-    "docs/tools.md is up to date (run scripts/gen_tools_doc.py)",
-    (ROOT / "docs" / "tools.md").read_text(encoding="utf-8").splitlines() == _gen.render().splitlines(),
+    "docs/usage/tools.md is up to date (run scripts/gen_tools_doc.py)",
+    (ROOT / "docs" / "usage" / "tools.md").read_text(encoding="utf-8").splitlines() == _gen.render().splitlines(),
 )
-vercel_doc = (ROOT / "docs" / "vercel.md").read_text(encoding="utf-8")
+vercel_doc = (ROOT / "docs" / "setup" / "vercel.md").read_text(encoding="utf-8")
 internal = {"PULSE_REPO_URL", "APIFY_TWEET_ACTOR"}
 check(
-    "every env var used in code is in docs/vercel.md",
+    "every env var used in code is in docs/setup/vercel.md",
     all(v in vercel_doc for v in env_used if v not in internal),
     sorted(v for v in env_used if v not in vercel_doc and v not in internal),
 )
