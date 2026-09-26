@@ -25,9 +25,9 @@ hits=$(git grep -I -l -E "$PATTERN" $revs 2>/dev/null | sort -u | head -20 || tr
 if [ -n "$hits" ]; then echo "$hits"; bad=1; else echo "none"; fi
 
 echo
-echo "== long values assigned to *_KEY/*_TOKEN/*_SECRET/*_PASSWORD (locations only, .example excluded)"
+echo "== long values assigned to *_KEY/*_TOKEN/*_SECRET/*_PASSWORD (locations only; .example and tests/ excluded because tests use fake fixtures. Real token formats and known values are still checked everywhere)"
 # shellcheck disable=SC2086
-hits=$(git grep -I -l -E '(KEY|TOKEN|SECRET|PASSWORD)[A-Z_]*[[:space:]]*[=:][[:space:]]*["'"'"']?[A-Za-z0-9_-]{24,}' $revs -- . ':!*.example' 2>/dev/null | sort -u | head -20 || true)
+hits=$(git grep -I -l -E '(KEY|TOKEN|SECRET|PASSWORD)[A-Z_]*[[:space:]]*[=:][[:space:]]*["'"'"']?[A-Za-z0-9_-]{24,}' $revs -- . ':!*.example' ':!tests/*' 2>/dev/null | sort -u | head -20 || true)
 if [ -n "$hits" ]; then echo "$hits"; bad=1; else echo "none"; fi
 
 echo
