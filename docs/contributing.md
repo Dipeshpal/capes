@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
+Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
 
 Read [What pulse-mcp is for](architecture.md) first if you want the big picture.
 

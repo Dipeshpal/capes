@@ -276,6 +276,10 @@ Details in [SECURITY.md](SECURITY.md) and the [security model](docs/architecture
 
 **Understand and contribute:** [What pulse-mcp is for](docs/architecture.md) | [Contributing](docs/contributing.md) | [Security policy](SECURITY.md) | [Release checklist](docs/release-checklist.md)
 
+## License
+
+[MIT](LICENSE). Use it, change it and share it; keep the copyright notice. It comes with no warranty, so you are responsible for what your AI assistants do with your mailbox and servers.
+
 ## References
 
 - [Model Context Protocol: introduction](https://modelcontextprotocol.io/docs/getting-started/intro) and [connecting Claude Code to MCP servers](https://code.claude.com/docs/en/mcp)

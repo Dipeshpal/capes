@@ -4,7 +4,7 @@ Use this before making the repository public, and before tagging a release. Each
 
 ## Before going public
 
-- [ ] **Choose and add a license** (`LICENSE`). The project has none yet, so nobody may legally reuse it. This is the maintainer's decision.
+- [x] **License:** MIT (`LICENSE`), chosen 2026-09-27.
 - [ ] **Rotate every credential that ever touched a private repo or old deployment** (Discord bot token, Apify token, Gmail app password if used in tests, `MCP_API_KEY`), then update Vercel and redeploy.
 - [ ] **Delete old repositories that held leaked history** (`gh repo delete <owner>/<name>`). GitHub keeps orphaned commits reachable by SHA, so a repo that ever contained a secret must be deleted, not just rewritten.
 - [ ] **Full-history secret scan is clean:** `bash .claude/skills/security-audit/scan.sh --strict` with your real values exported in the shell (it prints counts only).
