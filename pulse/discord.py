@@ -18,7 +18,7 @@ from .registry import ToolError, tool
 
 API = "https://discord.com/api/v10"
 SAFE_PATH = re.compile(r"(?:/[A-Za-z0-9@_.%:\-]+)+")
-INVITE_PERMISSIONS = "1495454313687"  # tests/protocol.py recomputes this from PERMISSIONS
+INVITE_PERMISSIONS = "2253295267998935"  # tests/protocol.py recomputes this from PERMISSIONS
 UA = "DiscordBot (https://github.com/Dipeshpal/pulse-mcp, 3.0)"
 DEFAULT_REASON = "via pulse-mcp"
 
@@ -67,6 +67,17 @@ PERMISSIONS = {
             "SEND_MESSAGES_IN_THREADS",
             "USE_EMBEDDED_ACTIVITIES",
             "MODERATE_MEMBERS",
+            "VIEW_CREATOR_MONETIZATION_ANALYTICS",
+            "USE_SOUNDBOARD",
+            "CREATE_GUILD_EXPRESSIONS",
+            "CREATE_EVENTS",
+            "USE_EXTERNAL_SOUNDS",
+            "SEND_VOICE_MESSAGES",
+            "RESERVED_47",
+            "RESERVED_48",
+            "SEND_POLLS",
+            "USE_EXTERNAL_APPS",
+            "PIN_MESSAGES",
         ]
     )
 }
@@ -482,7 +493,7 @@ async def bulk_delete(args):
 
 @tool(
     "discord_pin_message",
-    "Pin (default) or unpin a message. Needs Manage Messages.",
+    "Pin (default) or unpin a message. Needs the Pin Messages permission (Discord split it from Manage Messages).",
     {"channel_id": CHANNEL, "message_id": MESSAGE, "unpin": {"type": "boolean", "description": "Set true to unpin"}},
     ["channel_id", "message_id"],
     hint="write",

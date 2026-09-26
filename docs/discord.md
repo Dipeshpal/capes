@@ -34,18 +34,18 @@ The easiest way: after deploying, open the dashboard, go to **Connectors > Disco
 To build it by hand, open this link while signed in as the owner (or an admin) of the server. Replace `CLIENT_ID` with your **Application ID** (Developer Portal > **General Information** > Application ID).
 
 ```
-https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=1495454313687
+https://discord.com/oauth2/authorize?client_id=CLIENT_ID&scope=bot&permissions=2253295267998935
 ```
 
 Choose the server, click **Authorize**. Opening the same link again for a server the bot is already in **updates** its permissions.
 
-The number `1495454313687` grants exactly these permissions:
+The number `2253295267998935` grants exactly these permissions:
 
 | Area | Permissions |
 |------|-------------|
 | Read and write messages | View Channels, Send Messages, Send Messages in Threads, Embed Links, Attach Files, Read Message History, Add Reactions, Use External Emojis |
 | Threads | Create Public Threads, Create Private Threads, Manage Threads |
-| Manage the server | Manage Channels, Manage Roles, Manage Messages, Manage Webhooks, View Audit Log, Create Invite |
+| Manage the server | Manage Channels, Manage Roles, Manage Messages, Pin Messages, Manage Webhooks, View Audit Log, Create Invite |
 | Moderation | Kick Members, Ban Members, Timeout Members |
 
 It does not include Administrator, and it does not include **Manage Server**. Only `discord_list_invites` and `discord_delete_invite` need Manage Server; add that permission to the bot's role in Server Settings > Roles if you want them. If you do not need moderation or role tools, you can choose a smaller set in the Developer Portal under **OAuth2 > URL Generator** (scope `bot`, tick the permissions, copy the generated link).
@@ -85,7 +85,7 @@ Beyond channels and roles, the toolkit covers:
 These are Discord's rules, not limits of this project:
 
 - **Create servers.** Discord removed that for bots. Create the server yourself and invite the bot; it can then create channels, roles and threads.
-- **Edit other people's messages.** Bots can edit only their own. With Manage Messages they can delete others' messages.
+- **Edit other people's messages.** Bots can edit only their own. With Manage Messages they can delete others' messages, and Pin Messages lets them pin.
 - **Bulk delete** messages older than 14 days.
 - **Grant a permission it does not have**, or manage a role at or above its own.
 - Read channels it cannot see. Use a channel permission overwrite or a role that can view it.

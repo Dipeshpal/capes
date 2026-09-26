@@ -49,7 +49,7 @@ Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [
 | `discord_edit_message` | write | Edit a message. Discord only lets the bot edit its own messages. | `channel_id*`, `message_id*`, `content`, `embed`, `mentions` |
 | `discord_delete_message` | destructive | Delete a message. Needs Manage Messages to delete other people's messages. | `channel_id*`, `message_id*`, `reason` |
 | `discord_bulk_delete_messages` | destructive | Delete 2-100 messages at once (must be newer than 14 days). Needs Manage Messages. | `channel_id*`, `message_ids*`, `reason` |
-| `discord_pin_message` | write | Pin (default) or unpin a message. Needs Manage Messages. | `channel_id*`, `message_id*`, `unpin` |
+| `discord_pin_message` | write | Pin (default) or unpin a message. Needs the Pin Messages permission (Discord split it from Manage Messages). | `channel_id*`, `message_id*`, `unpin` |
 | `discord_add_reaction` | write | React to a message. emoji is a unicode emoji (👍) or a custom emoji as name:id. | `channel_id*`, `message_id*`, `emoji*` |
 | `discord_remove_reaction` | destructive | Remove the bot's reaction, another user's reaction (user_id), or all reactions on the message (clear_all). Removing others' reactions needs Manage Messages. | `channel_id*`, `message_id*`, `emoji`, `user_id`, `clear_all` |
 | `discord_create_channel` | write | Create a channel in a server. Needs Manage Channels. | `guild_id*`, `name*`, `type`, `topic`, `parent_id`, `nsfw`, `slowmode_seconds`, `private` |
