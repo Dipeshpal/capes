@@ -266,7 +266,7 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 - [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).
 - [x] **Limits you control:** switch a service or a single tool off, or make the whole server read-only. Every tool is labelled read, write or destructive.
 - [x] **Built to be safe:** arguments validated against each tool's schema, secrets redacted from errors and logs, signed dashboard sessions with CSRF protection, rate-limited sign-in, fail-closed settings.
-- [x] **Tested without credentials:** a fake IMAP server and a fake Discord API server exercise the tools in CI. Most Discord tools were also run against a real test server; one of 33 checks failed on the first run, and it was a real bug (pinning needs the separate Pin Messages permission), which is fixed.
+- [x] **Tested without credentials:** a fake IMAP server and a fake Discord API server exercise the tools in CI. Most Discord tools were also run against a real test server; one of 33 checks failed on the first run, and it was a real bug (pinning needs the separate Pin Messages permission), which is fixed. The maintainer has since tested it on a real community server too.
 - [x] **Open-source ready:** MIT license, contributor guard against unreviewed changes to CI and assistant settings, protected `main` (pull request, code-owner review and green checks), secret scanning, docs with diagrams.
 
 ## 🗺️ What's next

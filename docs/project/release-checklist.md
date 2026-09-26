@@ -27,6 +27,6 @@ Use this before making the repository public, and before tagging a release. Each
 
 ## Known gaps to accept or close
 
-- Discord tools are verified against a fake Discord REST server (`tests/discord_offline.py`: exact endpoint, method, payload and headers), and most were run by hand against a disposable test server on 2026-09-27. Direct messages, audit-log filters, invite deletion and a few destructive tools were not exercised there; run `tests/discord_e2e.py MODE=full` on a disposable server to cover the rest.
+- Discord tools are verified against a fake Discord REST server (`tests/discord_offline.py`: exact endpoint, method, payload and headers), and most were run by hand against a disposable test server on 2026-09-27. The maintainer has since tested it on a real community server as well. Direct messages, audit-log filters, invite deletion and a few destructive tools were not exercised in a recorded run; run `tests/discord_e2e.py MODE=full` on a disposable server to cover the rest.
 - Redis-backed features are tested against a fake server and locally; test them on a real Upstash database after adding the integration.
 - There are no per-client keys; anyone with `MCP_API_KEY` has full access to the connected services.
