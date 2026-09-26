@@ -30,6 +30,12 @@
     <td align="center"><a href="#-tools">All 62 tools</a></td>
   </tr>
   <tr>
+    <td align="right"><b>💬 Community</b></td>
+    <td align="center"><a href="#-whats-built">What's built</a></td>
+    <td align="center"><a href="#-whats-next">What's next</a></td>
+    <td align="center"><a href="#-request-a-feature-or-a-new-mcp-connector">Request a feature</a> · <a href="#-support-the-project">☕ Support</a></td>
+  </tr>
+  <tr>
     <td align="right"><b>🤝 Project</b></td>
     <td align="center"><a href="#-security">Security</a></td>
     <td align="center"><a href="#-contributing">Contributing</a></td>
@@ -251,6 +257,53 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 2. Or `curl https://<project>.vercel.app/health` returns `"status":"online"`.
 3. In your AI client, ask "List my Discord channels" (Discord), "How many unread emails do I have?" (Gmail) or "Search X for MCP servers" (Apify).
 4. Something wrong? [Troubleshooting](docs/usage/troubleshooting.md) maps every common error to its fix.
+
+## 🏁 What's built
+
+- [x] **62 tools across three services:** Gmail (17), Discord (44) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
+- [x] **Owner dashboard:** sign in with your key, test each connector, browse the tools, try read-only ones, watch activity, copy client config, and generate your Discord invite link in one click.
+- [x] **One-click deploy to your own Vercel** (Deploy button or one installer command), no database needed.
+- [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).
+- [x] **Limits you control:** switch a service or a single tool off, or make the whole server read-only. Every tool is labelled read, write or destructive.
+- [x] **Built to be safe:** arguments validated against each tool's schema, secrets redacted from errors and logs, signed dashboard sessions with CSRF protection, rate-limited sign-in, fail-closed settings.
+- [x] **Tested without credentials:** a fake IMAP server and a fake Discord API server exercise the tools in CI. Most Discord tools were also run against a real test server; one of 33 checks failed on the first run, and it was a real bug (pinning needs the separate Pin Messages permission), which is fixed.
+- [x] **Open-source ready:** MIT license, contributor guard against unreviewed changes to CI and assistant settings, protected `main` (pull request, code-owner review and green checks), secret scanning, docs with diagrams.
+
+## 🗺️ What's next
+
+Ideas, not promises. What you ask for moves up the list, so [tell us what you need](#-request-a-feature-or-a-new-mcp-connector).
+
+- [ ] **More Discord:** application commands, scheduled events, stickers and emoji management, member nickname edits.
+- [ ] **More services,** each as its own connector (for example calendar, chat or notes tools). See the request section below.
+- [ ] **Per-client keys and scopes,** so one assistant can be read-only while another is not.
+- [ ] **Multiple accounts per service** (for example two mailboxes).
+- [ ] **A short demo video or GIF** of an assistant using the tools.
+- [ ] **Verify the optional Redis settings** on a real Upstash database (today they are tested against a fake server).
+- [ ] **A fresh-account walkthrough** of the README and Deploy button, fixing every place a newcomer hesitates.
+- [ ] **Tagged releases and a changelog.**
+
+The design notes and known limits are in [What Capes is for](docs/project/architecture.md#known-limits).
+
+## 📬 Request a feature or a new MCP connector
+
+Want your assistant to reach another service, or a tool that is missing?
+
+**[Open a feature request](https://github.com/Dipeshpal/capes/issues/new?template=feature_request.md)** and tell us:
+
+- what you want to be able to ask your assistant to do,
+- for a new service: its API docs, how a user gets credentials (token, app password, OAuth), whether it is free for personal use, and whether it works over plain HTTP from a short-lived serverless function,
+- the tools you would like (name, what it does, read, write or destructive),
+- whether you plan to build it yourself.
+
+Want to build it? A new tool is one Python function; a whole service is a small module. Start with [Contributing](docs/project/contributing.md#add-a-service). Found a bug instead? [Report it](https://github.com/Dipeshpal/capes/issues/new?template=bug_report.md). Security problems go to [SECURITY.md](SECURITY.md), not a public issue.
+
+## ☕ Support the project
+
+Capes is free and open source, built and maintained in spare time. If it saves you time, a coffee helps keep it going.
+
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-ffdd00?style=for-the-badge&logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/dipeshpal)
+
+Starring the repo, sharing it, fixing a typo or sending a pull request helps just as much.
 
 ## 🛡️ Security
 

@@ -111,7 +111,7 @@ The dashboard idea was inspired by kebab-mcp. Capes's implementation is independ
 ## Known limits
 
 - Vercel stops a request after 60 seconds.
-- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](../setup/discord.md#what-the-bot-cannot-do). The Discord write tools are verified against a fake Discord server that checks the exact request each one sends, plus live read-only calls; they have not been run against a real server that they can change.
+- Discord: bots cannot create servers and can edit only their own messages. See the [Discord guide](../setup/discord.md#what-the-bot-cannot-do). The Discord tools are verified against a fake Discord server that checks the exact request each one sends, and most were also run by hand against a disposable test server (that run found that pinning needs the separate Pin Messages permission). Some tools, such as direct messages and audit-log filters, have not been exercised against a real server.
 - Gmail: one account, and Trash/Spam are not searchable. See the [Gmail guide](../setup/gmail.md#limits).
 - X search depends on a third-party scraper (Apify); its availability and prices are outside this project.
 
