@@ -18,7 +18,14 @@ from .mcp import run_tool, tool_allowed
 from .registry import TOOLS, kind
 
 ROOT = Path(__file__).resolve().parent.parent / "dashboard"
-ASSETS = {"index.html": "text/html; charset=utf-8", "app.js": "text/javascript; charset=utf-8", "style.css": "text/css; charset=utf-8"}
+ASSETS = {
+    "index.html": "text/html; charset=utf-8",
+    "app.js": "text/javascript; charset=utf-8",
+    "style.css": "text/css; charset=utf-8",
+    "logo.png": "image/png",
+    "favicon.png": "image/png",
+    "favicon.ico": "image/x-icon",
+}
 LOGIN_ATTEMPTS, LOGIN_WINDOW = 10, 900
 MAX_OUTPUT = 60_000
 

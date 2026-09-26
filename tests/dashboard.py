@@ -372,6 +372,13 @@ del os.environ["KV_REST_API_URL"], os.environ["KV_REST_API_TOKEN"]
 store.reset_for_tests()
 
 # ================================================================ headers and static assets
+_c = fresh_client()
+for _n, _t in (("logo.png", "image/png"), ("favicon.png", "image/png"), ("favicon.ico", "image/x-icon")):
+    _r = _c.get("/dashboard/" + _n)
+    check(
+        f"logo asset {_n} is served as {_t}",
+        _r.status_code == 200 and _r.headers["content-type"].startswith(_t) and _r.headers.get("x-content-type-options") == "nosniff",
+    )
 c = fresh_client()
 for path in ("/dashboard", "/dashboard/app.js", "/dashboard/style.css", "/dashboard/api/session", "/health"):
     r = c.get(path)
