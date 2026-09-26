@@ -13,7 +13,7 @@ Shared, committed lessons about this codebase. Keep entries short and factual. N
 ## Vercel
 - FastAPI preset routes every path to the app. A `rewrites` entry in `vercel.json` changes the path the app sees and returns 404 on `/mcp`.
 - Env var changes need a new deployment. Deployment Protection returns a login page/401 for the endpoint and breaks MCP clients.
-- `Capes.vercel.app` may already be taken; Vercel then assigns a suffix (for example `pulse-mcp-six`). The installer reads the real alias with `vercel inspect`.
+- `capes.vercel.app` may already be taken (it was, for this project, so the project is named `capes-mcp`); Vercel may also assign a suffix (for example `capes-mcp-six`). The installer reads the real alias with `vercel inspect`.
 - Imports work from the repo root package (`pulse/`) because `api/index.py` inserts the repo root into `sys.path`.
 
 ## Clients
