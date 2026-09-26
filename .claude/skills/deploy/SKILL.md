@@ -9,7 +9,7 @@ Current state:
 
 Steps:
 
-1. If the working tree has uncommitted changes, ask the user whether to commit first. Do not commit or push unless asked. `main` is protected: code reaches it only through a pull request (`docs/governance.md`), and deploys are run from a checkout of `main`.
+1. If the working tree has uncommitted changes, ask the user whether to commit first. Do not commit or push unless asked. `main` is protected: code reaches it only through a pull request (`docs/project/governance.md`), and deploys are run from a checkout of `main`.
 2. Run `/run-tests`. Do not deploy on failures.
 3. `vercel deploy --prod` (the project is linked in `.vercel/`; if not, run `node scripts/capes.mjs install`).
 4. Smoke test against the live URL from `.capes.local.json`. Read the URL and key with a command that does not print the key, and never echo the key into the conversation:

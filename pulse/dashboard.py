@@ -1,6 +1,6 @@
 """Owner dashboard: sign in with MCP_API_KEY, see connectors and tools, switch things off, try read-only tools.
 
-Security notes (details in docs/dashboard.md and docs/architecture.md):
+Security notes (details in docs/usage/dashboard.md and docs/project/architecture.md):
 - The session is a signed, HttpOnly, SameSite=Strict cookie; every state-changing call also needs a per-session CSRF token.
 - The API never returns secret values, only whether each variable is set.
 - Only read-only tools can be run from the dashboard.

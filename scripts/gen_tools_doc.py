@@ -1,7 +1,7 @@
-"""Generates docs/tools.md from the tool registry so the reference can never drift from the code.
+"""Generates docs/usage/tools.md from the tool registry so the reference can never drift from the code.
 
-    python scripts/gen_tools_doc.py           # rewrite docs/tools.md
-    python scripts/gen_tools_doc.py --check   # exit 1 if docs/tools.md is out of date (used by tests and CI)
+    python scripts/gen_tools_doc.py           # rewrite docs/usage/tools.md
+    python scripts/gen_tools_doc.py --check   # exit 1 if docs/usage/tools.md is out of date (used by tests and CI)
 
 Needs only aiohttp (the tool modules import it).
 """
@@ -15,11 +15,11 @@ sys.path.insert(0, str(ROOT))
 from pulse import discord, gmail, twitter  # noqa: E402,F401  (importing registers the tools)
 from pulse.registry import TOOLS  # noqa: E402
 
-TARGET = ROOT / "docs" / "tools.md"
+TARGET = ROOT / "docs" / "usage" / "tools.md"
 SERVICES = [
-    ("gmail", "Gmail", "Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](gmail.md)."),
-    ("discord", "Discord", "Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [Discord guide](discord.md)."),
-    ("twitter", "X/Twitter", "Needs `APIFY_TOKEN`. Setup: [Apify guide](apify.md)."),
+    ("gmail", "Gmail", "Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](../setup/gmail.md)."),
+    ("discord", "Discord", "Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [Discord guide](../setup/discord.md)."),
+    ("twitter", "X/Twitter", "Needs `APIFY_TOKEN`. Setup: [Apify guide](../setup/apify.md)."),
 ]
 
 
@@ -58,9 +58,9 @@ if __name__ == "__main__":
     if "--check" in sys.argv:
         current = TARGET.read_text(encoding="utf-8").replace("\r\n", "\n") if TARGET.exists() else ""
         if current != text:
-            print("docs/tools.md is out of date. Run: python scripts/gen_tools_doc.py")
+            print("docs/usage/tools.md is out of date. Run: python scripts/gen_tools_doc.py")
             sys.exit(1)
-        print("docs/tools.md is up to date")
+        print("docs/usage/tools.md is up to date")
     else:
         TARGET.write_text(text, encoding="utf-8", newline="\n")
         print(f"wrote {TARGET.relative_to(ROOT)} ({text.count(chr(10))} lines)")

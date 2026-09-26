@@ -19,7 +19,7 @@ You can expect an acknowledgement within a few days. Please give the maintainer 
 
 ## How the project protects itself
 
-- One secret guards the server: a key of at least 24 characters, checked in constant time. The dashboard uses a signed, HttpOnly, SameSite=Strict session cookie and a per-session CSRF token. See [docs/architecture.md](docs/architecture.md#security-model) and [docs/dashboard.md](docs/dashboard.md).
+- One secret guards the server: a key of at least 24 characters, checked in constant time. The dashboard uses a signed, HttpOnly, SameSite=Strict session cookie and a per-session CSRF token. See [docs/project/architecture.md](docs/project/architecture.md#security-model) and [docs/usage/dashboard.md](docs/usage/dashboard.md).
 - Tool arguments are validated against each tool's schema before any call, and IDs must match a strict pattern.
 - Every push and pull request runs a secret scan over the whole history and a guard (`scripts/check_claude_config.py`) that blocks hooks, wildcard permissions, hidden text, unapproved dependencies and risky workflows. Files that can execute code under `.claude/` and `.github/` are hash-pinned, so any change needs a maintainer to review it and re-pin.
 - `CODEOWNERS` routes security-sensitive paths to the maintainer.

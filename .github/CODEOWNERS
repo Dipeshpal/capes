@@ -1,5 +1,5 @@
 # Changes to anything that steers assistants, CI, deployment or authentication need the maintainer's review.
-# Enforced by .github/rulesets/protect-default-branch.json (see docs/governance.md).
+# Enforced by .github/rulesets/protect-default-branch.json (see docs/project/governance.md).
 
 *                          @Dipeshpal
 

@@ -127,7 +127,7 @@ async def load_policy(force: bool = False) -> Policy:
 
 async def save_policy(read_only: bool, disabled_tools: list, disabled_connectors: list) -> Policy:
     if not kv_config():
-        raise StoreUnavailable("Add Redis (see docs/dashboard.md) to change settings from the dashboard")
+        raise StoreUnavailable("Add Redis (see docs/usage/dashboard.md) to change settings from the dashboard")
     payload = {
         "read_only": bool(read_only),
         "disabled_tools": sorted(_clean_names(disabled_tools)),

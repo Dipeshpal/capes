@@ -8,7 +8,7 @@ Generated from the code by `python scripts/gen_tools_doc.py`. Do not edit by han
 
 ## Gmail
 
-Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](gmail.md).
+Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](../setup/gmail.md).
 
 | Tool | Kind | What it does | Arguments |
 |------|------|--------------|-----------|
@@ -32,7 +32,7 @@ Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](gmail.md).
 
 ## Discord
 
-Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [Discord guide](discord.md).
+Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [Discord guide](../setup/discord.md).
 
 | Tool | Kind | What it does | Arguments |
 |------|------|--------------|-----------|
@@ -83,7 +83,7 @@ Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [
 
 ## X/Twitter
 
-Needs `APIFY_TOKEN`. Setup: [Apify guide](apify.md).
+Needs `APIFY_TOKEN`. Setup: [Apify guide](../setup/apify.md).
 
 | Tool | Kind | What it does | Arguments |
 |------|------|--------------|-----------|

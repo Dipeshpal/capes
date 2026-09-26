@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
+Thanks for helping. By contributing you agree your work is released under the project's [MIT license](../../LICENSE). Anyone can contribute: fix a bug, improve a guide, add a tool, or build a whole new service. This page covers how to get started, the workflow, the standards, and how the `.claude/` folder makes it faster.
 
 Read [What Capes is for](architecture.md) first if you want the big picture. **Who can merge what, and why you cannot push to `main`, is in [Governance](governance.md).** In short: fork, open a pull request, and the maintainer reviews and merges it.
 
@@ -25,7 +25,7 @@ cp .env.example .env        # fill in only what you want to test; MCP_API_KEY mu
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
 
-The server listens on `http://127.0.0.1:8000`: the dashboard is at `/dashboard`, and `POST /mcp` takes `Authorization: Bearer <key>` (examples in [Usage](usage.md#calling-the-server-without-an-ai-client)). Most work needs no credentials at all because the tests fake the outside world.
+The server listens on `http://127.0.0.1:8000`: the dashboard is at `/dashboard`, and `POST /mcp` takes `Authorization: Bearer <key>` (examples in [Usage](../usage/usage.md#calling-the-server-without-an-ai-client)). Most work needs no credentials at all because the tests fake the outside world.
 
 ## Workflow
 
@@ -60,7 +60,7 @@ What they protect:
 - `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail.
 - `discord_offline.py`: the Discord tools against a fake Discord REST server that records every request, so the exact endpoint, method, payload, headers, multipart upload and retry behaviour of each write tool is checked without touching a real server.
 - `claude_config.py` and `check_claude_config.py`: the guard for assistant and CI configuration, and proof that each attack it exists for is blocked (see [below](#the-guard-for-assistant-and-ci-configuration)).
-- `gen_tools_doc.py --check`: [docs/tools.md](tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
+- `gen_tools_doc.py --check`: [docs/usage/tools.md](../usage/tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
 - `check_docs.py`: every relative link and `#anchor` in the docs resolves.
 - `ruff`: lint (including security rules) and formatting. `uvx ruff check . --fix && uvx ruff format .` fixes most findings.
 
@@ -99,17 +99,17 @@ If your change is legitimate, CI failing is expected: describe why in the pull r
 
 2. Choose the honest `hint`: `read` (no side effects), `write` (creates or changes things), `destructive` (deletes or is hard to undo).
 3. Write a description a language model can act on: what it does, what it needs, limits. Raise `ToolError("what to do next")` for expected failures.
-4. Add a test (offline if at all possible), then run `python scripts/gen_tools_doc.py` and add the tool name to the README tool list. `tests/protocol.py` fails if the README or docs/tools.md miss it.
+4. Add a test (offline if at all possible), then run `python scripts/gen_tools_doc.py` and add the tool name to the README tool list. `tests/protocol.py` fails if the README or docs/usage/tools.md miss it.
 
-The conventions are in [`CLAUDE.md`](../CLAUDE.md) and `.claude/rules/tools.md`.
+The conventions are in [`CLAUDE.md`](../../CLAUDE.md) and `.claude/rules/tools.md`.
 
 ## Add a service
 
 1. Create `pulse/<service>.py` with its `@tool` functions. Read credentials with `os.getenv` inside the function, not at import time. Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request.
 2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too). Register the service in `pulse/connectors.py` (name, tool prefix, environment variables, guide, and a read-only connection test) so it appears in the dashboard with a status and a **Test connection** button.
-3. Add the environment variables to `.env.example`, `docs/vercel.md` and the installer prompts in `scripts/capes.mjs`.
-4. Write `docs/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
-5. Add a row to the README services table and a line to `docs/troubleshooting.md`.
+3. Add the environment variables to `.env.example`, `docs/setup/vercel.md` and the installer prompts in `scripts/capes.mjs`.
+4. Write `docs/setup/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
+5. Add a row to the README services table and a line to `docs/usage/troubleshooting.md`.
 6. Add tests.
 
 With Claude Code, `/add-tool <service> <tool>` does the scaffolding and reminds you of every step.
@@ -126,11 +126,11 @@ With Claude Code, `/add-tool <service> <tool>` does the scaffolding and reminds 
 - Never commit credentials, keys, tokens, real IDs or message content. Use placeholders like `YOUR_API_KEY`.
 - Do not print secrets in logs, tool results or error messages.
 - Do not test destructive Discord tools on a real community server.
-- If you think you committed a secret, tell the maintainer at once. The fix is to rotate it and recreate the repository, not just to delete the line ([why](../CLAUDE.md#security-non-negotiable)).
+- If you think you committed a secret, tell the maintainer at once. The fix is to rotate it and recreate the repository, not just to delete the line ([why](../../CLAUDE.md#security-non-negotiable)).
 
 ## The `.claude/` folder
 
-The repo ships its Claude Code setup so every contributor's assistant starts with the same knowledge. [`CLAUDE.md`](../CLAUDE.md) is loaded automatically in every Claude Code session. The layout follows the [Claude Code directory guide](https://code.claude.com/docs/en/claude-directory).
+The repo ships its Claude Code setup so every contributor's assistant starts with the same knowledge. [`CLAUDE.md`](../../CLAUDE.md) is loaded automatically in every Claude Code session. The layout follows the [Claude Code directory guide](https://code.claude.com/docs/en/claude-directory).
 
 | Path | Purpose | Loaded |
 |------|---------|--------|
@@ -142,7 +142,7 @@ The repo ships its Claude Code setup so every contributor's assistant starts wit
 | `.claude/rules/dashboard.md` | Front-end and dashboard security rules | When you touch `dashboard/` or `pulse/dashboard.py`, `pulse/security.py`, `pulse/store.py` |
 | `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its guide |
 | `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its guide or its test |
-| `.claude/rules/github.md` | CI, ruleset and governance rules | When you touch `.github/`, `docs/governance.md` or `SECURITY.md` |
+| `.claude/rules/github.md` | CI, ruleset and governance rules | When you touch `.github/`, `docs/project/governance.md` or `SECURITY.md` |
 | `.claude/rules/installer.md` | Installer conventions | When you touch `scripts/` |
 | `.claude/rules/docs.md` | Documentation conventions | When you touch README, docs or CLAUDE.md |
 | `.claude/skills/add-tool/` | `/add-tool <service> <tool>`: scaffold a tool, tests and docs | When you run it |
@@ -166,6 +166,6 @@ Not using Claude Code? It is all plain Markdown: `CLAUDE.md` and `.claude/rules/
 
 - [ ] The checks above pass and CI is green.
 - [ ] New or changed tools have an honest `hint` and a test.
-- [ ] README tool list, `docs/tools.md`, `docs/<service>.md`, `.env.example` and installer prompts are updated where relevant.
+- [ ] README tool list, `docs/usage/tools.md`, `docs/setup/<service>.md`, `.env.example` and installer prompts are updated where relevant.
 - [ ] No secrets, tokens, real IDs or message content in the diff.
 - [ ] The description says what you could not test.

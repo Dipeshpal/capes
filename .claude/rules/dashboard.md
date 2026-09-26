@@ -31,5 +31,5 @@ The dashboard signs the owner in and can change what assistants may do, so it is
 
 ## Changing security-relevant behaviour
 - Add or update a test in `tests/dashboard.py` in the same change. A security fix without a test that fails without it is incomplete.
-- Update `docs/dashboard.md` and the security model in `docs/architecture.md` when a defence is added, changed or removed.
+- Update `docs/usage/dashboard.md` and the security model in `docs/project/architecture.md` when a defence is added, changed or removed.
 - These files are routed to the maintainer by `CODEOWNERS`. Say in the pull request what the change does to the threat model.

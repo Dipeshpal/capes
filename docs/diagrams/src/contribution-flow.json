@@ -1,0 +1,207 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "How a change reaches main",
+    "output": "contribution-flow.html",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "auto",
+      "entries": {
+        "frontend": {
+          "label": "Contributor step"
+        },
+        "security": {
+          "label": "Gate"
+        },
+        "backend": {
+          "label": "Merge"
+        },
+        "database": {
+          "label": "Protected branch"
+        },
+        "messagebus": {
+          "label": "Rework"
+        }
+      }
+    }
+  },
+  "lanes": [
+    {
+      "id": "contributor",
+      "label": "Contributor"
+    },
+    {
+      "id": "ci",
+      "label": "Automatic checks"
+    },
+    {
+      "id": "maintainer",
+      "label": "Maintainer"
+    }
+  ],
+  "phases": [
+    {
+      "id": "propose",
+      "label": "Propose",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "verify",
+      "label": "Verify",
+      "fromCol": 2,
+      "toCol": 3,
+      "variant": "emphasis"
+    },
+    {
+      "id": "land",
+      "label": "Land",
+      "fromCol": 4,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "fork",
+    "pr",
+    "checks",
+    "review",
+    "merge",
+    "main"
+  ],
+  "nodes": [
+    {
+      "id": "fork",
+      "lane": "contributor",
+      "col": 0,
+      "type": "frontend",
+      "label": "Fork or branch",
+      "sublabel": "feat/ fix/ docs/",
+      "width": 132
+    },
+    {
+      "id": "pr",
+      "lane": "contributor",
+      "col": 1,
+      "type": "frontend",
+      "label": "Open a PR",
+      "sublabel": "template + checklist",
+      "width": 132
+    },
+    {
+      "id": "checks",
+      "lane": "ci",
+      "col": 2,
+      "type": "security",
+      "label": "CI checks",
+      "sublabel": "lint, test, guard",
+      "tag": "all must pass",
+      "width": 132
+    },
+    {
+      "id": "review",
+      "lane": "maintainer",
+      "col": 3,
+      "type": "security",
+      "label": "Owner review",
+      "sublabel": "one approval",
+      "tag": "required",
+      "width": 132
+    },
+    {
+      "id": "merge",
+      "lane": "maintainer",
+      "col": 4,
+      "type": "backend",
+      "label": "Squash merge",
+      "sublabel": "linear history",
+      "width": 132
+    },
+    {
+      "id": "main",
+      "lane": "maintainer",
+      "col": 5,
+      "type": "database",
+      "label": "main",
+      "sublabel": "protected branch",
+      "width": 132
+    },
+    {
+      "id": "fix",
+      "lane": "contributor",
+      "col": 2,
+      "type": "messagebus",
+      "label": "Fix and push",
+      "sublabel": "checks run again",
+      "width": 132
+    }
+  ],
+  "edges": [
+    {
+      "id": "fork-to-pr",
+      "from": "fork",
+      "to": "pr"
+    },
+    {
+      "id": "pr-to-checks",
+      "from": "pr",
+      "to": "checks",
+      "variant": "emphasis"
+    },
+    {
+      "id": "checks-to-review",
+      "from": "checks",
+      "to": "review",
+      "label": "green",
+      "variant": "emphasis"
+    },
+    {
+      "id": "review-to-merge",
+      "from": "review",
+      "to": "merge",
+      "label": "approved"
+    },
+    {
+      "id": "merge-to-main",
+      "from": "merge",
+      "to": "main"
+    },
+    {
+      "id": "checks-to-fix",
+      "from": "checks",
+      "to": "fix",
+      "label": "red",
+      "variant": "security",
+      "role": "error",
+      "fromSide": "top",
+      "toSide": "bottom"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Everyone can propose",
+      "items": [
+        "Fork the repo and open a pull request",
+        "First-time contributors need a maintainer to approve the CI run"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Nothing skips the gates",
+      "items": [
+        "No direct pushes to main, for anyone",
+        "Checks and one code-owner approval are required"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Sensitive files pinned",
+      "items": [
+        "The guard hashes .claude, .github and scripts",
+        "A pull request cannot change its own guard"
+      ]
+    }
+  ]
+}

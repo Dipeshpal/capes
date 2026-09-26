@@ -9,41 +9,12 @@ Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by ea
 - `pulse/mcp.py`: JSON-RPC handler; validates arguments against each tool's schema (types, enum, `pattern`, length); enforces owner policy (disabled connectors/tools, read-only mode); logs activity.
 - `pulse/security.py`: key check, signed session cookies, CSRF, origin checks, security headers. `pulse/store.py`: settings (env + optional Redis), activity log, rate limiting. `pulse/connectors.py`: the 3 connectors and their connection tests. `pulse/dashboard.py` + `dashboard/`: dashboard API and its HTML/CSS/JS.
 - `pulse/discord.py`: Discord over REST only (no gateway). `pulse/gmail.py`: IMAP/SMTP with an app password. `pulse/twitter.py`: Apify.
-- `scripts/capes.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
+- `scripts/capes.mjs`: zero-dependency Node installer (`install`, `connect`). `scripts/gen_tools_doc.py`: regenerates `docs/usage/tools.md`. `scripts/check_claude_config.py`: guard for assistant/CI configuration.
 - `tests/`: `protocol.py`, `dashboard.py`, `gmail_offline.py` (fake IMAP), `discord_offline.py` (fake Discord REST server), `claude_config.py`, `check_docs.py`, `discord_e2e.py` (opt-in).
-- `.github/`: CI (`ci.yml`: jobs `lint`, `test`, `guard`), `CODEOWNERS`, issue/PR templates, Dependabot config, and `rulesets/protect-default-branch.json` (the branch rules; see `docs/governance.md`).
-- `docs/`: guides per service (`vercel`, `discord`, `gmail`, `apify`), `dashboard`, `clients`, `usage`, `architecture` (goals, security model, comparison), `troubleshooting`, `contributing`, `governance` (who can merge), `release-checklist`, generated `tools.md`, `assets/` (screenshots, `logo.png`, `social-preview.png`). The dashboard's own logo and favicons are in `dashboard/`.
-
-## Commands
-
-```bash
-# checks (no credentials needed; the same set runs in CI)
-uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
-uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
-uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
-uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_offline.py   # fake Discord server
-python tests/claude_config.py && python scripts/check_claude_config.py
-uv run --with aiohttp python scripts/gen_tools_doc.py --check   # run without --check after tool changes
-python tests/check_docs.py
-node --check scripts/capes.mjs && node --check dashboard/app.js
-uvx ruff check . && uvx ruff format --check .                   # add --fix / drop --check to fix
-
-# contributors only: run locally (needs .env from .env.example; MCP_API_KEY 24+ chars)
-uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
-# opt-in, needs a running server and a Discord test server (MODE=full only on a disposable one)
-GUILD=<test-server-id> MODE=read python tests/discord_e2e.py
-
-# deploy (Vercel CLI, project already linked)
-vercel deploy --prod
-printf '%s' 'VALUE' | vercel env add NAME production
-```
-
-Env vars: `MCP_API_KEY` (required); `DISCORD_BOT_TOKEN`, `APIFY_TOKEN`, `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` (optional, a tool without its token returns a clear `ToolError`); `KV_REST_API_URL`/`KV_REST_API_TOKEN` (optional Redis for dashboard settings); `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS`, `PULSE_DISABLED_TOOLS` (always-on restrictions).
-
-## Git and GitHub workflow
-
+- `.github/`: CI (`ci.yml`: jobs `lint`, `test`, `guard`), `CODEOWNERS`, issue/PR templates, Dependabot config, and `rulesets/protect-default-branch.json` (the branch rules; see `docs/project/governance.md`).
+- `docs/`: `README.md` is the index. `setup/` (`vercel`, `discord`, `gmail`, `apify`, `clients`), `usage/` (`usage`, `dashboard`, `troubleshooting`, and the generated `tools.md`), `project/` (`architecture` with goals, security model and comparison, `contributing`, `governance`, `release-checklist`), `diagrams/` (Archify sources in `src/`, delivered `.html`, and the `.png` the docs embed), `assets/` (logo, social preview, screenshots). The dashboard's own logo and favicons are in `dashboard/`.
 - The default branch is `main` and it is protected by a repository ruleset (`.github/rulesets/protect-default-branch.json`): **direct pushes are rejected**. Work on a branch (`feat/`, `fix/`, `docs/`), push it, open a PR with `gh pr create`, wait for `lint`, `test` and `guard`, then the owner merges: `gh pr merge N --squash --admin --delete-branch` (the owner bypass works only through a PR). Squash merge only, linear history.
-- Outside contributors fork and open PRs; only a code owner (`.github/CODEOWNERS`) approves and merges. Their first workflow run needs the maintainer's approval. Never use `pull_request_target`, and keep the workflow token read-only. See `docs/governance.md`.
+- Outside contributors fork and open PRs; only a code owner (`.github/CODEOWNERS`) approves and merges. Their first workflow run needs the maintainer's approval. Never use `pull_request_target`, and keep the workflow token read-only. See `docs/project/governance.md`.
 - Before `git add -A`, run `git status --short` and `git ls-files -o --exclude-standard`. A rename once made `.pulse.local.json` (a key file) stop matching `.gitignore`, so it got committed locally; it was caught before pushing and purged. When you rename an ignored file, update `.gitignore` in the same step and check.
 - The `gh` token needs the `workflow` scope to push changes under `.github/workflows/` (`gh auth refresh -h github.com -s workflow`, then approve in the browser).
 - Rulesets and branch protection need a public repo or a paid plan (a private free repo returns 403). Right after a visibility change GitHub briefly returns "Repository has been locked"; wait and retry.
@@ -62,14 +33,14 @@ The project brand is **Capes** (repo `Dipeshpal/capes`, Vercel project `capes-mc
 - Constrain every argument that reaches a URL, IMAP command or header in its schema: Discord IDs use `sid()` (snowflake `pattern`), closed sets use `enum`, free text gets `maxLength`. Validation is central in `pulse/mcp.py`.
 - IDs (Discord snowflakes) are strings in tool schemas, never integers.
 - Tool results are compact JSON dicts/lists with only useful fields, not raw upstream payloads.
-- Keep `README.md`, `docs/`, `.env.example` in sync with code. `tests/protocol.py` enforces tool list, tool count, permission integer, env vars and `docs/tools.md`.
+- Keep `README.md`, `docs/`, `.env.example` in sync with code. `tests/protocol.py` enforces tool list, tool count, permission integer, env vars and `docs/usage/tools.md`.
 - Code is formatted and linted with ruff (`ruff.toml`). Commit messages: imperative subject, short body explaining why.
 
 ## Gotchas that cost time before
 
 - `vercel.json` may contain only `functions`. A `rewrites` entry breaks `/mcp` (the FastAPI preset already routes everything), and CI blocks it.
 - Vercel function limit is 60 s (`maxDuration`); keep upstream calls under it (Apify sync run uses a 45 s timeout).
-- Discord bots cannot create servers (API error 20001) and can only edit their own messages. Abilities come from the invite permissions and role, not the token. The permission integer in `docs/discord.md` and `scripts/capes.mjs` must match `tests/protocol.py`.
+- Discord bots cannot create servers (API error 20001) and can only edit their own messages. Abilities come from the invite permissions and role, not the token. The permission integer in `docs/setup/discord.md` and `scripts/capes.mjs` must match `tests/protocol.py`.
 - Gmail ids are IMAP UIDs in All Mail. Trash and Spam are not in All Mail. Drafts carry the `\Draft` label there, not the IMAP flag. Search uses `X-GM-RAW` as an IMAP literal. `imaplib` does not quote mailbox names: use `quote()`, which rejects control characters.
 - The dashboard CSP forbids inline scripts and styles. Never use `innerHTML`; the `h()` helper inserts text only.
 - Settings are cached for 10 s per instance. If Redis is configured but down, use the last known settings, else fail closed (read-only).

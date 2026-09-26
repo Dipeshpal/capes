@@ -16,11 +16,14 @@ Capes is open to everyone, but only the maintainer decides what goes into the de
 | **Contributor** | Anyone with a GitHub account | Fork, open issues, open pull requests from their fork, comment on and review pull requests. Cannot push to this repo. |
 | **Triager** (GitHub "Triage") | Trusted regulars, invited by the maintainer | Label and close issues, request reviews, manage pull request state. Cannot push code. |
 | **Collaborator** (GitHub "Write") | Invited after several good merged contributions | Create branches in this repo and open pull requests from them. Still cannot push to or merge into `main`. |
-| **Maintainer / code owner** | [@Dipeshpal](https://github.com/Dipeshpal) | Approves and merges pull requests, changes settings, publishes releases. Listed in [`.github/CODEOWNERS`](../.github/CODEOWNERS). |
+| **Maintainer / code owner** | [@Dipeshpal](https://github.com/Dipeshpal) | Approves and merges pull requests, changes settings, publishes releases. Listed in [`.github/CODEOWNERS`](../../.github/CODEOWNERS). |
 
 To become a triager or collaborator, contribute a few useful pull requests and ask in an issue. More maintainers can be added to `CODEOWNERS` later; two maintainers is the healthy target.
 
 ## What every pull request must pass
+
+![How a change reaches main: fork or branch, open a pull request, CI checks, code-owner review, squash merge into main; red checks send the change back for a fix](../diagrams/contribution-flow.png)
+
 
 1. **All CI checks are green:** `lint`, `test` and `guard` (see [Contributing](contributing.md#checks)).
 2. **The branch is up to date** with `main` before it merges.
@@ -38,7 +41,7 @@ Changes to anything that steers assistants, CI, deployment or authentication (`.
 
 ## How the rules are enforced
 
-The rules live in [`.github/rulesets/protect-default-branch.json`](../.github/rulesets/protect-default-branch.json) and are applied to GitHub as a **repository ruleset**. They block deleting `main`, force pushes, merge commits and any merge without an approved review and green checks.
+The rules live in [`.github/rulesets/protect-default-branch.json`](../../.github/rulesets/protect-default-branch.json) and are applied to GitHub as a **repository ruleset**. They block deleting `main`, force pushes, merge commits and any merge without an approved review and green checks.
 
 The repository owner has one exception: they can merge their own pull requests without a second reviewer (there is only one maintainer), but only **through a pull request**, never by pushing straight to `main`. Add a second maintainer to `CODEOWNERS` and remove the bypass in the ruleset to require two people.
 
@@ -58,7 +61,7 @@ Then in **Settings** switch on:
 | Workflow token permissions | Actions > General > Workflow permissions | **Read repository contents** only; leave "Allow GitHub Actions to create and approve pull requests" **off** |
 | Merge methods | General > Pull Requests | **Squash merging** only; **Automatically delete head branches** on |
 | Secret scanning and push protection | Code security | On |
-| Private vulnerability reporting | Code security | On (so [SECURITY.md](../SECURITY.md) works) |
+| Private vulnerability reporting | Code security | On (so [SECURITY.md](../../SECURITY.md) works) |
 | Dependabot alerts and security updates | Code security | On |
 | Default branch | General | `main` |
 

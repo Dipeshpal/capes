@@ -12,7 +12,7 @@ API = "https://api.example.invalid/v1"
 async def call(method: str, path: str, **kwargs):
     token = os.getenv("SERVICE_TOKEN")
     if not token:
-        raise ToolError("SERVICE_TOKEN is not set on the server (see docs/<service>.md)")
+        raise ToolError("SERVICE_TOKEN is not set on the server (see docs/setup/<service>.md)")
     async with aiohttp.ClientSession() as session:
         async with session.request(
             method, f"{API}{path}", headers={"Authorization": f"Bearer {token}"}, timeout=aiohttp.ClientTimeout(total=20), **kwargs

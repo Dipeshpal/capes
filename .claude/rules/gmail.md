@@ -1,7 +1,7 @@
 ---
 paths:
   - "pulse/gmail.py"
-  - "docs/gmail.md"
+  - "docs/setup/gmail.md"
   - "tests/gmail_offline.py"
 ---
 
