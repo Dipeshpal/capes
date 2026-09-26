@@ -1,6 +1,6 @@
 # Using Capes
 
-Once your server is deployed and your AI client is connected ([setup steps](../../README.md#set-up-in-5-steps)), you just talk to your assistant. It picks the right tools. This page shows what to ask, how to stay safe, and how to test without an AI client.
+Once your server is deployed and your AI client is connected ([setup steps](../../README.md#-quick-start)), you just talk to your assistant. It picks the right tools. This page shows what to ask, how to stay safe, and how to test without an AI client.
 
 The exact tools and arguments are in the [tool reference](tools.md).
 
