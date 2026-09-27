@@ -138,7 +138,7 @@ async def state(request: Request):
     tools = [_tool_view(n, policy) for n in sorted(TOOLS)]
     cons = []
     for c in connectors.CONNECTORS:
-        info = connectors.describe(c)
+        info = await connectors.describe(c)
         info["enabled"] = c.id not in policy.disabled_connectors
         info["locked"] = c.id in policy.locked_connectors
         cons.append(info)

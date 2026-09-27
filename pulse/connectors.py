@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import aiohttp
 
+from . import creds
 from .registry import TOOLS, ToolError, kind
 from .security import redact
 
@@ -20,11 +21,18 @@ class Connector:
     env: tuple
     guide: str
     summary: str
+    db_backed: bool = True  # can its credentials also live encrypted in the database, not just env vars?
 
 
 CONNECTORS = (
     Connector(
-        "gmail", "Gmail", "gmail_", ("GMAIL_ADDRESS", "GMAIL_APP_PASSWORD"), "docs/setup/gmail.md", "Search, read, send, reply, forward, drafts, labels, trash."
+        "gmail",
+        "Gmail",
+        "gmail_",
+        ("GMAIL_ADDRESS", "GMAIL_APP_PASSWORD"),
+        "docs/setup/gmail.md",
+        "Search, read, send, reply, forward, drafts, labels, trash.",
+        db_backed=False,  # still env-only; OAuth + DB-backed storage is tracked in issue #36
     ),
     Connector(
         "discord", "Discord", "discord_", ("DISCORD_BOT_TOKEN",), "docs/setup/discord.md", "Read and manage servers, channels, threads, roles and messages."
@@ -39,19 +47,23 @@ def connector_of(tool_name: str) -> Connector | None:
     return next((c for c in CONNECTORS if tool_name.startswith(c.prefix)), None)
 
 
-def missing_env(c: Connector) -> list[str]:
-    return [name for name in c.env if not os.getenv(name)]
+async def missing_env(c: Connector) -> list[str]:
+    if not c.db_backed:
+        return [name for name in c.env if not os.getenv(name)]
+    return [name for name in c.env if not await creds.get(name)]
 
 
-def describe(c: Connector) -> dict:
+async def describe(c: Connector) -> dict:
     tools = sorted(n for n in TOOLS if n.startswith(c.prefix))
+    missing = await missing_env(c)
     return {
         "id": c.id,
         "name": c.name,
         "summary": c.summary,
         "env": list(c.env),
-        "missing_env": missing_env(c),
-        "configured": not missing_env(c),
+        "missing_env": missing,
+        "configured": not missing,
+        "db_backed": c.db_backed,
         "guide": f"{REPO_URL}/blob/main/{c.guide}",
         "tools": tools,
         "kinds": {k: sum(1 for n in tools if kind(TOOLS[n]["spec"]) == k) for k in ("read", "write", "destructive")},
@@ -63,8 +75,9 @@ async def test_connection(connector_id: str) -> dict:
     c = BY_ID.get(connector_id)
     if not c:
         return {"ok": False, "detail": "Unknown connector"}
-    if missing_env(c):
-        return {"ok": False, "detail": "Missing environment variable(s): " + ", ".join(missing_env(c))}
+    missing = await missing_env(c)
+    if missing:
+        return {"ok": False, "detail": "Missing environment variable(s): " + ", ".join(missing)}
     try:
         if c.id == "gmail":
             from . import gmail

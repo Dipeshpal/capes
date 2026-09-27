@@ -6,7 +6,6 @@ What the bot can do is decided by Discord, not by this code: see "Discord permis
 import asyncio
 import base64
 import json
-import os
 import re
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -14,6 +13,7 @@ from urllib.parse import quote
 
 import aiohttp
 
+from . import creds
 from .registry import ToolError, tool
 
 API = "https://discord.com/api/v10"
@@ -110,7 +110,7 @@ _bot_id: str | None = None
 
 async def call(method: str, path: str, *, json_body: Any = None, params: dict | None = None, reason: str | None = None, data_factory=None) -> Any:
     """One Discord REST call. `data_factory` builds a fresh multipart body per attempt (a form can only be sent once)."""
-    token = os.getenv("DISCORD_BOT_TOKEN")
+    token = await creds.get("DISCORD_BOT_TOKEN")
     if not token:
         raise ToolError("DISCORD_BOT_TOKEN is not set on the server")
     if not SAFE_PATH.fullmatch(path) or ".." in path:
