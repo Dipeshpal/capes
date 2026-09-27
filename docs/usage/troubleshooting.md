@@ -20,8 +20,11 @@ Find your symptom, apply the fix, retry. Service-specific problems also have a t
 |---------|-----|
 | "That key is not correct" | Use the current value of `MCP_API_KEY` from Vercel; check for stray spaces. |
 | "Too many attempts" | Sign-in is blocked for 15 minutes after 10 wrong tries. |
-| Server error mentioning "at least 24 characters" | Your `MCP_API_KEY` is too short. Set a longer one ([how](../setup/vercel.md#2-create-your-mcp_api_key)) and redeploy. |
-| Switches are greyed out | Normal without Redis (no database is needed): set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel and redeploy ([details](dashboard.md#switches-read-only-mode-and-where-settings-are-stored)). |
+| Server error mentioning "at least 24 characters" | Your `MCP_API_KEY` is too short. Set a longer one ([how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)) and redeploy. |
+| `500 ENCRYPTION_KEY is not set on the server` | `DATABASE_URL` is set but `ENCRYPTION_KEY` is not. Add it (a *different* long random string from `MCP_API_KEY`, [how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)) and redeploy. |
+| "Add DATABASE_URL to..." on API keys or connector credentials | Those features need a Postgres database. Add `DATABASE_URL` and `ENCRYPTION_KEY` ([Vercel setup](../setup/vercel.md#3-get-a-database-database_url)) and redeploy; everything else keeps working without it. |
+| Settings/Connectors tab says the database is "configured but not reachable" | `DATABASE_URL` is set but the connection failed (wrong password, DB paused, network issue). Check the connection string on Vercel; `MCP_API_KEY` and everything env-var-based still works. |
+| Switches are greyed out | Normal without Redis (a separate, optional integration from `DATABASE_URL`): set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel and redeploy ([details](dashboard.md#switches-read-only-mode-and-where-settings-are-stored)). |
 | Banner says settings storage is unreachable | The server is using the last known settings, or read-only mode if none. Check the Redis integration in Vercel **Storage**. |
 | A client still sees a tool you switched off | Wait about 10 seconds and restart the client. |
 | Signed out again | Sessions last 8 hours by default (`PULSE_SESSION_HOURS`). Sign in again; the key does not need rotating. |
