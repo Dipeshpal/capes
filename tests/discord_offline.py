@@ -79,6 +79,15 @@ def respond(method: str, path: str, query: dict, body):
     if "770000000000000001" in path:
         return 502, None  # not JSON
     routes = [
+        ("GET", r"/guilds/600000000000000001/emojis", lambda: []),
+        (
+            "GET",
+            r"/guilds/\d+/emojis",
+            lambda: [
+                {"id": "500000000000000001", "name": "wave", "animated": True, "user": {"username": "private"}},
+                {"id": "500000000000000002", "name": "hello"},
+            ],
+        ),
         ("GET", r"/guilds/600000000000000001/scheduled-events", lambda: []),
         (
             "GET",
@@ -191,6 +200,26 @@ def tool(tool_name, /, **args):
 
 
 G, C, M, U, R = "200000000000000001", "100000000000000001", "300000000000000001", "900000000000000001", "500000000000000001"
+
+ok, r, reqs = tool("discord_list_emojis", guild_id=G)
+check(
+    "emojis return only compact reaction fields",
+    ok
+    and r
+    == [
+        {"id": R, "name": "wave", "animated": True, "reaction": f"wave:{R}"},
+        {"id": "500000000000000002", "name": "hello", "animated": False, "reaction": "hello:500000000000000002"},
+    ],
+)
+check(
+    "emoji listing makes exactly one GET with no payload",
+    len(reqs) == 1 and reqs[0]["method"] == "GET" and reqs[0]["path"] == f"/guilds/{G}/emojis" and reqs[0]["json"] is None and reqs[0]["query"] == {},
+)
+ok, r, reqs = tool("discord_list_emojis", guild_id="600000000000000001")
+check("empty emoji list", ok and r == [])
+for arguments in ({}, {"guild_id": "../bad"}, {"guild_id": True}):
+    ok, r, reqs = tool("discord_list_emojis", **arguments)
+    check("invalid emoji guild ID makes no request", not ok and not reqs)
 
 ok, r, reqs = tool("discord_list_scheduled_events", guild_id=G)
 check(

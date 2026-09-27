@@ -6,7 +6,7 @@
 
 ### Give Claude, Codex, Cursor and any MCP client hands: your Gmail, Discord and X, through one private server you own.
 
-[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-63-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
+[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-64-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
@@ -27,7 +27,7 @@
     <td align="right"><b>⚙️ Reference</b></td>
     <td align="center"><a href="#-services-and-credentials">Services</a></td>
     <td align="center"><a href="#-the-dashboard">Dashboard</a></td>
-    <td align="center"><a href="#-tools">All 63 tools</a></td>
+    <td align="center"><a href="#-tools">All 64 tools</a></td>
   </tr>
   <tr>
     <td align="right"><b>💬 Community</b></td>
@@ -64,7 +64,7 @@ AI assistants read, summarise and act well, but your real work lives in accounts
 | | What it does |
 |---|---|
 | 📧 **Gmail** (17 tools) | Search with Gmail syntax, read, send, reply, forward, drafts, labels, archive, trash. No Google Cloud project, just an app password. |
-| 💬 **Discord** (45 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
+| 💬 **Discord** (46 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
 | 🐦 **X / Twitter** (1 tool) | Search tweets through an Apify scraper. |
 | 🖥️ **Dashboard** | Test each service's credentials, browse and try the tools, watch recent activity, copy ready-made client config. |
 | 🛡️ **Limits you control** | Turn a service or a single tool off, or make the whole server read-only. Tools are labelled read, write or destructive. |
@@ -230,7 +230,7 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 ## 🧰 Tools
 
-63 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
+64 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
 
 <details>
 <summary><b>📧 Gmail (17)</b></summary>
@@ -240,9 +240,9 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 </details>
 
 <details>
-<summary><b>💬 Discord (45)</b></summary>
+<summary><b>💬 Discord (46)</b></summary>
 
-**Read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_scheduled_events`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
+**Read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_emojis`, `discord_list_scheduled_events`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
 
 **Messages**: `discord_send_message` (text, embeds, replies), `discord_send_dm`, `discord_send_file` (base64 upload), `discord_create_poll`, `discord_edit_message`, `discord_delete_message`, `discord_bulk_delete_messages`, `discord_pin_message`, `discord_add_reaction`, `discord_remove_reaction`
 
@@ -272,7 +272,7 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 ## 🏁 What's built
 
-- [x] **63 tools across three services:** Gmail (17), Discord (45) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
+- [x] **64 tools across three services:** Gmail (17), Discord (46) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
 - [x] **Owner dashboard:** sign in with your key, test each connector, browse the tools, try read-only ones, watch activity, copy client config, and generate your Discord invite link in one click.
 - [x] **One-click deploy to your own Vercel** (Deploy button or one installer command), no database needed.
 - [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).
