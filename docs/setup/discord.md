@@ -111,3 +111,5 @@ These are Discord's rules, not limits of this project:
 | Empty message text | Turn on Message Content Intent (step 2). |
 | `discord_list_members` fails | Turn on Server Members Intent (step 2). |
 | `401 Unauthorized` from Discord | The token is wrong or was reset. Copy the new one. |
+
+Use `discord_list_emojis` with a server ID to find its custom emoji names and IDs. The returned `reaction` value can be passed to `discord_add_reaction`; listing does not add a reaction.
