@@ -239,21 +239,21 @@ check("every Discord *_id is a string with a snowflake pattern", not loose_ids, 
 weak = os.environ["MCP_API_KEY"]
 for header, code in ((None, 401), ("Bearer wrong", 403), ("wrong", 401), ("Basic abc", 401), ("Bearer", 401), (KEY, 401)):
     try:
-        verify_api_key(header)
+        run(verify_api_key(header))
         check(f"auth rejects {header!r}", False)
     except HTTPException as e:
         check(f"auth rejects {header!r}", e.status_code == code, e.status_code)
-check("auth accepts Bearer key", verify_api_key(f"Bearer {KEY}") is None)
-check("auth scheme is case-insensitive", verify_api_key(f"bearer {KEY}") is None)
+check("auth accepts Bearer key", run(verify_api_key(f"Bearer {KEY}")) is None)
+check("auth scheme is case-insensitive", run(verify_api_key(f"bearer {KEY}")) is None)
 os.environ["MCP_API_KEY"] = "short-key"
 try:
-    verify_api_key("Bearer short-key")
+    run(verify_api_key("Bearer short-key"))
     check("weak key refused", False)
 except HTTPException as e:
     check("weak key refused", e.status_code == 500 and "at least" in e.detail, e.detail)
 os.environ.pop("MCP_API_KEY")
 try:
-    verify_api_key("Bearer x")
+    run(verify_api_key("Bearer x"))
     check("auth fails closed without server key", False)
 except HTTPException as e:
     check("auth fails closed without server key", e.status_code == 500)

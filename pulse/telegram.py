@@ -5,11 +5,11 @@ there is no alternative. redact() in security.py strips the token from any text 
 reaches a client or a log, and _TOKEN_IN_URL below does the same for the URL itself.
 """
 
-import os
 import re
 
 import aiohttp
 
+from . import creds
 from .registry import ToolError, tool
 
 API = "https://api.telegram.org"
@@ -27,7 +27,7 @@ def redact_url(text: str) -> str:
 
 
 async def call(method: str, params: dict) -> dict:
-    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    token = await creds.get("TELEGRAM_BOT_TOKEN")
     if not token:
         raise ToolError("TELEGRAM_BOT_TOKEN is not set on the server")
     url = f"{API}/bot{token}/{method}"

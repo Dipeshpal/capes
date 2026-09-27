@@ -10,6 +10,7 @@ import secrets
 import time
 from urllib.parse import urlparse
 
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import HTTPException, Request
 
 MIN_KEY_LENGTH = 24
@@ -35,11 +36,9 @@ CSP = (
 
 
 def api_key() -> str:
-    """The server secret. Refuses to run with a missing or weak key."""
+    """The legacy single-key secret. Refuses to run with a weak key; empty means 'no legacy key configured'."""
     key = os.getenv("MCP_API_KEY", "")
-    if not key:
-        raise HTTPException(500, "MCP_API_KEY is not set on the server")
-    if len(key) < MIN_KEY_LENGTH:
+    if key and len(key) < MIN_KEY_LENGTH:
         raise HTTPException(
             500,
             f"MCP_API_KEY must be at least {MIN_KEY_LENGTH} characters. Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('base64url'))\"",
@@ -47,19 +46,64 @@ def api_key() -> str:
     return key
 
 
-def verify_bearer(authorization: str | None) -> None:
-    """Check `Authorization: Bearer <MCP_API_KEY>` for the /mcp endpoint."""
-    expected = api_key()
+def hash_key(key: str) -> str:
+    return hashlib.sha256(key.encode()).hexdigest()
+
+
+async def _db_key_valid(supplied: str) -> bool:
+    from . import db
+
+    if not db.configured():
+        return False
+    try:
+        row = await db.fetchrow(
+            "select 1 from api_keys where key_hash = $1 and revoked_at is null and (expires_at is null or expires_at > now())",
+            hash_key(supplied),
+        )
+    except db.DatabaseUnavailable:
+        return False
+    return row is not None
+
+
+async def verify_bearer(authorization: str | None) -> None:
+    """Check `Authorization: Bearer <key>` for the /mcp endpoint.
+
+    Accepts either the legacy MCP_API_KEY env var (single key, no DB needed) or any non-revoked, non-expired key
+    issued from the dashboard's Settings page (stored hashed in the database). Either path alone is enough.
+    """
     if not authorization:
         raise HTTPException(401, "Missing Authorization header")
     scheme, _, supplied = authorization.partition(" ")
+    supplied = supplied.strip()
     if scheme.lower() != "bearer" or not supplied:
-        raise HTTPException(401, "Use the header: Authorization: Bearer <MCP_API_KEY>")
-    if not secrets.compare_digest(supplied.strip().encode(), expected.encode()):
-        raise HTTPException(403, "Invalid API key")
+        raise HTTPException(401, "Use the header: Authorization: Bearer <key>")
+    legacy = api_key()
+    if legacy and secrets.compare_digest(supplied.encode(), legacy.encode()):
+        return
+    if await _db_key_valid(supplied):
+        return
+    if not legacy and not db_configured():
+        raise HTTPException(500, "No MCP_API_KEY set and no database configured; see docs/setup/vercel.md")
+    raise HTTPException(403, "Invalid API key")
 
 
-SECRET_ENV = ("MCP_API_KEY", "DISCORD_BOT_TOKEN", "APIFY_TOKEN", "GMAIL_APP_PASSWORD", "TELEGRAM_BOT_TOKEN", "KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN")
+def db_configured() -> bool:
+    from . import db
+
+    return db.configured()
+
+
+SECRET_ENV = (
+    "MCP_API_KEY",
+    "DISCORD_BOT_TOKEN",
+    "APIFY_TOKEN",
+    "GMAIL_APP_PASSWORD",
+    "TELEGRAM_BOT_TOKEN",
+    "KV_REST_API_TOKEN",
+    "UPSTASH_REDIS_REST_TOKEN",
+    "ENCRYPTION_KEY",
+    "DATABASE_URL",
+)
 _WEBHOOK_TOKEN_IN_URL = re.compile(r"(/webhooks/\d+/)[A-Za-z0-9_\-.]+")
 
 
@@ -78,11 +122,34 @@ def redact(text: str) -> str:
 
 
 def key_matches(supplied: str) -> bool:
-    return secrets.compare_digest(supplied.encode(), api_key().encode())
+    legacy = api_key()
+    return bool(legacy) and secrets.compare_digest(supplied.encode(), legacy.encode())
 
 
 # ---------------------------------------------------------------------------
-# Sessions and CSRF (stateless, signed with a key derived from MCP_API_KEY)
+# Encryption for connector credentials stored in the database (AES-256-GCM, key from ENCRYPTION_KEY)
+# ---------------------------------------------------------------------------
+
+
+def _encryption_key() -> bytes:
+    key = os.getenv("ENCRYPTION_KEY", "")
+    if not key:
+        raise HTTPException(500, "ENCRYPTION_KEY is not set on the server; required to store credentials in the database")
+    return hashlib.sha256(key.encode()).digest()
+
+
+def encrypt(plaintext: str) -> tuple[bytes, bytes]:
+    """Returns (ciphertext, nonce). Raises if ENCRYPTION_KEY is not set."""
+    nonce = secrets.token_bytes(12)
+    return AESGCM(_encryption_key()).encrypt(nonce, plaintext.encode(), None), nonce
+
+
+def decrypt(ciphertext: bytes, nonce: bytes) -> str:
+    return AESGCM(_encryption_key()).decrypt(nonce, ciphertext, None).decode()
+
+
+# ---------------------------------------------------------------------------
+# Sessions and CSRF (stateless, signed with a key derived from MCP_API_KEY, or ENCRYPTION_KEY for DB-only deploys)
 # ---------------------------------------------------------------------------
 
 
@@ -95,7 +162,10 @@ def _unb64(text: str) -> bytes:
 
 
 def _signing_key() -> bytes:
-    return hmac.new(api_key().encode(), b"pulse-dashboard-session-v1", hashlib.sha256).digest()
+    secret = api_key() or os.getenv("ENCRYPTION_KEY", "")
+    if not secret:
+        raise HTTPException(500, "Set MCP_API_KEY or ENCRYPTION_KEY on the server before signing in")
+    return hmac.new(secret.encode(), b"pulse-dashboard-session-v1", hashlib.sha256).digest()
 
 
 def make_session(now: float | None = None) -> str:

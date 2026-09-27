@@ -91,6 +91,8 @@ Set these under **Project > Settings > Environment Variables** (Production), or 
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) |
 | `TELEGRAM_BOT_TOKEN` | For Telegram | [Telegram guide](telegram.md) |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | For dashboard switches | Set by `vercel integration add upstash` (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` also work) |
+| `DATABASE_URL` | No | Any Postgres connection string (Supabase, Neon, etc). Lets connector tokens and extra MCP API keys live in the database instead of env vars, managed from the dashboard. See issue #36. |
+| `ENCRYPTION_KEY` | Only if `DATABASE_URL` is set | Generate it the same way as `MCP_API_KEY` (step 2). Encrypts anything stored in the database; losing it makes stored credentials unrecoverable. |
 | `PULSE_SESSION_HOURS` | No | How long a dashboard sign-in lasts, 1 to 168 hours (default 8). Then you sign in again with your key. |
 | `PULSE_READ_ONLY` | No | `1` hides every tool that changes anything. Cannot be undone from the dashboard. |
 | `PULSE_DISABLED_CONNECTORS` | No | Comma list, for example `discord,apify`. Always applies. |

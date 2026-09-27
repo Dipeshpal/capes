@@ -4,6 +4,7 @@ import os
 
 import aiohttp
 
+from . import creds
 from .registry import ToolError, tool
 
 ACTOR = os.getenv("APIFY_TWEET_ACTOR", "apidojo~tweet-scraper")
@@ -19,7 +20,7 @@ ACTOR = os.getenv("APIFY_TWEET_ACTOR", "apidojo~tweet-scraper")
     ["query"],
 )
 async def twitter_search(args: dict):
-    token = os.getenv("APIFY_TOKEN")
+    token = await creds.get("APIFY_TOKEN")
     if not token:
         raise ToolError("APIFY_TOKEN is not set on the server")
     limit = max(1, min(int(args.get("limit", 50)), 500))

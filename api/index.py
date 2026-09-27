@@ -45,13 +45,13 @@ async def harden(request: Request, call_next):
     return response
 
 
-def verify_api_key(authorization: str | None) -> None:
-    security.verify_bearer(authorization)
+async def verify_api_key(authorization: str | None) -> None:
+    await security.verify_bearer(authorization)
 
 
 @app.post("/mcp")
 async def mcp(request: Request, authorization: str | None = Header(None)):
-    verify_api_key(authorization)
+    await verify_api_key(authorization)
     if security.content_length(request) > MAX_BODY:
         raise HTTPException(413, "Request too large")
     try:
