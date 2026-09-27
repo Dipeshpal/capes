@@ -18,12 +18,14 @@ Find your symptom, apply the fix, retry. Service-specific problems also have a t
 
 | Symptom | Fix |
 |---------|-----|
-| "That key is not correct" | Use the current value of `MCP_API_KEY` from Vercel; check for stray spaces. |
+| "That key is not correct" | Use the current value of `MCP_API_KEY` from Vercel; check for stray spaces. Doesn't apply if `DASHBOARD_USER`/`DASHBOARD_PASSWORD` are set -- see the next row. |
+| "That username or password is not correct" | You have `DASHBOARD_USER`/`DASHBOARD_PASSWORD` set, so the dashboard login is no longer `MCP_API_KEY`. Use the current values from Vercel. |
 | "Too many attempts" | Sign-in is blocked for 15 minutes after 10 wrong tries. |
 | Server error mentioning "at least 24 characters" | Your `MCP_API_KEY` is too short. Set a longer one ([how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)) and redeploy. |
+| Server error mentioning "at least 8 characters" | Your `DASHBOARD_PASSWORD` is too short. Set a longer one and redeploy. |
 | `500 ENCRYPTION_KEY is not set on the server` | `DATABASE_URL` is set but `ENCRYPTION_KEY` is not. Add it (a *different* long random string from `MCP_API_KEY`, [how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)) and redeploy. |
 | "Add DATABASE_URL to..." on API keys or connector credentials | Those features need a Postgres database. Add `DATABASE_URL` and `ENCRYPTION_KEY` ([Vercel setup](../setup/vercel.md#3-get-a-database-database_url)) and redeploy; everything else keeps working without it. |
-| Settings/Connectors tab says the database is "configured but not reachable" | `DATABASE_URL` is set but the connection failed (wrong password, DB paused, network issue). Check the connection string on Vercel; `MCP_API_KEY` and everything env-var-based still works. |
+| Settings/Connectors tab says the database is "configured but not reachable" | `DATABASE_URL` is set but the connection failed. If it's a Supabase **Direct connection** URL (host `db.<ref>.supabase.co`), that's IPv6-only and unreachable from Vercel -- switch to the **Session pooler** URL instead ([details](../setup/vercel.md#3-get-a-database-database_url)). Otherwise check the password and that the database isn't paused. `MCP_API_KEY` and everything env-var-based still works either way. |
 | Switches are greyed out | Normal without Redis (a separate, optional integration from `DATABASE_URL`): set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel and redeploy ([details](dashboard.md#switches-read-only-mode-and-where-settings-are-stored)). |
 | Banner says settings storage is unreachable | The server is using the last known settings, or read-only mode if none. Check the Redis integration in Vercel **Storage**. |
 | A client still sees a tool you switched off | Wait about 10 seconds and restart the client. |

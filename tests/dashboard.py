@@ -145,7 +145,7 @@ def mut(c, method, path, body=None, token=True, **headers):
 c = fresh_client()
 check("state needs a session", c.get("/dashboard/api/state").status_code == 401)
 check("discord invite needs a session", c.get("/dashboard/api/discord-invite").status_code == 401)
-check("session endpoint reports signed out without leaking", c.get("/dashboard/api/session").json() == {"authenticated": False})
+check("session endpoint reports signed out without leaking", c.get("/dashboard/api/session").json() == {"authenticated": False, "login_mode": "key"})
 r = login(c, "wrong-key-wrong-key-wrong-key-1")
 check("wrong key rejected", r.status_code == 403 and not r.cookies)
 r = c.post("/dashboard/api/login", json={"key": ["x"]})
@@ -530,6 +530,41 @@ check(
 )
 db.configured, db.execute, db.fetch = real_configured, real_execute, real_fetch
 del os.environ["ENCRYPTION_KEY"]
+
+# ================================================================ dashboard username/password login (DASHBOARD_USER/DASHBOARD_PASSWORD)
+os.environ["DASHBOARD_USER"] = "owner"
+os.environ["DASHBOARD_PASSWORD"] = "a-fine-dashboard-password"
+
+c = fresh_client()
+check(
+    "session reports login_mode userpass once DASHBOARD_USER/PASSWORD are set",
+    c.get("/dashboard/api/session").json() == {"authenticated": False, "login_mode": "userpass"},
+)
+check("legacy key login is refused once userpass mode is active", c.post("/dashboard/api/login", json={"key": KEY}).status_code == 403)
+check("wrong username is refused", c.post("/dashboard/api/login", json={"username": "nope", "password": "a-fine-dashboard-password"}).status_code == 403)
+check("wrong password is refused", c.post("/dashboard/api/login", json={"username": "owner", "password": "wrong-password"}).status_code == 403)
+check("non-string username/password is refused, not a crash", c.post("/dashboard/api/login", json={"username": ["x"], "password": 5}).status_code == 403)
+r = c.post("/dashboard/api/login", json={"username": "owner", "password": "a-fine-dashboard-password"})
+check("correct username/password signs in", r.status_code == 200 and r.json()["authenticated"] and "csrf" in r.json(), r.text)
+check("state reachable after userpass login", c.get("/dashboard/api/state").status_code == 200)
+
+os.environ["MCP_API_KEY"] = "a-completely-different-key-0123456789abcdef"
+check("rotating MCP_API_KEY does NOT sign out a userpass session (decoupled)", c.get("/dashboard/api/state").status_code == 200)
+os.environ["MCP_API_KEY"] = KEY
+
+os.environ["DASHBOARD_PASSWORD"] = "a-different-dashboard-password"
+check("rotating DASHBOARD_PASSWORD signs out existing userpass sessions", c.get("/dashboard/api/state").status_code == 401)
+os.environ["DASHBOARD_PASSWORD"] = "a-fine-dashboard-password"
+
+os.environ["DASHBOARD_PASSWORD"] = "short"
+check(
+    "weak DASHBOARD_PASSWORD (<8 chars) is a 500 on login",
+    fresh_client().post("/dashboard/api/login", json={"username": "owner", "password": "short"}).status_code == 500,
+)
+
+del os.environ["DASHBOARD_USER"]
+del os.environ["DASHBOARD_PASSWORD"]
+check("without DASHBOARD_USER/PASSWORD, mode reverts to key", fresh_client().get("/dashboard/api/session").json()["login_mode"] == "key")
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

@@ -113,7 +113,7 @@ Other ways to solve this exist (hosted platforms like Composio, gateways like Me
 
 </div>
 
-Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key (no third-party accounts). Every call passes a guard that checks the key, validates the arguments and applies your limits before a tool runs. Service credentials (Gmail app password, Discord bot token, Apify token) live as Vercel environment variables or, encrypted, in your own Postgres database -- never anywhere else.
+Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key, or with a separate username/password if you set `DASHBOARD_USER`/`DASHBOARD_PASSWORD` (no third-party accounts either way). Every call passes a guard that checks the key, validates the arguments and applies your limits before a tool runs. Service credentials (Gmail app password, Discord bot token, Apify token) live as Vercel environment variables or, encrypted, in your own Postgres database -- never anywhere else.
 
 **Interactive diagrams** (pan, zoom, search, trace a path): [architecture](docs/diagrams/architecture.html), [life of a tool call](docs/diagrams/request-lifecycle.html) and [how a change reaches main](docs/diagrams/contribution-flow.html). GitHub shows an HTML file as source, so click the link, choose **Download raw file** (the download icon), and open the file in your browser. It is self-contained and works offline.
 

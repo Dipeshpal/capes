@@ -6,13 +6,15 @@ Every deployment includes a web dashboard at `https://<project>.vercel.app/dashb
 
 ## Signing in
 
-Open `/dashboard` (browsers opening the plain address are sent there) and enter your `MCP_API_KEY`, the same key your AI clients use. There are no separate accounts or passwords.
+By default, open `/dashboard` (browsers opening the plain address are sent there) and enter your `MCP_API_KEY`, the same key your AI clients use. There are no separate accounts.
 
-- The key is never stored in the browser. On success the server sets a **signed session cookie** (HttpOnly, Secure, SameSite=Strict) that lasts 8 hours by default (`PULSE_SESSION_HOURS` changes it, 1 to 168).
-- After that you simply sign in again with the same key. **You never need to rotate the key on a schedule.** Change it only if you think it leaked; doing so also ends every session.
+**Optional: a separate login.** Set `DASHBOARD_USER` and `DASHBOARD_PASSWORD` (8+ characters) on Vercel and the dashboard switches to a real username and password instead -- `MCP_API_KEY` then only protects `/mcp`, not the dashboard. See [Vercel setup](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key).
+
+- Neither the key nor the password is ever stored in the browser. On success the server sets a **signed session cookie** (HttpOnly, Secure, SameSite=Strict) that lasts 8 hours by default (`PULSE_SESSION_HOURS` changes it, 1 to 168).
+- After that you simply sign in again. **You never need to rotate either on a schedule.** Change it only if you think it leaked; doing so also ends every session (whichever of `MCP_API_KEY` or `DASHBOARD_PASSWORD` is your current login secret).
 - Sessions end when you click **Sign out** or when the time is up.
 - After 10 wrong attempts from one address, sign-in is blocked for 15 minutes.
-- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. Set a stronger one ([how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)).
+- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. If it says the password is too short, `DASHBOARD_PASSWORD` is under 8. Set a stronger one ([how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)).
 
 ## What each tab does
 

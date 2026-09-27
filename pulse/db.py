@@ -9,6 +9,7 @@ not the one-connection-per-request pattern that breaks classic serverless.
 """
 
 import os
+import re
 from pathlib import Path
 
 import asyncpg
@@ -27,6 +28,16 @@ class DatabaseUnavailable(Exception):
     """Raised when a feature needs the database and it is not configured or not reachable."""
 
 
+_SUPABASE_DIRECT_HOST = re.compile(r"@db\.[a-z0-9]+\.supabase\.co[:/]")
+
+
+def _connect_hint() -> str:
+    url = os.getenv("DATABASE_URL", "")
+    if _SUPABASE_DIRECT_HOST.search(url):
+        return " This looks like Supabase's Direct connection URL, which is IPv6-only and unreachable from Vercel. Use the Session pooler URL instead (Project Settings > Database > Connection string)."
+    return ""
+
+
 async def pool() -> asyncpg.Pool:
     global _pool
     if not configured():
@@ -37,7 +48,7 @@ async def pool() -> asyncpg.Pool:
         if not _migrated:
             await _migrate(_pool)
     except (OSError, asyncpg.PostgresError) as e:
-        raise DatabaseUnavailable("Could not connect to the database") from e
+        raise DatabaseUnavailable("Could not connect to the database." + _connect_hint()) from e
     return _pool
 
 

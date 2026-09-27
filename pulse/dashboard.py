@@ -77,9 +77,10 @@ def _asset(request: Request, name: str) -> FileResponse:
 @router.get("/dashboard/api/session")
 async def session_state(request: Request):
     cookie = security.session_cookie(request)
+    mode = security.login_mode()
     if security.read_session(cookie) is None:
-        return json_response(request, {"authenticated": False})
-    return json_response(request, {"authenticated": True, "csrf": security.csrf_token(cookie)})
+        return json_response(request, {"authenticated": False, "login_mode": mode})
+    return json_response(request, {"authenticated": True, "csrf": security.csrf_token(cookie), "login_mode": mode})
 
 
 @router.post("/dashboard/api/login")
@@ -89,9 +90,15 @@ async def login(request: Request):
         raise HTTPException(429, "Too many attempts. Try again in 15 minutes.")
     body = await json_body(request, 2_000)
     await asyncio.sleep(0.4)  # uniform delay slows guessing
-    key = body.get("key")
-    if not isinstance(key, str) or not security.key_matches(key):
-        raise HTTPException(403, "That key is not correct")
+    if security.login_mode() == "userpass":
+        username, password = body.get("username"), body.get("password")
+        ok = isinstance(username, str) and isinstance(password, str) and security.credentials_match(username, password)
+        if not ok:
+            raise HTTPException(403, "That username or password is not correct")
+    else:
+        key = body.get("key")
+        if not isinstance(key, str) or not security.key_matches(key):
+            raise HTTPException(403, "That key is not correct")
     cookie = security.make_session()
     response = json_response(request, {"authenticated": True, "csrf": security.csrf_token(cookie)})
     response.set_cookie(

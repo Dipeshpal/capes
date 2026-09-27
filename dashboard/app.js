@@ -56,16 +56,24 @@
   }
 
   // ---- login / session ----
-  function showLogin() {
+  function showLogin(mode) {
     app.csrf = null;
+    if (mode) app.loginMode = mode;
+    const userpass = app.loginMode === 'userpass';
+    $('login-key-mode').hidden = userpass;
+    $('login-userpass-mode').hidden = !userpass;
+    $('key').required = !userpass;
+    $('username').required = userpass;
+    $('user-password').required = userpass;
     $('shell').hidden = true;
     $('login').hidden = false;
-    $('key').focus();
+    (userpass ? $('username') : $('key')).focus();
   }
 
   async function boot() {
     try {
       const s = await api('/session');
+      app.loginMode = s.login_mode;
       if (s.authenticated) { app.csrf = s.csrf; await load(); } else showLogin();
     } catch (_) { showLogin(); }
   }
@@ -75,8 +83,10 @@
     const err = $('login-error');
     err.hidden = true;
     try {
-      const s = await api('/login', { method: 'POST', body: { key: $('key').value } });
+      const body = app.loginMode === 'userpass' ? { username: $('username').value, password: $('user-password').value } : { key: $('key').value };
+      const s = await api('/login', { method: 'POST', body });
       $('key').value = '';
+      $('user-password').value = '';
       app.csrf = s.csrf;
       await load();
     } catch (ex) {
@@ -377,11 +387,12 @@
           onchange: (e) => save((s) => { s.read_only = e.target.checked; }),
         }), h('span', { text: d.settings.read_only_locked ? 'On (locked by PULSE_READ_ONLY)' : d.settings.read_only ? 'On' : 'Off' }))),
       h('div', { class: 'card stack' },
-        h('h3', { text: 'Where settings live' }),
+        h('h3', { text: 'Where these switches live' }),
+        h('p', { class: 'muted small', text: 'This is about read-only mode and the on/off switches above, not your Postgres database (that stores credentials and API keys, see the card above).' }),
         d.settings.can_edit
           ? h('p', { text: 'A Redis database is connected, so switches on this page are saved and take effect within about 10 seconds.' })
           : h('div', { class: 'stack' },
-            h('p', { text: 'No database needed. This server stores nothing: your credentials and limits are Vercel environment variables. To restrict what assistants can do, set any of these on Vercel and redeploy:' }),
+            h('p', { text: 'These switches are not stored anywhere by default: they come from Vercel environment variables. Set any of these on Vercel and redeploy:' }),
             h('div', { class: 'snippet' }, h('pre', {}, h('code', { text: 'PULSE_READ_ONLY=1\nPULSE_DISABLED_CONNECTORS=discord\nPULSE_DISABLED_TOOLS=gmail_trash,discord_delete_channel' }))),
             h('p', { class: 'muted small', text: 'Optional: connect a free Redis database (vercel integration add upstash) only if you want to flip switches from this page without redeploying.' }))),
       h('div', { class: 'card stack' },
