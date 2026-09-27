@@ -294,14 +294,15 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 Ideas, not promises. What you ask for moves up the list, so [tell us what you need](#-request-a-feature-or-a-new-mcp-connector).
 
-- [ ] **More Discord:** application commands, scheduled events, stickers and emoji management, member nickname edits.
-- [ ] **More services,** each as its own connector (for example calendar, chat or notes tools). See the request section below.
-- [ ] **Per-client keys and scopes,** so one assistant can be read-only while another is not.
+- [x] **Discord: scheduled events, emoji listing, nicknames.** Community-contributed ([#25](https://github.com/Dipeshpal/capes/pull/25), [#26](https://github.com/Dipeshpal/capes/pull/26)) plus `discord_set_nickname`. Still open: application commands, stickers.
+- [x] **A second connector: Telegram.** Send messages, read chat info, poll updates ([#33](https://github.com/Dipeshpal/capes/pull/33)). More services welcome — [claim one](https://github.com/Dipeshpal/capes/issues/23).
+- [x] **A short demo video** of an assistant using the tools, linked at the top of this README.
+- [x] **A fresh-account walkthrough** of the README and Deploy button. Found and fixed a real bug: the button listed optional service credentials as required, contradicting "leave them empty" ([#31](https://github.com/Dipeshpal/capes/pull/31)).
+- [x] **v1.0.0 tagged release**, with [release notes](https://github.com/Dipeshpal/capes/releases/tag/v1.0.0).
+- [ ] **Per-client keys and scopes,** so one assistant can be read-only while another is not. Design posted for discussion in [#24](https://github.com/Dipeshpal/capes/issues/24); implementation not started.
+- [ ] **Verify the optional Redis settings** on a real Upstash database (today they are tested against a fake server) — [in progress](https://github.com/Dipeshpal/capes/issues/22).
 - [ ] **Multiple accounts per service** (for example two mailboxes).
-- [ ] **A short demo video or GIF** of an assistant using the tools.
-- [ ] **Verify the optional Redis settings** on a real Upstash database (today they are tested against a fake server).
-- [ ] **A fresh-account walkthrough** of the README and Deploy button, fixing every place a newcomer hesitates.
-- [ ] **Tagged releases and a changelog.**
+- [ ] **More connectors:** calendar, chat and notes tools are natural next candidates.
 
 The design notes and known limits are in [What Capes is for](docs/project/architecture.md#known-limits).
 
