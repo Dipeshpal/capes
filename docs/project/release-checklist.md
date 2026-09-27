@@ -13,7 +13,7 @@ Use this before making the repository public, and before tagging a release. Each
 - [x] **Enable private vulnerability reporting** (Settings > Code security) so [SECURITY.md](../../SECURITY.md) works.
 - [x] **Discord bot is private** (Developer Portal > Bot > Public Bot off) and its permissions are what you want.
 - [ ] **Vercel Deployment Protection** and the dashboard sign-in work on the production address ([guide](../setup/vercel.md#deployment-protection)).
-- [ ] **Docs read cleanly** from a stranger's point of view: follow the README on a fresh Vercel account and note every place you hesitated.
+- [x] **Docs read cleanly** from a stranger's point of view: tested end-to-end from a fresh Vercel account via the Deploy button. Working.
 - [ ] **The Deploy button URL points at the public repository** and creates a working project.
 
 ## Every release
