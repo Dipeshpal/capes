@@ -113,3 +113,5 @@ These are Discord's rules, not limits of this project:
 | `401 Unauthorized` from Discord | The token is wrong or was reset. Copy the new one. |
 
 Use `discord_list_emojis` with a server ID to find its custom emoji names and IDs. The returned `reaction` value can be passed to `discord_add_reaction`; listing does not add a reaction.
+
+Use `discord_list_scheduled_events` with a server ID to read event times, status and interested counts. Channel events include a channel ID; external events include their location. This tool does not create, edit or join events.

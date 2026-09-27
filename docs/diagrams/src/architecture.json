@@ -13,7 +13,7 @@
     { "id": "dashboard", "type": "frontend", "label": "Dashboard", "sublabel": "/dashboard", "pos": [280, 110], "size": [150, 64] },
     { "id": "policy", "type": "security", "label": "Guard", "sublabel": "auth, validate, policy", "pos": [520, 300], "size": [160, 64], "tag": "read-only mode" },
     { "id": "limits", "type": "database", "label": "Settings", "sublabel": "env vars or optional Redis", "pos": [520, 110], "size": [160, 64] },
-    { "id": "tools", "type": "backend", "label": "Tool registry", "sublabel": "63 tools", "pos": [770, 300], "size": [150, 64] },
+    { "id": "tools", "type": "backend", "label": "Tool registry", "sublabel": "64 tools", "pos": [770, 300], "size": [150, 64] },
     { "id": "secrets", "type": "security", "label": "Credentials", "sublabel": "Vercel env vars", "pos": [770, 470], "size": [150, 64] },
     { "id": "gmail", "type": "external", "label": "Gmail", "sublabel": "IMAP / SMTP", "pos": [1010, 170], "size": [130, 60] },
     { "id": "discord", "type": "external", "label": "Discord", "sublabel": "REST API", "pos": [1010, 300], "size": [130, 60] },

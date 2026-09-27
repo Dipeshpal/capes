@@ -403,6 +403,33 @@ async def list_emojis(args):
     return [{"id": e["id"], "name": e["name"], "animated": e.get("animated", False), "reaction": f"{e['name']}:{e['id']}"} for e in emojis]
 
 
+@tool(
+    "discord_list_scheduled_events",
+    "List a server's scheduled events with times, channel or external location, status and interested user count. The bot must have access to the server.",
+    {"guild_id": GUILD},
+    ["guild_id"],
+    hint="read",
+)
+async def list_scheduled_events(args):
+    events = await call("GET", f"/guilds/{args['guild_id']}/scheduled-events", params={"with_user_count": "true"})
+    statuses = {1: "scheduled", 2: "active", 3: "completed", 4: "canceled"}
+    return [
+        clean(
+            {
+                "id": event["id"],
+                "name": event["name"],
+                "scheduled_start_time": event["scheduled_start_time"],
+                "scheduled_end_time": event.get("scheduled_end_time"),
+                "channel_id": event.get("channel_id"),
+                "location": (event.get("entity_metadata") or {}).get("location"),
+                "status": statuses.get(event["status"], event["status"]),
+                "user_count": event.get("user_count"),
+            }
+        )
+        for event in events
+    ]
+
+
 @tool("discord_list_roles", "List a server's roles with their permissions.", {"guild_id": GUILD}, ["guild_id"])
 async def list_roles(args):
     roles = await call("GET", f"/guilds/{args['guild_id']}/roles")
