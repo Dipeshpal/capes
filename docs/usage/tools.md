@@ -1,6 +1,6 @@
 # Tool reference
 
-64 tools.
+65 tools.
 
 Generated from the code by `python scripts/gen_tools_doc.py`. Do not edit by hand; change the tool's description or schema in `pulse/` and regenerate.
 
@@ -66,6 +66,7 @@ Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [
 | `discord_edit_role` | write | Edit a role. Passing permissions replaces the role's whole permission set. | `guild_id*`, `role_id*`, `name`, `permissions`, `color`, `hoist`, `mentionable` |
 | `discord_delete_role` | destructive | Delete a role permanently. | `guild_id*`, `role_id*`, `reason` |
 | `discord_member_role` | write | Give a role to a member, or take it away. The role must be below the bot's highest role. | `guild_id*`, `user_id*`, `role_id*`, `action*` |
+| `discord_set_nickname` | write | Change a member's nickname, or clear it. Needs Manage Nicknames, which is not in the default invite; add it to the bot's role in Server Settings > Roles if you want this tool. The bot cannot change a member whose top role is above its own. | `guild_id*`, `user_id*`, `nick`, `reason` |
 | `discord_moderate_member` | destructive | Moderate a member: kick, ban, unban, timeout (mute for N minutes) or untimeout. Needs Kick/Ban/Moderate Members. Destructive: confirm with the user first. | `guild_id*`, `user_id*`, `action*`, `timeout_minutes`, `delete_message_seconds`, `reason` |
 | `discord_get_message` | read | Read one message by ID. | `channel_id*`, `message_id*` |
 | `discord_list_reactions` | read | List the users who reacted to a message with one emoji (unicode or name:id). | `channel_id*`, `message_id*`, `emoji*`, `limit` |

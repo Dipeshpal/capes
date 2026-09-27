@@ -547,6 +547,18 @@ ok, r, reqs = tool("discord_moderate_member", guild_id=G, user_id=U, action="tim
 check("timeout longer than 28 days refused", not ok and not reqs)
 ok, r, reqs = tool("discord_moderate_member", guild_id=G, user_id=U, action="untimeout")
 check("untimeout sends null", reqs[0]["json"] == {"communication_disabled_until": None})
+ok, r, reqs = tool("discord_set_nickname", guild_id=G, user_id=U, nick="Newname", reason="because")
+check(
+    "set_nickname: PATCH the member with the new nick and reason",
+    reqs[0]["method"] == "PATCH"
+    and reqs[0]["path"] == f"/guilds/{G}/members/{U}"
+    and reqs[0]["json"] == {"nick": "Newname"}
+    and unquote(reqs[0]["headers"]["X-Audit-Log-Reason"]) == "because",
+)
+ok, r, reqs = tool("discord_set_nickname", guild_id=G, user_id=U)
+check("set_nickname with no nick clears it", reqs[0]["json"] == {"nick": None})
+ok, r, reqs = tool("discord_set_nickname", guild_id=G, user_id=U, nick="x" * 33)
+check("nick over 32 chars is refused by the schema", not ok and "too long" in r and not reqs, r)
 ok, r, reqs = tool("discord_thread_member", thread_id=C, action="join")
 ok2, r2, reqs2 = tool("discord_thread_member", thread_id=C, action="add", user_id=U)
 check(
