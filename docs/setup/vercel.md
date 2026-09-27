@@ -19,9 +19,9 @@ You need **two different** long random strings you make up. `MCP_API_KEY` is any
 | Node.js | `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
 | No terminal | a password manager's generator: 32+ random characters |
 
-Copy both results into a password manager. You will paste `MCP_API_KEY` into Vercel, into your AI client, and use it to sign in to the dashboard (unless you also set up `DASHBOARD_USER`/`DASHBOARD_PASSWORD` below, in which case those sign in to the dashboard instead). `ENCRYPTION_KEY` only goes into Vercel. Do not commit or share either.
+Copy both results into a password manager. You will paste `MCP_API_KEY` into Vercel and into your AI client; it no longer signs in to the dashboard (see below). `ENCRYPTION_KEY` only goes into Vercel. Do not commit or share either.
 
-**Optional: a separate dashboard login.** By default the dashboard login is `MCP_API_KEY` itself. To use a real username and password instead -- so the API key and the dashboard login are two different secrets -- also set `DASHBOARD_USER` (any name) and `DASHBOARD_PASSWORD` (8+ characters) in step 4. Skip this if you're fine signing in with `MCP_API_KEY`.
+You also pick a **dashboard username and password**: `DASHBOARD_USER` (any name you like) and `DASHBOARD_PASSWORD` (8+ characters, a real password -- doesn't need to be machine-generated like the two keys above). This signs in to `/dashboard`, kept as a separate secret from `MCP_API_KEY` so the API key and the dashboard login aren't the same thing.
 
 ## 3. Get a database (`DATABASE_URL`)
 
@@ -41,12 +41,12 @@ Already running Postgres elsewhere (Neon, Railway, your own server)? Any standar
 
 No install and no terminal. Everything happens in your browser.
 
-1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY%2CDATABASE_URL%2CENCRYPTION_KEY&envDescription=MCP_API_KEY%20and%20ENCRYPTION_KEY%20are%20two%20different%20long%20random%20strings%20you%20make%20up%20%2824%2B%20characters%20each%29.%20DATABASE_URL%20is%20a%20Postgres%20connection%20string%2C%20for%20example%20from%20a%20free%20Supabase%20project.%20Add%20service%20credentials%20%28Discord%2C%20Gmail%2C%20etc%29%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes). Vercel copies the repository into your own GitHub account. It asks for `MCP_API_KEY`, `DATABASE_URL` and `ENCRYPTION_KEY`; a service credential you already have can be added on the same screen with **Add More**, or afterward.
-2. Paste your three values from steps 2 and 3 above. If you already have credentials for a service ([Discord](discord.md), [Gmail](gmail.md), [Apify](apify.md), [Telegram](telegram.md)), click **Add More** on the same screen and add them now.
+1. Open the deploy link: [Deploy with Vercel](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY%2CDATABASE_URL%2CENCRYPTION_KEY%2CDASHBOARD_USER%2CDASHBOARD_PASSWORD&envDescription=MCP_API_KEY%20and%20ENCRYPTION_KEY%20are%20two%20different%20long%20random%20strings%20you%20make%20up%20%2824%2B%20characters%20each%29.%20DATABASE_URL%20is%20a%20Postgres%20connection%20string%2C%20for%20example%20from%20a%20free%20Supabase%20project%20%28use%20the%20Session%20pooler%20URL%2C%20not%20Direct%20connection%29.%20DASHBOARD_USER%20and%20DASHBOARD_PASSWORD%20%288%2B%20characters%29%20are%20your%20dashboard%20sign-in%2C%20separate%20from%20MCP_API_KEY.%20Add%20service%20credentials%20%28Discord%2C%20Gmail%2C%20etc%29%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes). Vercel copies the repository into your own GitHub account. It asks for `MCP_API_KEY`, `DATABASE_URL`, `ENCRYPTION_KEY`, `DASHBOARD_USER` and `DASHBOARD_PASSWORD`; a service credential you already have can be added on the same screen with **Add More**, or afterward.
+2. Paste your five values from steps 2 and 3 above. If you already have credentials for a service ([Discord](discord.md), [Gmail](gmail.md), [Apify](apify.md), [Telegram](telegram.md)), click **Add More** on the same screen and add them now.
 
    Otherwise, deploy first and add service credentials afterward, one of two ways: one at a time in **Settings > Environment Variables**, or all at once with `node scripts/capes.mjs env --name <your-project-name>` from a clone of the repo — it prompts for each service once, sets every variable and redeploys, without touching `MCP_API_KEY` or any client you've already connected.
 3. Click **Deploy** and wait for the build (about a minute).
-4. Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY`.
+4. Open `https://<project>.vercel.app/dashboard` and sign in with your `DASHBOARD_USER`/`DASHBOARD_PASSWORD`.
 
 The link works for anyone once the repository is public. Until then, or if you work from your own fork, use **Vercel > Add New > Project > Import Git Repository** and pick the repo, then add the same environment variables on the setup screen.
 
@@ -69,6 +69,8 @@ vercel link --yes                       # inside the repo; creates the project
 printf '%s' 'YOUR_MCP_API_KEY' | vercel env add MCP_API_KEY production
 printf '%s' 'YOUR_ENCRYPTION_KEY' | vercel env add ENCRYPTION_KEY production
 printf '%s' 'YOUR_DATABASE_URL' | vercel env add DATABASE_URL production
+printf '%s' 'YOUR_DASHBOARD_USER' | vercel env add DASHBOARD_USER production
+printf '%s' 'YOUR_DASHBOARD_PASSWORD' | vercel env add DASHBOARD_PASSWORD production
 vercel deploy --prod
 ```
 
@@ -99,14 +101,14 @@ Or in the Vercel dashboard: **your project > Storage > Create > Upstash for Redi
 
 Set these under **Project > Settings > Environment Variables** (Production), or with `vercel env add NAME production`.
 
-`DATABASE_URL` and `ENCRYPTION_KEY` are required for new deployments (steps above). If you deployed Capes before this was added, your server keeps running fine without them -- everything falls back to environment variables exactly as before; add a database later only if you want dashboard-managed credentials, multiple API keys, or (eventually) Gmail OAuth.
+`DATABASE_URL`, `ENCRYPTION_KEY`, `DASHBOARD_USER` and `DASHBOARD_PASSWORD` are required for new deployments (steps above). If you deployed Capes before these were added, your server keeps running fine without them -- everything falls back to environment variables and `MCP_API_KEY`-based dashboard login exactly as before; add them later only if you want dashboard-managed credentials, multiple API keys, a separate dashboard login, or (eventually) Gmail OAuth.
 
 | Variable | Required | Where it comes from |
 |----------|----------|---------------------|
 | `MCP_API_KEY` | Yes | You generate it (step 2). At least 24 characters. Protects `/mcp`; also the dashboard login unless `DASHBOARD_USER`/`DASHBOARD_PASSWORD` (below) are set. |
 | `DATABASE_URL` | Yes | Any Postgres connection string (step 3: Supabase, Neon, etc). Stores connector credentials and extra MCP API keys, managed from the dashboard. |
 | `ENCRYPTION_KEY` | Yes | You generate it (step 2), different from `MCP_API_KEY`. Encrypts anything stored in the database; losing it makes stored credentials unrecoverable. |
-| `DASHBOARD_USER`, `DASHBOARD_PASSWORD` | No | Set both to sign in to `/dashboard` with a real username and password instead of `MCP_API_KEY`, so the API key and the dashboard login are separate secrets. `DASHBOARD_PASSWORD` must be at least 8 characters. |
+| `DASHBOARD_USER`, `DASHBOARD_PASSWORD` | Yes | You pick them (step 2). Sign in to `/dashboard` with a real username and password instead of `MCP_API_KEY`, so the API key and the dashboard login are separate secrets. `DASHBOARD_PASSWORD` must be at least 8 characters. |
 | `DISCORD_BOT_TOKEN` | For Discord | [Discord guide](discord.md) (or set from the dashboard's Connectors tab once `DATABASE_URL` is set) |
 | `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) |
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) (or set from the dashboard's Connectors tab) |
