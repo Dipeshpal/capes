@@ -8,7 +8,7 @@
 
 [![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-65-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20It%20is%20the%20only%20required%20variable%3B%20add%20service%20credentials%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
 <table>
   <tr>
@@ -55,7 +55,7 @@
 
 </div>
 
-Fresh Vercel deploy, checking connectors, browsing all 62 tools, connecting a client, and asking Claude to use it.
+Fresh Vercel deploy, checking connectors, browsing all 65 tools, connecting a client, and asking Claude to use it.
 
 ## ✨ What you get
 
@@ -64,7 +64,7 @@ AI assistants read, summarise and act well, but your real work lives in accounts
 | | What it does |
 |---|---|
 | 📧 **Gmail** (17 tools) | Search with Gmail syntax, read, send, reply, forward, drafts, labels, archive, trash. No Google Cloud project, just an app password. |
-| 💬 **Discord** (46 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
+| 💬 **Discord** (47 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
 | 🐦 **X / Twitter** (1 tool) | Search tweets through an Apify scraper. |
 | 🖥️ **Dashboard** | Test each service's credentials, browse and try the tools, watch recent activity, copy ready-made client config. |
 | 🛡️ **Limits you control** | Turn a service or a single tool off, or make the whole server read-only. Tools are labelled read, write or destructive. |
@@ -148,10 +148,10 @@ Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a c
 
 No install, no terminal.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20It%20is%20the%20only%20required%20variable%3B%20add%20service%20credentials%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
 1. Click the button and sign in to Vercel. It copies the repository into your GitHub account.
-2. Paste your `MCP_API_KEY` ([how to make one](docs/setup/vercel.md#2-create-your-mcp_api_key)) and the credentials for the services you want. Leave the rest empty.
+2. Paste your `MCP_API_KEY` ([how to make one](docs/setup/vercel.md#2-create-your-mcp_api_key)). It's the only variable Vercel requires here. If you already have credentials for Discord, Gmail or Apify, click **Add More** on the same screen and add them now; otherwise add them afterward in **Settings > Environment Variables** and redeploy — Vercel forces every variable listed in the button's link to be filled in, so listing the optional ones there would block you from deploying without them.
 3. Click **Deploy**, then open `https://<project>.vercel.app/dashboard` and sign in with your key.
 
 The button works for anyone once the repository is public. Before that, or from a fork, use **Vercel > Add New > Project > Import Git Repository**, choose the repo and add the same variables. Details, Deployment Protection and key rotation: [Vercel guide](docs/setup/vercel.md).
