@@ -12,7 +12,7 @@ Open `/dashboard` (browsers opening the plain address are sent there) and enter 
 - After that you simply sign in again with the same key. **You never need to rotate the key on a schedule.** Change it only if you think it leaked; doing so also ends every session.
 - Sessions end when you click **Sign out** or when the time is up.
 - After 10 wrong attempts from one address, sign-in is blocked for 15 minutes.
-- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. Set a stronger one ([how](../setup/vercel.md#2-create-your-mcp_api_key)).
+- If sign-in says the key is too short, your `MCP_API_KEY` is under 24 characters. Set a stronger one ([how](../setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key)).
 
 ## What each tab does
 
@@ -39,7 +39,7 @@ The button makes one harmless, read-only call with the credentials you set on Ve
 
 ## Switches, read-only mode, and where settings are stored
 
-**You do not need a database or Redis.** Everything below works with environment variables alone; Redis only adds live switches and a durable activity log.
+**These switches don't need Redis.** Everything below works with environment variables alone; Redis only adds live switches and a durable activity log. (Separately, `DATABASE_URL` -- required for new deployments -- stores connector credentials and API keys, not these switches; see [Vercel setup](../setup/vercel.md).)
 
 You can restrict what AI clients may do in three ways:
 
@@ -54,7 +54,7 @@ Where the choices live depends on your setup:
 | Setup | What happens |
 |-------|--------------|
 | **With Redis** (optional and advanced: `vercel integration add upstash`, free) | Switches on the dashboard work and are saved. A change reaches clients within about 10 seconds. The activity log is kept for the last 100 calls. |
-| **Without Redis** (the normal setup, no database at all) | Nothing is stored on the server. The dashboard shows the current state and you restrict clients with environment variables on Vercel: `PULSE_READ_ONLY=1`, `PULSE_DISABLED_CONNECTORS=discord,apify`, `PULSE_DISABLED_TOOLS=gmail_trash,...`. Activity is kept in memory on the server instance only and resets when it restarts. |
+| **Without Redis** (the normal setup) | These switches aren't stored anywhere (your Postgres database, if configured, holds credentials and API keys, not these). The dashboard shows the current state and you restrict clients with environment variables on Vercel: `PULSE_READ_ONLY=1`, `PULSE_DISABLED_CONNECTORS=discord,apify`, `PULSE_DISABLED_TOOLS=gmail_trash,...`. Activity is kept in memory on the server instance only and resets when it restarts. |
 
 Environment restrictions always win. Anything set by an environment variable shows as **locked** and cannot be switched back on from the dashboard, so you can pin a safe baseline that no session can loosen.
 

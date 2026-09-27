@@ -6,9 +6,9 @@
 
 ### Give Claude, Codex, Cursor and any MCP client hands: your Gmail, Discord and X, through one private server you own.
 
-[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-68-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
+[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-68-7c3aed) ![Database](https://img.shields.io/badge/database-your%20own%20Postgres-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20It%20is%20the%20only%20required%20variable%3B%20add%20service%20credentials%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY%2CDATABASE_URL%2CENCRYPTION_KEY&envDescription=MCP_API_KEY%20and%20ENCRYPTION_KEY%20are%20two%20different%20long%20random%20strings%20you%20make%20up%20%2824%2B%20characters%20each%29.%20DATABASE_URL%20is%20a%20Postgres%20connection%20string%2C%20for%20example%20from%20a%20free%20Supabase%20project.%20Add%20service%20credentials%20%28Discord%2C%20Gmail%2C%20etc%29%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
 <table>
   <tr>
@@ -69,7 +69,7 @@ AI assistants read, summarise and act well, but your real work lives in accounts
 | ✈️ **Telegram** (3 tools) | Send messages, get chat info, poll recent updates. |
 | 🖥️ **Dashboard** | Test each service's credentials, browse and try the tools, watch recent activity, copy ready-made client config. |
 | 🛡️ **Limits you control** | Turn a service or a single tool off, or make the whole server read-only. Tools are labelled read, write or destructive. |
-| 🔑 **You own it** | Your credentials live only in your Vercel project. No central service, no account with us, no database. |
+| 🔑 **You own it** | Your credentials live only in your Vercel project and your own Postgres database. No central service, no account with us. |
 
 ## 🎬 A day with Capes
 
@@ -113,7 +113,7 @@ Other ways to solve this exist (hosted platforms like Composio, gateways like Me
 
 </div>
 
-Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key (no database, no accounts). Every call passes a guard that checks the key, validates the arguments and applies your limits before a tool runs. The service credentials (Gmail app password, Discord bot token, Apify token) are Vercel environment variables and never leave your project.
+Your server exposes `POST /mcp`, protected by a secret key you create (`MCP_API_KEY`), and a dashboard at `/dashboard` that you sign in to with the same key (no third-party accounts). Every call passes a guard that checks the key, validates the arguments and applies your limits before a tool runs. Service credentials (Gmail app password, Discord bot token, Apify token) live as Vercel environment variables or, encrypted, in your own Postgres database -- never anywhere else.
 
 **Interactive diagrams** (pan, zoom, search, trace a path): [architecture](docs/diagrams/architecture.html), [life of a tool call](docs/diagrams/request-lifecycle.html) and [how a change reaches main](docs/diagrams/contribution-flow.html). GitHub shows an HTML file as source, so click the link, choose **Download raw file** (the download icon), and open the file in your browser. It is self-contained and works offline.
 
@@ -135,14 +135,15 @@ Click a guide for the exact steps, permissions and limits of each service.
 
 | Service | What it unlocks | What you need | Where to get it | Setup guide |
 |---------|-----------------|---------------|-----------------|-------------|
-| **Vercel** (required) | Hosts your server and dashboard (free Hobby plan) | A Vercel account and a key you invent, `MCP_API_KEY` (24+ characters) | [vercel.com/signup](https://vercel.com/signup) | [Vercel setup](docs/setup/vercel.md) |
+| **Vercel** (required) | Hosts your server and dashboard (free Hobby plan) | A Vercel account and two keys you invent, `MCP_API_KEY` and `ENCRYPTION_KEY` (24+ characters each) | [vercel.com/signup](https://vercel.com/signup) | [Vercel setup](docs/setup/vercel.md) |
+| **Postgres** (required) | Stores connector credentials and extra API keys, managed from the dashboard | `DATABASE_URL`, any Postgres connection string | Free: [Supabase](https://supabase.com) | [Vercel setup](docs/setup/vercel.md#3-get-a-database-database_url) |
 | **Gmail** | Read, send and organize email (free, no Google Cloud project) | `GMAIL_ADDRESS` and an app password `GMAIL_APP_PASSWORD` | [Google app passwords](https://myaccount.google.com/apppasswords) | [Gmail setup](docs/setup/gmail.md) |
 | **Discord** | Read and manage servers, channels, messages, roles | Bot token `DISCORD_BOT_TOKEN`, bot invited with permissions | [Developer Portal](https://discord.com/developers/applications) | [Discord setup](docs/setup/discord.md) |
 | **Apify** (for X/Twitter) | Search tweets | API token `APIFY_TOKEN` | [Apify API settings](https://console.apify.com/settings/integrations) | [Apify setup](docs/setup/apify.md) |
 | **Telegram** | Send messages, read chats, poll updates | Bot token `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) | [Telegram setup](docs/setup/telegram.md) |
-| *Database* | **Not needed.** Nothing is stored on the server. | (Advanced, optional: a free Redis via `vercel integration add upstash` lets the dashboard flip switches without redeploying.) | [Vercel Marketplace](https://vercel.com/marketplace/upstash) | [Dashboard guide](docs/usage/dashboard.md#switches-read-only-mode-and-where-settings-are-stored) |
+| *Redis* | **Not needed.** Only for flipping dashboard switches without redeploying. | (Advanced, optional: a free Redis via `vercel integration add upstash`.) | [Vercel Marketplace](https://vercel.com/marketplace/upstash) | [Dashboard guide](docs/usage/dashboard.md#switches-read-only-mode-and-where-settings-are-stored) |
 
-Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a clear message instead of failing.
+`MCP_API_KEY`, `ENCRYPTION_KEY` and `DATABASE_URL` are required. Discord/Gmail/Apify/Telegram are all optional -- a tool whose credentials are missing returns a clear message instead of failing.
 
 ## ☁️ Deploy
 
@@ -150,23 +151,23 @@ Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a c
 
 No install, no terminal.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20It%20is%20the%20only%20required%20variable%3B%20add%20service%20credentials%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY%2CDATABASE_URL%2CENCRYPTION_KEY&envDescription=MCP_API_KEY%20and%20ENCRYPTION_KEY%20are%20two%20different%20long%20random%20strings%20you%20make%20up%20%2824%2B%20characters%20each%29.%20DATABASE_URL%20is%20a%20Postgres%20connection%20string%2C%20for%20example%20from%20a%20free%20Supabase%20project.%20Add%20service%20credentials%20%28Discord%2C%20Gmail%2C%20etc%29%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
 1. Click the button and sign in to Vercel. It copies the repository into your GitHub account.
-2. Paste your `MCP_API_KEY` ([how to make one](docs/setup/vercel.md#2-create-your-mcp_api_key)). It's the only variable Vercel requires here. If you already have credentials for Discord, Gmail, Apify or Telegram, click **Add More** on the same screen and add them now. Otherwise, deploy first and add them later, either one at a time in **Settings > Environment Variables**, or all at once from a clone of the repo:
+2. Paste `MCP_API_KEY` and `ENCRYPTION_KEY` ([how to make them](docs/setup/vercel.md#2-create-your-mcp_api_key-and-encryption_key), two different random strings) and `DATABASE_URL` ([get a free one from Supabase](docs/setup/vercel.md#3-get-a-database-database_url)). These three are required. If you already have credentials for Discord, Gmail, Apify or Telegram, click **Add More** on the same screen and add them now. Otherwise, deploy first and add them later, either one at a time in **Settings > Environment Variables**, or all at once from a clone of the repo:
 
    ```bash
    node scripts/capes.mjs env --name <your-project-name>
    ```
 
-   It asks for each credential once, sets them all and redeploys — never touches `MCP_API_KEY` or a client you've already connected. (Vercel forces every variable listed in the button's own link to be filled in, so listing the optional ones there would block you from deploying without them; this is why they aren't pre-filled.)
+   It asks for each service credential once, sets them all and redeploys — never touches `MCP_API_KEY` or a client you've already connected.
 3. Click **Deploy**, then open `https://<project>.vercel.app/dashboard` and sign in with your key.
 
 The button works for anyone once the repository is public. Before that, or from a fork, use **Vercel > Add New > Project > Import Git Repository**, choose the repo and add the same variables. Details, Deployment Protection and key rotation: [Vercel guide](docs/setup/vercel.md).
 
 ### Option B: one command from your computer
 
-Needs [Node.js 18+](https://nodejs.org). It logs you in to Vercel, generates a strong key, asks for your credentials (Enter skips any), deploys, connects your AI clients and prints your Discord invite link:
+Needs [Node.js 18+](https://nodejs.org) and a Postgres `DATABASE_URL` (free: [supabase.com](https://supabase.com)). It logs you in to Vercel, generates strong keys, asks for your database URL and service credentials (Enter skips optional ones), deploys, connects your AI clients and prints your Discord invite link:
 
 ```bash
 git clone https://github.com/Dipeshpal/capes.git
@@ -174,7 +175,7 @@ cd capes
 node scripts/capes.mjs install
 ```
 
-Your address and key are saved to `.capes.local.json` (git-ignored). Non-interactive: `node scripts/capes.mjs install --name my-capes --discord TOKEN --apify TOKEN --gmail you@gmail.com --gmail-password APP_PASSWORD --clients desktop,cursor`.
+Your address, key and encryption key are saved to `.capes.local.json` (git-ignored). Non-interactive: `node scripts/capes.mjs install --name my-capes --database postgres://... --discord TOKEN --apify TOKEN --gmail you@gmail.com --gmail-password APP_PASSWORD --clients desktop,cursor`.
 
 ### Option C: Vercel CLI by hand
 
@@ -197,7 +198,7 @@ Open `https://<project>.vercel.app/dashboard` and sign in with your `MCP_API_KEY
 
 - **Overview, Connectors, Tools:** what is connected and which tools clients can see.
 - **Test connection:** a read-only check of each service's credentials.
-- **Limits:** turn a service or a single tool off, or hide everything that changes data. No database needed: set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel (an optional free Redis lets you flip these on the dashboard without redeploying).
+- **Limits:** turn a service or a single tool off, or hide everything that changes data. Set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel (an optional free Redis, separate from your Postgres database, lets you flip these on the dashboard without redeploying).
 - **Try:** run read-only tools with a form.
 - **Activity:** recent calls, without arguments or results.
 - **Connect a client:** copy-ready config for Claude, Cursor and Codex.
@@ -289,12 +290,13 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 - [x] **68 tools across four services:** Gmail (17), Discord (47), X search (1) and Telegram (3). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
 - [x] **Owner dashboard:** sign in with your key, test each connector, browse the tools, try read-only ones, watch activity, copy client config, and generate your Discord invite link in one click.
-- [x] **One-click deploy to your own Vercel** (Deploy button or one installer command), no database needed.
+- [x] **One-click deploy to your own Vercel** (Deploy button or one installer command). Needs a free Postgres database (e.g. Supabase) for credentials and API keys.
 - [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).
 - [x] **Limits you control:** switch a service or a single tool off, or make the whole server read-only. Every tool is labelled read, write or destructive.
 - [x] **Built to be safe:** arguments validated against each tool's schema, secrets redacted from errors and logs, signed dashboard sessions with CSRF protection, rate-limited sign-in, fail-closed settings.
 - [x] **Tested without credentials:** a fake IMAP server and a fake Discord API server exercise the tools in CI. Most Discord tools were also run against a real test server; one of 33 checks failed on the first run, and it was a real bug (pinning needs the separate Pin Messages permission), which is fixed. The maintainer has since tested it on a real community server too.
 - [x] **Open-source ready:** MIT license, contributor guard against unreviewed changes to CI and assistant settings, protected `main` (pull request, code-owner review and green checks), secret scanning, docs with diagrams.
+- [x] **Bring-your-own Postgres for credentials and API keys:** connector tokens encrypted in your own database, multiple labelled/expiring MCP API keys managed from the dashboard's Settings tab, all optional for existing deployments ([#38](https://github.com/Dipeshpal/capes/pull/38), [#39](https://github.com/Dipeshpal/capes/pull/39)). New deploys (Deploy button and installer) now provision it by default ([#40](https://github.com/Dipeshpal/capes/pull/40)).
 
 ## 🗺️ What's next
 

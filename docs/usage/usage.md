@@ -52,7 +52,7 @@ Open your [dashboard](dashboard.md) at `https://<project>.vercel.app/dashboard` 
 - **Tool switches** turn single tools off, such as `gmail_trash` or `discord_moderate_member`.
 - **Activity** shows what was called and whether it worked.
 
-No database is needed: set the same limits with the `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` and `PULSE_DISABLED_TOOLS` environment variables on Vercel. (An optional free Redis add-on lets you flip switches on the dashboard without redeploying.) Details: [Dashboard guide](dashboard.md#switches-read-only-mode-and-where-settings-are-stored).
+These limits always work from plain environment variables alone (`PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS`, `PULSE_DISABLED_TOOLS` on Vercel), independent of the Postgres database used for credentials and API keys. An optional free Redis add-on lets you flip these switches on the dashboard without redeploying. Details: [Dashboard guide](dashboard.md#switches-read-only-mode-and-where-settings-are-stored).
 
 ## Good to know
 
