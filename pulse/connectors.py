@@ -32,7 +32,6 @@ CONNECTORS = (
         ("GMAIL_ADDRESS", "GMAIL_APP_PASSWORD"),
         "docs/setup/gmail.md",
         "Search, read, send, reply, forward, drafts, labels, trash.",
-        db_backed=False,  # still env-only; OAuth + DB-backed storage is tracked in issue #36
     ),
     Connector(
         "discord", "Discord", "discord_", ("DISCORD_BOT_TOKEN",), "docs/setup/discord.md", "Read and manage servers, channels, threads, roles and messages."
@@ -87,7 +86,8 @@ async def test_connection(connector_id: str) -> dict:
                     typ, st = mb.m.status("INBOX", "(MESSAGES UNSEEN)")
                     return st[0].decode() if typ == "OK" and st and st[0] else "connected"
 
-            detail = await asyncio.to_thread(check)
+            async with gmail.session():
+                detail = await asyncio.to_thread(check)
             return {"ok": True, "detail": f"Signed in to Gmail. {detail}"}
         if c.id == "discord":
             from . import discord
@@ -96,11 +96,12 @@ async def test_connection(connector_id: str) -> dict:
             guilds = await discord.call("GET", "/users/@me/guilds")
             return {"ok": True, "detail": f"Bot '{me.get('username')}' is in {len(guilds)} server(s)."}
         if c.id == "apify":
+            token = await creds.get("APIFY_TOKEN")
             async with (
                 aiohttp.ClientSession() as session,
                 session.get(
                     "https://api.apify.com/v2/users/me",
-                    headers={"Authorization": f"Bearer {os.getenv('APIFY_TOKEN')}"},
+                    headers={"Authorization": f"Bearer {token}"},
                     timeout=aiohttp.ClientTimeout(total=15),
                 ) as resp,
             ):

@@ -110,7 +110,7 @@ Set these under **Project > Settings > Environment Variables** (Production), or 
 | `ENCRYPTION_KEY` | Yes | You generate it (step 2), different from `MCP_API_KEY`. Encrypts anything stored in the database; losing it makes stored credentials unrecoverable. |
 | `DASHBOARD_USER`, `DASHBOARD_PASSWORD` | Yes | You pick them (step 2). Sign in to `/dashboard` with a real username and password instead of `MCP_API_KEY`, so the API key and the dashboard login are separate secrets. `DASHBOARD_PASSWORD` must be at least 8 characters. |
 | `DISCORD_BOT_TOKEN` | For Discord | [Discord guide](discord.md) (or set from the dashboard's Connectors tab once `DATABASE_URL` is set) |
-| `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) |
+| `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) (or set from the dashboard's Connectors tab once `DATABASE_URL` is set) |
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) (or set from the dashboard's Connectors tab) |
 | `TELEGRAM_BOT_TOKEN` | For Telegram | [Telegram guide](telegram.md) (or set from the dashboard's Connectors tab) |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | For dashboard switches | Set by `vercel integration add upstash` (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` also work). Separate from `DATABASE_URL`, see step 6. |

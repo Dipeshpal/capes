@@ -7,9 +7,9 @@ All Mail, so search does not cover them.
 import asyncio
 import base64
 import contextlib
+import contextvars
 import email
 import imaplib
-import os
 import re
 import smtplib
 import ssl
@@ -19,6 +19,7 @@ from email.message import EmailMessage
 from email.utils import formatdate, getaddresses, make_msgid
 from html.parser import HTMLParser
 
+from . import creds
 from .registry import ToolError, tool
 
 IMAP_HOST = "imap.gmail.com"
@@ -28,14 +29,39 @@ MAX_ATTACHMENT_BYTES = 2_000_000
 
 # --------------------------------------------------------------------------
 # Connection
+#
+# Credentials can live in the database (Settings/Connectors tab) as well as GMAIL_ADDRESS/GMAIL_APP_PASSWORD env
+# vars (creds.get() checks both). imaplib/smtplib are synchronous, so every Gmail tool runs its work in a thread
+# via run() below; the async-fetched credentials are handed to that thread through a ContextVar, since asyncio.
+# to_thread copies the calling context. session() does the same for the one caller outside run() (connectors.py's
+# gmail connection test).
 # --------------------------------------------------------------------------
+
+_creds_ctx: contextvars.ContextVar[tuple[str, str] | None] = contextvars.ContextVar("gmail_creds", default=None)
+
+
+async def _load_credentials() -> tuple[str, str] | None:
+    address = await creds.get("GMAIL_ADDRESS")
+    password = await creds.get("GMAIL_APP_PASSWORD")
+    if not address or not password:
+        return None
+    return address.strip().strip("\"'"), password.strip().strip("\"'").replace(" ", "")
+
+
+@contextlib.asynccontextmanager
+async def session():
+    token = _creds_ctx.set(await _load_credentials())
+    try:
+        yield
+    finally:
+        _creds_ctx.reset(token)
 
 
 def credentials() -> tuple[str, str]:
-    address, password = os.getenv("GMAIL_ADDRESS"), os.getenv("GMAIL_APP_PASSWORD")
-    if not address or not password:
+    ctx = _creds_ctx.get()
+    if ctx is None:
         raise ToolError("GMAIL_ADDRESS and GMAIL_APP_PASSWORD are not set on the server (see docs/setup/gmail.md)")
-    return address.strip().strip("\"'"), password.strip().strip("\"'").replace(" ", "")
+    return ctx
 
 
 def quote(name: str) -> str:
@@ -366,10 +392,11 @@ def uid_set(ids) -> str:
 
 
 async def run(fn, args):
-    try:
-        return await asyncio.to_thread(fn, args)
-    except (imaplib.IMAP4.error, smtplib.SMTPException, OSError) as e:
-        raise ToolError(f"Gmail error: {e}") from e
+    async with session():
+        try:
+            return await asyncio.to_thread(fn, args)
+        except (imaplib.IMAP4.error, smtplib.SMTPException, OSError) as e:
+            raise ToolError(f"Gmail error: {e}") from e
 
 
 IDS = {"type": "array", "items": {"type": "integer"}, "description": "Message ids (from gmail_search), up to 100"}

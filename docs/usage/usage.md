@@ -50,7 +50,6 @@ Open your [dashboard](dashboard.md) at `https://<project>.vercel.app/dashboard` 
 - **Read-only mode** (`PULSE_READ_ONLY=1`) hides every tool that sends, changes or deletes. Use it when you only want summaries and search.
 - **Connector switch** turns a whole service off (for example Discord while you are away).
 - **Tool switches** turn single tools off, such as `gmail_trash` or `discord_moderate_member`.
-- **Activity** shows what was called and whether it worked.
 
 These limits always work from plain environment variables alone (`PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS`, `PULSE_DISABLED_TOOLS` on Vercel), independent of the Postgres database used for credentials and API keys. An optional free Redis add-on lets you flip these switches on the dashboard without redeploying. Details: [Dashboard guide](dashboard.md#switches-read-only-mode-and-where-settings-are-stored).
 

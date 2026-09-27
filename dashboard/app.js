@@ -5,7 +5,6 @@
     ['overview', 'Overview'],
     ['connectors', 'Connectors'],
     ['tools', 'Tools'],
-    ['activity', 'Activity'],
     ['connect', 'Connect a client'],
     ['settings', 'Settings'],
   ];
@@ -119,7 +118,7 @@
 
   function render() {
     const main = $('main');
-    const views = { overview, connectors, tools, activity, connect, settings };
+    const views = { overview, connectors, tools, connect, settings };
     main.replaceChildren();
     Promise.resolve(views[app.tab]()).then((node) => main.replaceChildren(node)).catch((ex) => main.replaceChildren(h('p', { class: 'error', text: ex.message })));
   }
@@ -283,18 +282,6 @@
       filterBar,
       h('div', { class: 'table-wrap' }, h('table', {}, h('thead', {}, h('tr', {}, h('th', { text: 'On' }), h('th', { text: 'Tool' }), h('th', { text: 'Kind' }), h('th', { text: 'What it does' }), h('th', { text: '' }))), tbody)),
       h('p', { class: 'muted small', text: 'Try runs read-only tools with your real credentials. Write and destructive tools cannot be run from the dashboard.' }),
-    );
-  }
-
-  async function activity() {
-    const a = await api('/activity');
-    const note = a.source === 'kv' ? 'Stored in Redis (last 100 calls).' : 'Kept in memory on the server instance only (resets on cold start). Add Redis for a durable log.';
-    return h('div', { class: 'stack' },
-      h('div', { class: 'section-head' }, h('h1', { text: 'Activity' }), h('button', { class: 'btn small', type: 'button', onclick: render }, 'Refresh')),
-      h('p', { class: 'muted', text: note + ' Only tool names, times and outcomes are recorded, never arguments or results.' }),
-      a.entries.length ? h('div', { class: 'table-wrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['Time (UTC)', 'Tool', 'Source', 'Result', 'ms'].map((x) => h('th', { text: x })))),
-        h('tbody', {}, a.entries.map((e) => h('tr', {}, h('td', { class: 'mono', text: e.ts.replace('T', ' ').replace('+00:00', '') }), h('td', {}, h('code', { text: e.tool })), h('td', { text: e.source }),
-          h('td', {}, e.ok ? badge('ok', 'ok') : badge('error', 'bad'), e.error ? h('div', { class: 'muted small', text: e.error }) : null), h('td', { text: String(e.ms) })))))) : h('p', { class: 'muted', text: 'No calls recorded yet.' }),
     );
   }
 

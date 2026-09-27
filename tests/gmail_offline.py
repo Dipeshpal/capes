@@ -96,6 +96,8 @@ def make(uid, frm, subject, body, flags=("\\Seen",), labels=("\\Inbox",), thrid=
 
 class FakeIMAP:
     store_state = None
+    expected_login = ("me@gmail.com", "abcdefghijklmnop")
+    last_login = None
 
     def __init__(self, *a, **k):
         self.literal = None
@@ -104,7 +106,8 @@ class FakeIMAP:
         self.state = FakeIMAP.store_state
 
     def login(self, u, p):
-        assert u == "me@gmail.com" and p == "abcdefghijklmnop", "credentials not normalised"
+        FakeIMAP.last_login = (u, p)
+        assert (u, p) == FakeIMAP.expected_login, "credentials not normalised"
         return "OK", [b"ok"]
 
     def logout(self):
@@ -399,6 +402,25 @@ async def main():
         check("missing attachment error", False)
     except ToolError as e:
         check("missing attachment error", "Available" in str(e))
+
+    # credentials from the database (creds.get), not the environment -- simulates DATABASE_URL being set
+    real_creds_get = gmail.creds.get
+    del os.environ["GMAIL_ADDRESS"]
+
+    async def fake_db_creds(name):
+        return {"GMAIL_ADDRESS": "db-user@gmail.com", "GMAIL_APP_PASSWORD": "abcd efgh ijkl mnop"}.get(name)
+
+    gmail.creds.get = fake_db_creds
+    FakeIMAP.expected_login = ("db-user@gmail.com", "abcdefghijklmnop")
+    FakeIMAP.store_state = fresh_state()
+    r = await call("gmail_list_labels")
+    check("db-backed credentials work with no GMAIL_ADDRESS env var set", isinstance(r, dict) and "labels" in r, r)
+    check(
+        "db-backed address reaches the IMAP login, not the old env value", FakeIMAP.last_login == ("db-user@gmail.com", "abcdefghijklmnop"), FakeIMAP.last_login
+    )
+    gmail.creds.get = real_creds_get
+    FakeIMAP.expected_login = ("me@gmail.com", "abcdefghijklmnop")
+    os.environ["GMAIL_ADDRESS"] = "me@gmail.com"
 
     # missing credentials
     del os.environ["GMAIL_APP_PASSWORD"]

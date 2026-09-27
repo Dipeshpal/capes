@@ -204,7 +204,6 @@ Open `https://<project>.vercel.app/dashboard` and sign in with your `DASHBOARD_U
 - **Test connection:** a read-only check of each service's credentials.
 - **Limits:** turn a service or a single tool off, or hide everything that changes data. Set `PULSE_READ_ONLY`, `PULSE_DISABLED_CONNECTORS` or `PULSE_DISABLED_TOOLS` on Vercel (an optional free Redis, separate from your Postgres database, lets you flip these on the dashboard without redeploying).
 - **Try:** run read-only tools with a form.
-- **Activity:** recent calls, without arguments or results.
 - **Connect a client:** copy-ready config for Claude, Cursor and Codex.
 
 Full walkthrough and security details: [Dashboard guide](docs/usage/dashboard.md).
