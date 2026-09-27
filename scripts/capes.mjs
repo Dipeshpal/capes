@@ -2,6 +2,7 @@
 // capes installer. No dependencies; needs Node 18+.
 //   node scripts/capes.mjs install    deploy to your Vercel account, then connect your clients
 //   node scripts/capes.mjs connect    connect clients to an existing deployment
+//   node scripts/capes.mjs env        add or update service credentials on an existing deployment (never touches MCP_API_KEY)
 // Flags: --name --discord --apify --gmail --gmail-password --telegram --url --key --clients desktop,claude-code,cursor,codex,none
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -27,6 +28,55 @@ function run(bin, args, opts = {}) {
   return spawnSync(bin, args, { encoding: 'utf8', shell: WIN, ...opts });
 }
 const has = (bin) => run(bin, ['--version']).status === 0;
+
+// ---------------------------------------------------------------- env (add credentials to an existing deployment)
+async function addEnv() {
+  const vercel = has('vercel') ? ['vercel'] : ['npx', '-y', 'vercel'];
+  const vc = (args, opts) => run(vercel[0], [...vercel.slice(1), ...args], opts);
+
+  log('\ncapes: add or update service credentials on an existing deployment\n');
+  log('This never touches MCP_API_KEY, so any client already connected keeps working.\n');
+  if (vc(['whoami']).status !== 0) {
+    log('Log in to Vercel (a browser window will open)...');
+    if (vc(['login'], { stdio: 'inherit' }).status !== 0) throw new Error('Vercel login failed');
+  }
+
+  const name = flags.name ?? (await ask('Vercel project name (from your Vercel dashboard, or the URL: https://<this>.vercel.app)', 'capes'));
+  log('\nCredentials to add or replace (press Enter to skip any):');
+  const discord = flags.discord ?? (await ask('Discord bot token'));
+  const apify = flags.apify ?? (await ask('Apify token (for X/Twitter search)'));
+  const gmail = flags.gmail ?? (await ask('Gmail address'));
+  const gmailPass = gmail ? (flags['gmail-password'] ?? (await ask('Gmail app password (myaccount.google.com/apppasswords)'))) : '';
+  const telegram = flags.telegram ?? (await ask('Telegram bot token (from @BotFather)'));
+
+  const env = {
+    ...(discord && { DISCORD_BOT_TOKEN: discord }),
+    ...(apify && { APIFY_TOKEN: apify }),
+    ...(gmail && gmailPass && { GMAIL_ADDRESS: gmail, GMAIL_APP_PASSWORD: gmailPass }),
+    ...(telegram && { TELEGRAM_BOT_TOKEN: telegram }),
+  };
+  if (!Object.keys(env).length) {
+    log('Nothing entered, nothing changed.');
+    return;
+  }
+
+  log('\nLinking Vercel project...');
+  const link = vc(['link', '--yes', '--project', name]);
+  if (link.status !== 0) throw new Error(`vercel link failed:\n${link.stderr || link.stdout}`);
+
+  for (const [k, v] of Object.entries(env)) {
+    vc(['env', 'rm', k, 'production', '--yes']);
+    const r = vc(['env', 'add', k, 'production'], { input: v });
+    if (r.status !== 0) throw new Error(`Could not set ${k}:\n${r.stderr || r.stdout}`);
+    log(`  set ${k}`);
+  }
+
+  log('\nRedeploying so the new credentials take effect (about a minute)...');
+  const dep = vc(['deploy', '--prod', '--yes']);
+  if (dep.status !== 0) throw new Error(`Deploy failed:\n${dep.stderr || dep.stdout}`);
+  log('\nDone. MCP_API_KEY and your connected clients are unchanged.');
+  log('Open your dashboard\'s Connectors tab and click Test connection to confirm.');
+}
 
 // ---------------------------------------------------------------- install
 async function install() {
@@ -184,7 +234,8 @@ async function connect(url, key) {
 try {
   if (cmd === 'install') await install();
   else if (cmd === 'connect') await connect(flags.url, flags.key);
-  else log('Usage: node scripts/capes.mjs <install|connect>');
+  else if (cmd === 'env') await addEnv();
+  else log('Usage: node scripts/capes.mjs <install|connect|env>');
 } catch (e) {
   console.error(`\nError: ${e.message}`);
   process.exitCode = 1;
