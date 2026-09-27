@@ -62,7 +62,7 @@ ALLOWED_URL_HOSTS = {
     "example.invalid",
     "api.example.invalid",
 }
-ALLOWED_DEPENDENCIES = {"fastapi", "aiohttp", "python-dotenv"}
+ALLOWED_DEPENDENCIES = {"fastapi", "aiohttp", "python-dotenv", "asyncpg", "cryptography"}
 PINNED_SUFFIXES = {".sh", ".json", ".txt", ".py", ".js", ".mjs", ".ps1", ".bat", ".cmd", ".yml", ".yaml"}
 HIDDEN_CHARS = re.compile("[\u200b-\u200f\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff\u00ad]")
 INJECTION_PHRASES = re.compile(
