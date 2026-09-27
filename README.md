@@ -45,6 +45,18 @@
 
 </div>
 
+## 🎬 Demo
+
+<div align="center">
+
+[![Capes demo: fresh Vercel deploy, connectors, tools and connecting a client](https://i.ytimg.com/vi/5UdGxXCC8WY/hqdefault.jpg)](https://youtu.be/5UdGxXCC8WY)
+
+**[▶ Watch the demo on YouTube](https://youtu.be/5UdGxXCC8WY)**
+
+</div>
+
+Fresh Vercel deploy, checking connectors, browsing all 62 tools, connecting a client, and asking Claude to use it.
+
 ## ✨ What you get
 
 AI assistants read, summarise and act well, but your real work lives in accounts they cannot reach. Capes is **one private [MCP](https://modelcontextprotocol.io/docs/getting-started/intro) server** that you deploy to your own Vercel account. Connect it once and the same tools appear in every AI client you use.
