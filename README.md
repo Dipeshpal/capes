@@ -6,7 +6,7 @@
 
 ### Give Claude, Codex, Cursor and any MCP client hands: your Gmail, Discord and X, through one private server you own.
 
-[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-64-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
+[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-65-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY,DISCORD_BOT_TOKEN,APIFY_TOKEN,GMAIL_ADDRESS,GMAIL_APP_PASSWORD&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20All%20the%20others%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
@@ -27,7 +27,7 @@
     <td align="right"><b>⚙️ Reference</b></td>
     <td align="center"><a href="#-services-and-credentials">Services</a></td>
     <td align="center"><a href="#-the-dashboard">Dashboard</a></td>
-    <td align="center"><a href="#-tools">All 64 tools</a></td>
+    <td align="center"><a href="#-tools">All 65 tools</a></td>
   </tr>
   <tr>
     <td align="right"><b>💬 Community</b></td>
@@ -230,7 +230,7 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 ## 🧰 Tools
 
-64 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
+65 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
 
 <details>
 <summary><b>📧 Gmail (17)</b></summary>
@@ -240,7 +240,7 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 </details>
 
 <details>
-<summary><b>💬 Discord (46)</b></summary>
+<summary><b>💬 Discord (47)</b></summary>
 
 **Read**: `discord_list_guilds`, `discord_get_guild`, `discord_list_channels`, `discord_get_channel` (with permission overwrites), `discord_read_channel`, `discord_get_message`, `discord_list_pins`, `discord_list_reactions`, `discord_list_members` (search too), `discord_list_roles`, `discord_list_emojis`, `discord_list_scheduled_events`, `discord_list_threads`, `discord_list_invites`, `discord_get_audit_log`, `discord_read_dm`
 
@@ -250,7 +250,7 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 **Forums and webhooks**: `discord_list_forum_tags`, `discord_manage_forum_tag`, `discord_list_webhooks`, `discord_create_webhook`, `discord_send_webhook_message` (the webhook token never leaves the server), `discord_delete_webhook`
 
-**Roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_moderate_member` (kick, ban, unban, timeout)
+**Roles and moderation**: `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_member_role`, `discord_set_nickname`, `discord_moderate_member` (kick, ban, unban, timeout)
 
 </details>
 
@@ -272,7 +272,7 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 ## 🏁 What's built
 
-- [x] **64 tools across three services:** Gmail (17), Discord (46) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
+- [x] **65 tools across three services:** Gmail (17), Discord (47) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
 - [x] **Owner dashboard:** sign in with your key, test each connector, browse the tools, try read-only ones, watch activity, copy client config, and generate your Discord invite link in one click.
 - [x] **One-click deploy to your own Vercel** (Deploy button or one installer command), no database needed.
 - [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).

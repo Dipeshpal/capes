@@ -873,6 +873,28 @@ async def member_role(args):
 
 
 @tool(
+    "discord_set_nickname",
+    "Change a member's nickname, or clear it. Needs Manage Nicknames, which is not in the default invite; add it to the bot's role in Server Settings > Roles if you want this tool. The bot cannot change a member whose top role is above its own.",
+    {
+        "guild_id": GUILD,
+        "user_id": USER,
+        "nick": {"type": "string", "maxLength": 32, "description": "New nickname. Omit or send empty to clear it."},
+        "reason": REASON,
+    },
+    ["guild_id", "user_id"],
+    hint="write",
+)
+async def set_nickname(args):
+    await call(
+        "PATCH",
+        f"/guilds/{args['guild_id']}/members/{args['user_id']}",
+        json_body={"nick": args.get("nick") or None},
+        reason=args.get("reason") or DEFAULT_REASON,
+    )
+    return {"user_id": str(args["user_id"]), "nick": args.get("nick") or None}
+
+
+@tool(
     "discord_moderate_member",
     "Moderate a member: kick, ban, unban, timeout (mute for N minutes) or untimeout. Needs Kick/Ban/Moderate Members. Destructive: confirm with the user first.",
     {
