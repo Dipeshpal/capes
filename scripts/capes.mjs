@@ -3,6 +3,7 @@
 //   node scripts/capes.mjs install    deploy to your Vercel account, then connect your clients
 //   node scripts/capes.mjs connect    connect clients to an existing deployment
 //   node scripts/capes.mjs env        add or update service credentials on an existing deployment (never touches MCP_API_KEY)
+//   node scripts/capes.mjs update     pull the latest capes release into your fork and redeploy
 // Flags: --name --database --encryption-key --dashboard-user --dashboard-password --discord --apify --gmail --gmail-password --telegram --url --key --clients desktop,claude-code,cursor,codex,none
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
@@ -84,6 +85,65 @@ async function addEnv() {
   if (encryptionKey && !flags['encryption-key']) log(`Generated ENCRYPTION_KEY (save this -- losing it makes stored credentials unrecoverable):\n  ${encryptionKey}\n`);
   if (dashboardUser) log(`Dashboard sign-in is now username "${dashboardUser}" and your password, instead of MCP_API_KEY.`);
   log('Open your dashboard\'s Connectors tab and click Test connection to confirm.');
+}
+
+// ---------------------------------------------------------------- update (pull upstream changes into your fork, redeploy)
+const UPSTREAM_URL = 'https://github.com/Dipeshpal/capes.git';
+
+async function update() {
+  log('\ncapes: pull the latest release into your deployment\n');
+  if (run('git', ['rev-parse', '--is-inside-work-tree']).status !== 0) {
+    throw new Error('Run this from inside a clone of your capes fork (git clone https://github.com/<you>/capes.git && cd capes).');
+  }
+  const status = run('git', ['status', '--porcelain']);
+  if (status.stdout.trim()) {
+    throw new Error('You have uncommitted changes. Commit, stash, or discard them first, then run this again:\n' + status.stdout);
+  }
+
+  const remotes = run('git', ['remote']).stdout.split('\n').map((s) => s.trim());
+  if (!remotes.includes('upstream')) {
+    log(`Adding "upstream" remote (${UPSTREAM_URL})...`);
+    const add = run('git', ['remote', 'add', 'upstream', UPSTREAM_URL]);
+    if (add.status !== 0) throw new Error(`Could not add upstream remote:\n${add.stderr || add.stdout}`);
+  }
+
+  log('Fetching the latest changes from Dipeshpal/capes...');
+  const fetch = run('git', ['fetch', 'upstream']);
+  if (fetch.status !== 0) throw new Error(`git fetch failed:\n${fetch.stderr || fetch.stdout}`);
+
+  const branch = run('git', ['branch', '--show-current']).stdout.trim() || 'main';
+  log(`Merging upstream/main into your current branch (${branch})...`);
+  const merge = run('git', ['merge', 'upstream/main', '--no-edit']);
+  if (merge.status !== 0) {
+    throw new Error(
+      `Merge did not complete cleanly, most likely a conflict with changes you made locally:\n${merge.stderr || merge.stdout}\n` +
+        'Resolve the conflict (git status shows which files), then commit and run this command again -- or run `git merge --abort` to back out.',
+    );
+  }
+  log('Merged cleanly.');
+
+  const remoteBranches = run('git', ['branch', '-r']).stdout;
+  if (remoteBranches.includes(`origin/${branch}`)) {
+    log('Pushing to your fork (origin)...');
+    const push = run('git', ['push', 'origin', branch]);
+    if (push.status !== 0) log(`Could not push to origin (continuing anyway; deploying directly instead):\n${push.stderr || push.stdout}`);
+    else log('Pushed. If your Vercel project is connected to this fork on GitHub, it will redeploy automatically in a minute or two.');
+  }
+
+  const vercel = has('vercel') ? ['vercel'] : ['npx', '-y', 'vercel'];
+  const vc = (args, opts) => run(vercel[0], [...vercel.slice(1), ...args], opts);
+  if (vc(['whoami']).status !== 0) {
+    log('\nNot logged in to the Vercel CLI, so skipping a direct deploy.');
+    log('If your project auto-deploys from GitHub, you are done. Otherwise log in (`vercel login`) and run this again, or `vercel deploy --prod` by hand.');
+    return;
+  }
+  const name = flags.name ?? (await ask('Vercel project name (from your Vercel dashboard, or the URL: https://<this>.vercel.app)', 'capes'));
+  const link = vc(['link', '--yes', '--project', name]);
+  if (link.status !== 0) throw new Error(`vercel link failed:\n${link.stderr || link.stdout}`);
+  log('\nDeploying the merged code directly (about a minute)...');
+  const dep = vc(['deploy', '--prod', '--yes']);
+  if (dep.status !== 0) throw new Error(`Deploy failed:\n${dep.stderr || dep.stdout}`);
+  log('\nDone. Database migrations (if any) run automatically on the server\'s next request. MCP_API_KEY and your connected clients are unchanged.');
 }
 
 // ---------------------------------------------------------------- install
@@ -258,7 +318,8 @@ try {
   if (cmd === 'install') await install();
   else if (cmd === 'connect') await connect(flags.url, flags.key);
   else if (cmd === 'env') await addEnv();
-  else log('Usage: node scripts/capes.mjs <install|connect|env>');
+  else if (cmd === 'update') await update();
+  else log('Usage: node scripts/capes.mjs <install|connect|env|update>');
 } catch (e) {
   console.error(`\nError: ${e.message}`);
   process.exitCode = 1;

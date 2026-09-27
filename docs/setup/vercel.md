@@ -137,6 +137,19 @@ You never need to rotate the key on a schedule (it is not tied to the dashboard 
 
 **Do not rotate `ENCRYPTION_KEY` the same casual way.** It decrypts whatever is already stored in `DATABASE_URL`; changing it makes existing stored credentials unreadable (you'd need to re-enter them from the dashboard afterward). Only change it if you believe it leaked, and expect to re-enter connector credentials and re-issue API keys after.
 
+## Updating your deployment
+
+When new features or fixes land in [Dipeshpal/capes](https://github.com/Dipeshpal/capes), pull them into your own deployment:
+
+```bash
+cd capes   # your clone of your fork (or of the repo, if you deployed via Option B/C above)
+node scripts/capes.mjs update
+```
+
+This fetches from the upstream repo, merges into your current branch, pushes to your fork if you have one connected, and deploys directly either way. Database migrations (if any) run automatically the next time the server handles a request -- nothing to run by hand. `MCP_API_KEY` and every client already connected are unaffected.
+
+If it reports a merge conflict (only happens if you've hand-edited a file also changed upstream, like `scripts/capes.mjs` itself), it tells you which files and stops; resolve them the normal git way (`git status`, fix, `git add`, `git commit`), then run the command again -- or `git merge --abort` to back out and stay on your current version.
+
 ## Limits to know (Hobby plan)
 
 - Each request may run for up to 60 seconds (configured in `vercel.json`). Long Apify searches are capped below that.
