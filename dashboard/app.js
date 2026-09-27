@@ -10,7 +10,7 @@
     ['settings', 'Settings'],
   ];
   const $ = (id) => document.getElementById(id);
-  const app = { csrf: null, data: null, tab: 'overview', filter: { text: '', kind: '', connector: '' }, tests: {} };
+  const app = { csrf: null, data: null, tab: 'overview', filter: { text: '', kind: '', connector: '' }, tests: {}, revealedKey: null, keys: null };
 
   // ---- DOM helper: every value is inserted as text, so data can never become markup ----
   function h(tag, props, ...children) {
@@ -193,9 +193,28 @@
               h('a', { class: 'btn small', href: c.guide, target: '_blank', rel: 'noopener noreferrer' }, 'Guide'))),
           result ? h('p', { class: result.ok ? 'small' : 'small error', text: (result.ok ? 'OK: ' : 'Failed: ') + result.detail }) : null,
           c.id === 'discord' && c.configured ? inviteBlock() : null,
+          c.db_backed && d.settings.db_configured ? credentialForm(c) : null,
         );
       })),
     );
+  }
+
+  function credentialForm(c) {
+    const form = h('form', { class: 'stack' },
+      ...c.env.map((name) => h('div', {}, h('label', { for: 'cred-' + name, text: name }), h('input', { id: 'cred-' + name, name, type: 'password', autocomplete: 'off', placeholder: 'Leave blank to keep unchanged' }))),
+      h('button', { class: 'btn small', type: 'submit' }, 'Save credentials'));
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const values = {};
+      for (const name of c.env) { const v = form.elements[name].value; if (v) values[name] = v; }
+      if (!Object.keys(values).length) { toast('Nothing entered'); return; }
+      try {
+        await api('/connectors/' + c.id + '/secrets', { method: 'PUT', body: { values } });
+        await load();
+        toast('Saved. Stored encrypted in the database.');
+      } catch (ex) { toast(ex.message); }
+    };
+    return h('details', {}, h('summary', { text: 'Set credentials here (stored encrypted in the database)' }), form);
   }
 
   function inviteBlock() {
@@ -287,10 +306,69 @@
     );
   }
 
-  function settings() {
+  function revealedKeyBanner() {
+    const k = app.revealedKey;
+    return h('div', { class: 'banner ok stack' },
+      h('p', {}, h('b', {}, 'New key created. '), 'Copy it now; it will not be shown again.'),
+      h('div', { class: 'row' }, h('code', { text: k.key }), h('button', { class: 'btn small', type: 'button', onclick: () => copy(k.key) }, 'Copy')),
+      h('button', { class: 'btn small', type: 'button', onclick: () => { app.revealedKey = null; render(); } }, "I've saved it"));
+  }
+
+  async function revokeKey(id) {
+    if (!confirm('Revoke this key? Any client using it stops working immediately.')) return;
+    try { await api('/keys/' + id, { method: 'DELETE', body: {} }); render(); } catch (ex) { toast(ex.message); }
+  }
+
+  async function apiKeysCard() {
+    const k = await api('/keys');
+    if (!k.db_configured) {
+      return h('div', { class: 'card stack' }, h('h3', { text: 'API keys' }),
+        h('p', { class: 'muted', text: 'MCP_API_KEY (the environment variable) is always your one key. Add DATABASE_URL to issue additional, labelled, expiring keys from here without redeploying.' }));
+    }
+    if (k.degraded) {
+      return h('div', { class: 'card stack' }, h('h3', { text: 'API keys' }),
+        h('div', { class: 'banner bad', text: 'The database is configured but not reachable right now, so additional keys cannot be listed or managed. MCP_API_KEY (the environment variable) still works.' }));
+    }
+    const rows = k.keys.map((key) => {
+      const expired = key.expires_at && new Date(key.expires_at) < new Date();
+      const status = key.revoked_at ? 'Revoked' : expired ? 'Expired' : 'Active';
+      return h('tr', {},
+        h('td', { text: key.label || '(unlabeled)' }),
+        h('td', { class: 'muted', text: key.created_at.slice(0, 10) }),
+        h('td', { class: 'muted', text: key.expires_at ? key.expires_at.slice(0, 10) : 'Never' }),
+        h('td', {}, badge(status, status === 'Active' ? 'ok' : status === 'Revoked' ? 'bad' : 'warn')),
+        h('td', {}, status === 'Active' ? h('button', { class: 'btn small', type: 'button', onclick: () => revokeKey(key.id) }, 'Revoke') : null));
+    });
+    const form = h('form', { class: 'row' },
+      h('input', { name: 'label', type: 'text', placeholder: 'Label (optional)', maxlength: '60' }),
+      h('select', { name: 'expires_days' },
+        h('option', { value: '' }, 'Never expires'),
+        h('option', { value: '30' }, '30 days'),
+        h('option', { value: '90' }, '90 days'),
+        h('option', { value: '365' }, '1 year')),
+      h('button', { class: 'btn small', type: 'submit' }, 'Create key'));
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const label = form.elements.label.value;
+      const days = form.elements.expires_days.value;
+      try {
+        app.revealedKey = await api('/keys', { method: 'POST', body: { label: label || null, expires_days: days ? Number(days) : null } });
+        render();
+      } catch (ex) { toast(ex.message); }
+    };
+    return h('div', { class: 'card stack' },
+      h('h3', { text: 'API keys' }),
+      h('p', { class: 'muted', text: 'Additional keys for the MCP endpoint, on top of MCP_API_KEY. Stored hashed; the plaintext is shown only once, right after creation.' }),
+      app.revealedKey ? revealedKeyBanner() : null,
+      k.keys.length ? h('div', { class: 'table-wrap' }, h('table', {}, h('thead', {}, h('tr', {}, ['Label', 'Created', 'Expires', 'Status', ''].map((x) => h('th', { text: x })))), h('tbody', {}, rows))) : h('p', { class: 'muted small', text: 'No additional keys yet.' }),
+      form);
+  }
+
+  async function settings() {
     const d = app.data;
     return h('div', { class: 'stack' },
       h('div', { class: 'section-head' }, h('h1', { text: 'Settings' })),
+      await apiKeysCard(),
       h('div', { class: 'card stack' },
         h('h3', { text: 'Read-only mode' }),
         h('p', { class: 'muted', text: 'Hides every tool that sends, changes or deletes something. Clients can only read. Useful when you want an assistant to look but never act.' }),
