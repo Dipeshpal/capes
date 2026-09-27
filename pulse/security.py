@@ -14,6 +14,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import HTTPException, Request
 
 MIN_KEY_LENGTH = 24
+MIN_PASSWORD_LENGTH = 8
 
 
 def _session_ttl() -> int:
@@ -103,6 +104,7 @@ SECRET_ENV = (
     "UPSTASH_REDIS_REST_TOKEN",
     "ENCRYPTION_KEY",
     "DATABASE_URL",
+    "DASHBOARD_PASSWORD",
 )
 _WEBHOOK_TOKEN_IN_URL = re.compile(r"(/webhooks/\d+/)[A-Za-z0-9_\-.]+")
 
@@ -124,6 +126,35 @@ def redact(text: str) -> str:
 def key_matches(supplied: str) -> bool:
     legacy = api_key()
     return bool(legacy) and secrets.compare_digest(supplied.encode(), legacy.encode())
+
+
+# ---------------------------------------------------------------------------
+# Dashboard username/password login (independent of MCP_API_KEY, which then only guards /mcp)
+# ---------------------------------------------------------------------------
+
+
+def dashboard_credentials() -> tuple[str, str] | None:
+    """(user, password) if DASHBOARD_USER and DASHBOARD_PASSWORD are both set, else None (legacy MCP_API_KEY login)."""
+    user = os.getenv("DASHBOARD_USER", "").strip()
+    password = os.getenv("DASHBOARD_PASSWORD", "")
+    if not user or not password:
+        return None
+    if len(password) < MIN_PASSWORD_LENGTH:
+        raise HTTPException(500, f"DASHBOARD_PASSWORD must be at least {MIN_PASSWORD_LENGTH} characters")
+    return user, password
+
+
+def login_mode() -> str:
+    """'userpass' if DASHBOARD_USER/DASHBOARD_PASSWORD are configured, else 'key' (legacy MCP_API_KEY login)."""
+    return "userpass" if dashboard_credentials() else "key"
+
+
+def credentials_match(user: str, password: str) -> bool:
+    creds = dashboard_credentials()
+    if creds is None:
+        return False
+    expected_user, expected_password = creds
+    return secrets.compare_digest(user.encode(), expected_user.encode()) and secrets.compare_digest(password.encode(), expected_password.encode())
 
 
 # ---------------------------------------------------------------------------
@@ -162,9 +193,10 @@ def _unb64(text: str) -> bytes:
 
 
 def _signing_key() -> bytes:
-    secret = api_key() or os.getenv("ENCRYPTION_KEY", "")
+    creds = dashboard_credentials()
+    secret = creds[1] if creds else (api_key() or os.getenv("ENCRYPTION_KEY", ""))
     if not secret:
-        raise HTTPException(500, "Set MCP_API_KEY or ENCRYPTION_KEY on the server before signing in")
+        raise HTTPException(500, "Set DASHBOARD_USER/DASHBOARD_PASSWORD, MCP_API_KEY or ENCRYPTION_KEY on the server before signing in")
     return hmac.new(secret.encode(), b"pulse-dashboard-session-v1", hashlib.sha256).digest()
 
 

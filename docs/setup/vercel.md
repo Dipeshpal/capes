@@ -19,17 +19,21 @@ You need **two different** long random strings you make up. `MCP_API_KEY` is any
 | Node.js | `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"` |
 | No terminal | a password manager's generator: 32+ random characters |
 
-Copy both results into a password manager. You will paste `MCP_API_KEY` into Vercel, into your AI client, and use it to sign in to the dashboard. `ENCRYPTION_KEY` only goes into Vercel. Do not commit or share either.
+Copy both results into a password manager. You will paste `MCP_API_KEY` into Vercel, into your AI client, and use it to sign in to the dashboard (unless you also set up `DASHBOARD_USER`/`DASHBOARD_PASSWORD` below, in which case those sign in to the dashboard instead). `ENCRYPTION_KEY` only goes into Vercel. Do not commit or share either.
+
+**Optional: a separate dashboard login.** By default the dashboard login is `MCP_API_KEY` itself. To use a real username and password instead -- so the API key and the dashboard login are two different secrets -- also set `DASHBOARD_USER` (any name) and `DASHBOARD_PASSWORD` (8+ characters) in step 4. Skip this if you're fine signing in with `MCP_API_KEY`.
 
 ## 3. Get a database (`DATABASE_URL`)
 
 Capes needs a Postgres database for connector credentials, extra API keys, and (later) Gmail OAuth. Any Postgres works; the fastest free option:
 
 1. Go to [supabase.com](https://supabase.com), sign up, and create a new project (pick any region, set a project password).
-2. Once it's ready: **Project Settings > Database > Connection string**, choose **Session pooler** (works well with serverless), and copy the URI. Replace `[YOUR-PASSWORD]` in it with the password you set.
+2. Once it's ready: **Project Settings > Database > Connection string**, choose **Session pooler**, and copy the URI. Replace `[YOUR-PASSWORD]` in it with the password you set.
 3. That full string is your `DATABASE_URL`.
 
-Already running Postgres elsewhere (Neon, Railway, your own server)? Any standard `postgres://` connection string works the same way.
+**Use the Session pooler, not Direct connection.** Supabase shows both on the same screen. Direct connection (host like `db.<ref>.supabase.co`, port 5432) is IPv6-only, and Vercel functions cannot reach it -- the dashboard will show "configured but not reachable" if you use it. Session pooler (host like `aws-0-<region>.pooler.supabase.com`) works over IPv4 and is what you want.
+
+Already running Postgres elsewhere (Neon, Railway, your own server)? Any standard `postgres://` connection string works the same way, as long as it's reachable over IPv4.
 
 ## 4. Deploy
 
@@ -99,9 +103,10 @@ Set these under **Project > Settings > Environment Variables** (Production), or 
 
 | Variable | Required | Where it comes from |
 |----------|----------|---------------------|
-| `MCP_API_KEY` | Yes | You generate it (step 2). At least 24 characters. |
+| `MCP_API_KEY` | Yes | You generate it (step 2). At least 24 characters. Protects `/mcp`; also the dashboard login unless `DASHBOARD_USER`/`DASHBOARD_PASSWORD` (below) are set. |
 | `DATABASE_URL` | Yes | Any Postgres connection string (step 3: Supabase, Neon, etc). Stores connector credentials and extra MCP API keys, managed from the dashboard. |
 | `ENCRYPTION_KEY` | Yes | You generate it (step 2), different from `MCP_API_KEY`. Encrypts anything stored in the database; losing it makes stored credentials unrecoverable. |
+| `DASHBOARD_USER`, `DASHBOARD_PASSWORD` | No | Set both to sign in to `/dashboard` with a real username and password instead of `MCP_API_KEY`, so the API key and the dashboard login are separate secrets. `DASHBOARD_PASSWORD` must be at least 8 characters. |
 | `DISCORD_BOT_TOKEN` | For Discord | [Discord guide](discord.md) (or set from the dashboard's Connectors tab once `DATABASE_URL` is set) |
 | `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) |
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) (or set from the dashboard's Connectors tab) |

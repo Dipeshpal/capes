@@ -15,12 +15,21 @@
   <section id="login" class="login" hidden aria-labelledby="login-title">
     <form id="login-form" class="card login-card" autocomplete="on">
       <h1 id="login-title">Capes</h1>
-      <p class="muted">Sign in with your <code>MCP_API_KEY</code>.</p>
-      <label for="key">MCP API key</label>
-      <input id="key" name="password" type="password" autocomplete="current-password" required minlength="24" spellcheck="false">
+      <div id="login-key-mode">
+        <p class="muted">Sign in with your <code>MCP_API_KEY</code>.</p>
+        <label for="key">MCP API key</label>
+        <input id="key" name="password" type="password" autocomplete="current-password" minlength="24" spellcheck="false">
+      </div>
+      <div id="login-userpass-mode" hidden>
+        <p class="muted">Sign in with your dashboard username and password.</p>
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" spellcheck="false">
+        <label for="user-password">Password</label>
+        <input id="user-password" name="user-password" type="password" autocomplete="current-password" spellcheck="false">
+      </div>
       <p id="login-error" class="error" role="alert" hidden></p>
       <button class="btn primary" type="submit">Sign in</button>
-      <p class="muted small">The key is the one you set on Vercel. It is never stored in the browser; a signed, HttpOnly session cookie is used.</p>
+      <p class="muted small">Set on Vercel. Never stored in the browser; a signed, HttpOnly session cookie is used.</p>
     </form>
   </section>
 

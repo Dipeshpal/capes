@@ -183,5 +183,14 @@ check("revoking an unknown id reports not-found", run(apikeys.revoke_key(str(uui
 
 del os.environ["ENCRYPTION_KEY"]
 
+# ---------------------------------------------------------------- Supabase Direct-connection hint
+
+check("no hint for a normal (pooler-style) DATABASE_URL", db._connect_hint() == "")
+os.environ["DATABASE_URL"] = "postgresql://postgres:secret@db.abcdefghijklmnop.supabase.co:5432/postgres"
+check("Supabase Direct connection URL gets an actionable hint", "Session pooler" in db._connect_hint() and "IPv6" in db._connect_hint())
+os.environ["DATABASE_URL"] = "postgresql://postgres.abcdefgh:secret@aws-0-us-east-1.pooler.supabase.com:5432/postgres"
+check("Supabase Session pooler URL gets no hint", db._connect_hint() == "")
+del os.environ["DATABASE_URL"]
+
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)
