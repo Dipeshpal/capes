@@ -1,6 +1,6 @@
 {
   ".claude/settings.json": "6a73aa3524ff68e3edc592846896755e9410ad87ab53da10fa49008bd252f1de",
-  ".claude/skills/add-tool/template.py.txt": "3600277623cd59974b14d17508c2cadf47ae429929913dcb3eac297c451455a5",
+  ".claude/skills/add-tool/template.py.txt": "1a93be8ce1919e3c1bf7be3b6ce45c61f6d7ea69440d3fe6e9dad366081eb47f",
   ".claude/skills/security-audit/scan.sh": "59140c1ec7de925adf42c52aab371335b361e790592313928afdec02bb9832b1",
   ".github/FUNDING.yml": "ba3146bc926960672f023b98aafd73c9e3ffe737a788d9bfe419385bad82d3df",
   ".github/dependabot.yml": "e355c2fd8769e2be7ea27a63ea574fa64dd24254d92ddd547456b53712283ccd",

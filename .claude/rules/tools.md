@@ -14,5 +14,5 @@ paths:
 - Return small dicts/lists with only the useful fields. Convert upstream payloads instead of passing them through.
 - Snowflake IDs and other big integers are strings in schemas.
 - Blocking libraries (imaplib, smtplib) run inside `asyncio.to_thread`; network code with `aiohttp` sets an explicit timeout under 60 s (Vercel `maxDuration`).
-- Read secrets from `os.getenv` inside the function, never at import time, so a missing token only breaks that service.
-- New module? Import it in `api/index.py` so it registers. Then update `README.md` (tool list), `.env.example` and add a test.
+- Read secrets inside the function, never at import time, so a missing token only breaks that service. Prefer `await creds.get("NAME")` (checks the database, then falls back to `os.getenv`) over `os.getenv` directly, so the same connector works for both env-var and dashboard-managed credentials with no extra code -- see [Add a service](../../docs/project/contributing.md#add-a-service) for the full pattern, including the synchronous-library case (Gmail).
+- New module? Import it in `api/index.py` **and** `scripts/gen_tools_doc.py` (separate import, easy to miss). Then update `README.md` (tool list), `.env.example` and add a test.

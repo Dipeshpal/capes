@@ -1,16 +1,15 @@
 """<Service> tools. Requires <SERVICE_TOKEN>."""
 
-import os
-
 import aiohttp
 
+from . import creds
 from .registry import ToolError, tool
 
 API = "https://api.example.invalid/v1"
 
 
 async def call(method: str, path: str, **kwargs):
-    token = os.getenv("SERVICE_TOKEN")
+    token = await creds.get("SERVICE_TOKEN")  # checks the database first, then the env var of the same name
     if not token:
         raise ToolError("SERVICE_TOKEN is not set on the server (see docs/setup/<service>.md)")
     async with aiohttp.ClientSession() as session:

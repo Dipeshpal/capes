@@ -12,7 +12,7 @@
     { "id": "client", "type": "external", "label": "AI client", "sublabel": "Claude, Codex, Cursor" },
     { "id": "mcp", "type": "backend", "label": "POST /mcp", "sublabel": "JSON-RPC handler" },
     { "id": "guard", "type": "security", "label": "Guard", "sublabel": "key, schema, policy" },
-    { "id": "tool", "type": "backend", "label": "Tool", "sublabel": "Gmail, Discord, X" },
+    { "id": "tool", "type": "backend", "label": "Tool", "sublabel": "Gmail, Discord, X, Telegram" },
     { "id": "service", "type": "external", "label": "Service", "sublabel": "upstream API" },
     { "id": "log", "type": "database", "label": "Activity log", "sublabel": "names and results only" }
   ],
@@ -23,7 +23,7 @@
   ],
   "messages": [
     { "id": "call", "from": "client", "to": "mcp", "y": 165, "label": "tools/call + Bearer key", "variant": "emphasis" },
-    { "id": "check", "from": "mcp", "to": "guard", "y": 196, "label": "key, arguments, policy", "variant": "security" },
+    { "id": "check", "from": "mcp", "to": "guard", "y": 196, "label": "key (env or DB), args, policy", "variant": "security" },
     { "id": "verdict", "from": "guard", "to": "mcp", "y": 227, "label": "allowed or refused", "variant": "return" },
     { "id": "run", "from": "mcp", "to": "tool", "y": 268, "label": "run the tool" },
     { "id": "upstream", "from": "tool", "to": "service", "y": 299, "label": "call with your token" },
@@ -41,7 +41,7 @@
   ],
   "cards": [
     { "dot": "cyan", "title": "Check first", "items": ["A wrong key stops at the door", "Bad arguments never reach a service", "Disabled tools and read-only mode refuse writes"] },
-    { "dot": "emerald", "title": "Run with your token", "items": ["The token is read from Vercel env vars", "Results are trimmed to the useful fields"] },
+    { "dot": "emerald", "title": "Run with your token", "items": ["The token comes from Vercel env vars, or your encrypted Postgres", "Results are trimmed to the useful fields"] },
     { "dot": "rose", "title": "Leave no secrets", "items": ["Errors and results are redacted", "The log keeps names and outcomes, not content"] }
   ]
 }

@@ -12,7 +12,11 @@
 /pulse/store.py            @Dipeshpal
 /pulse/mcp.py              @Dipeshpal
 /pulse/dashboard.py        @Dipeshpal
+/pulse/db.py               @Dipeshpal
+/pulse/creds.py            @Dipeshpal
+/pulse/apikeys.py          @Dipeshpal
 /dashboard/                @Dipeshpal
+/migrations/               @Dipeshpal
 /vercel.json               @Dipeshpal
 /requirements.txt          @Dipeshpal
 /.vercelignore             @Dipeshpal

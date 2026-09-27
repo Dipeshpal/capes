@@ -7,8 +7,9 @@ paths:
 
 # Gmail module rules
 
-- Transport is IMAP (`imap.gmail.com:993`) and SMTP (`smtp.gmail.com:465`) with an app password. There is deliberately no Google Cloud/OAuth dependency.
+- Transport is IMAP (`imap.gmail.com:993`) and SMTP (`smtp.gmail.com:465`) with an app password. There is deliberately no Google Cloud/OAuth dependency yet (tracked in issue #36; Google's verification requirements for the Gmail scope on an unverified app are the open question, not the code).
 - One `Mailbox` context manager per tool call. Do not cache connections across calls (serverless).
+- Credentials (`GMAIL_ADDRESS`/`GMAIL_APP_PASSWORD`) can come from the database as well as env vars, via `creds.get()`. Because `imaplib`/`smtplib` are synchronous, every tool routes its blocking work through `run()`, which fetches credentials asynchronously and hands them into the worker thread through the `_creds_ctx` `ContextVar` (`asyncio.to_thread` copies the calling context, so this is the only clean way to get an async-fetched value into sync code). Never add a new `Mailbox()` call site that bypasses `run()`/`session()` -- it won't see database-stored credentials, only env vars.
 - Message ids are IMAP UIDs in the All Mail folder. Trash and Spam are not in All Mail, so they are not searchable. Find special folders through IMAP special-use flags (`\All`, `\Drafts`, `\Trash`, `\Junk`), never by English names, so localized accounts work.
 - Search uses `X-GM-RAW` with the query sent as an IMAP literal (`m.literal`) and `CHARSET UTF-8`, so any Gmail search syntax and non-ASCII text works.
 - Always pass mailbox names through `quote()`; `imaplib` does not.

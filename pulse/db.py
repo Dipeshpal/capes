@@ -99,8 +99,3 @@ async def execute(query: str, *args):
         raise
     except (OSError, asyncpg.PostgresError) as e:
         raise DatabaseUnavailable("Database query failed") from e
-
-
-def reset_for_tests() -> None:
-    global _pool, _migrated
-    _pool, _migrated = None, False

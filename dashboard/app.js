@@ -9,7 +9,7 @@
     ['settings', 'Settings'],
   ];
   const $ = (id) => document.getElementById(id);
-  const app = { csrf: null, data: null, tab: 'overview', filter: { text: '', kind: '', connector: '' }, tests: {}, revealedKey: null, keys: null };
+  const app = { csrf: null, data: null, tab: 'overview', filter: { text: '', kind: '', connector: '' }, tests: {}, revealedKey: null };
 
   // ---- DOM helper: every value is inserted as text, so data can never become markup ----
   function h(tag, props, ...children) {
@@ -384,7 +384,7 @@
             h('p', { class: 'muted small', text: 'Optional: connect a free Redis database (vercel integration add upstash) only if you want to flip switches from this page without redeploying.' }))),
       h('div', { class: 'card stack' },
         h('h3', { text: 'Security' }),
-        h('p', { class: 'muted', text: `You stay signed in for ${d.settings.session_hours} hours, then you sign in again with your key. You never need to change the key on a schedule; change it only if you think it leaked (that also signs everyone out). Anyone with the key controls your connected accounts, so keep it private.` }),
+        h('p', { class: 'muted', text: `You stay signed in for ${d.settings.session_hours} hours, then you sign in again. You never need to change your login on a schedule; change it only if you think it leaked (that also signs everyone out). Anyone who can sign in here controls your connected accounts, so keep your credentials private.` }),
         h('button', { class: 'btn', type: 'button', onclick: () => $('logout').click() }, 'Sign out')),
     );
   }

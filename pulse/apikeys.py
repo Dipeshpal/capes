@@ -5,6 +5,7 @@ these are additional keys layered on top, managed from the dashboard's Settings 
 """
 
 import secrets
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from . import db, security
@@ -48,7 +49,8 @@ async def revoke_key(key_id: str) -> bool:
     if not db.configured():
         raise db.DatabaseUnavailable("No database configured")
     try:
-        result = await db.execute("update api_keys set revoked_at = now() where id = $1::uuid and revoked_at is null", key_id)
-    except db.DatabaseUnavailable:
-        return False
+        uuid.UUID(key_id)
+    except ValueError:
+        return False  # not a real id, so it can't match a row -- distinct from the database being unreachable
+    result = await db.execute("update api_keys set revoked_at = now() where id = $1::uuid and revoked_at is null", key_id)
     return result != "UPDATE 0"
