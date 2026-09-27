@@ -30,6 +30,7 @@ CONNECTORS = (
         "discord", "Discord", "discord_", ("DISCORD_BOT_TOKEN",), "docs/setup/discord.md", "Read and manage servers, channels, threads, roles and messages."
     ),
     Connector("apify", "Apify (X/Twitter search)", "twitter_", ("APIFY_TOKEN",), "docs/setup/apify.md", "Search tweets through an Apify scraper."),
+    Connector("telegram", "Telegram", "telegram_", ("TELEGRAM_BOT_TOKEN",), "docs/setup/telegram.md", "Send messages, read chats, poll updates."),
 )
 BY_ID = {c.id: c for c in CONNECTORS}
 
@@ -95,6 +96,11 @@ async def test_connection(connector_id: str) -> dict:
                     return {"ok": False, "detail": f"Apify answered {resp.status}: check the token."}
             data = body.get("data", {})
             return {"ok": True, "detail": f"Apify account '{data.get('username')}' ({(data.get('plan') or {}).get('id', 'plan unknown')})."}
+        if c.id == "telegram":
+            from . import telegram
+
+            me = await telegram.call("getMe", {})
+            return {"ok": True, "detail": f"Bot @{me.get('username')} ({me.get('first_name')})."}
     except ToolError as e:
         return {"ok": False, "detail": redact(str(e))[:300]}
     except Exception as e:

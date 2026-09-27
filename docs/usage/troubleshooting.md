@@ -1,6 +1,6 @@
 # Troubleshooting
 
-Find your symptom, apply the fix, retry. Service-specific problems also have a table at the end of each guide: [Vercel](../setup/vercel.md), [Discord](../setup/discord.md), [Gmail](../setup/gmail.md), [Apify](../setup/apify.md).
+Find your symptom, apply the fix, retry. Service-specific problems also have a table at the end of each guide: [Vercel](../setup/vercel.md), [Discord](../setup/discord.md), [Gmail](../setup/gmail.md), [Apify](../setup/apify.md), [Telegram](../setup/telegram.md).
 
 ## Connecting
 
@@ -40,6 +40,7 @@ More in the [Dashboard guide](dashboard.md#troubleshooting).
 | `Discord ... Missing Permissions` | Re-authorize the bot and raise its role ([Discord guide](../setup/discord.md#5-put-the-bots-role-high-enough)). |
 | `Gmail login failed` | Use the app password ([Gmail guide](../setup/gmail.md#2-create-the-app-password)). |
 | `Apify API ...` | See the table in the [Apify guide](../setup/apify.md#common-problems). |
+| `Telegram API ...` | See the table in the [Telegram guide](../setup/telegram.md#common-problems). |
 | A request takes very long and times out | Vercel stops requests after 60 seconds. Ask for fewer results. |
 
 ## Installer

@@ -59,7 +59,7 @@ def verify_bearer(authorization: str | None) -> None:
         raise HTTPException(403, "Invalid API key")
 
 
-SECRET_ENV = ("MCP_API_KEY", "DISCORD_BOT_TOKEN", "APIFY_TOKEN", "GMAIL_APP_PASSWORD", "KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN")
+SECRET_ENV = ("MCP_API_KEY", "DISCORD_BOT_TOKEN", "APIFY_TOKEN", "GMAIL_APP_PASSWORD", "TELEGRAM_BOT_TOKEN", "KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN")
 _WEBHOOK_TOKEN_IN_URL = re.compile(r"(/webhooks/\d+/)[A-Za-z0-9_\-.]+")
 
 

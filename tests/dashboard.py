@@ -245,8 +245,8 @@ login(c)
 state = c.get("/dashboard/api/state").json()
 blob = json.dumps(state) + json.dumps(c.get("/dashboard/api/activity").json())
 check(
-    "state has 3 connectors and every tool",
-    [x["id"] for x in state["connectors"]] == ["gmail", "discord", "apify"] and state["server"]["tools_total"] == len(TOOLS),
+    "state has 4 connectors and every tool",
+    [x["id"] for x in state["connectors"]] == ["gmail", "discord", "apify", "telegram"] and state["server"]["tools_total"] == len(TOOLS),
 )
 check("no secret values in state/activity", SECRET_TOKEN not in blob and KEY not in blob and "GMAIL_APP_PASSWORD=" not in blob)
 disc = next(x for x in state["connectors"] if x["id"] == "discord")

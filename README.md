@@ -6,7 +6,7 @@
 
 ### Give Claude, Codex, Cursor and any MCP client hands: your Gmail, Discord and X, through one private server you own.
 
-[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-65-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
+[![CI](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Dipeshpal/capes/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Tools](https://img.shields.io/badge/tools-68-7c3aed) ![Database](https://img.shields.io/badge/database-none%20needed-2ea44f) ![Runs on](https://img.shields.io/badge/runs%20on-Vercel%20free%20tier-000000?logo=vercel&logoColor=white) ![MCP](https://img.shields.io/badge/protocol-MCP-e0459b) [![Stars](https://img.shields.io/github/stars/Dipeshpal/capes?style=social)](https://github.com/Dipeshpal/capes)
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes&env=MCP_API_KEY&envDescription=MCP_API_KEY%20is%20any%20long%20random%20string%20you%20make%20up%20(24%2B%20characters).%20It%20is%20the%20only%20required%20variable%3B%20add%20service%20credentials%20on%20this%20same%20screen%20or%20afterward.&envLink=https%3A%2F%2Fgithub.com%2FDipeshpal%2Fcapes%2Fblob%2Fmain%2Fdocs%2Fsetup%2Fvercel.md&project-name=capes&repository-name=capes)
 
@@ -27,7 +27,7 @@
     <td align="right"><b>⚙️ Reference</b></td>
     <td align="center"><a href="#-services-and-credentials">Services</a></td>
     <td align="center"><a href="#-the-dashboard">Dashboard</a></td>
-    <td align="center"><a href="#-tools">All 65 tools</a></td>
+    <td align="center"><a href="#-tools">All 68 tools</a></td>
   </tr>
   <tr>
     <td align="right"><b>💬 Community</b></td>
@@ -55,7 +55,7 @@
 
 </div>
 
-Fresh Vercel deploy, checking connectors, browsing all 65 tools, connecting a client, and asking Claude to use it.
+Fresh Vercel deploy, checking connectors, browsing all 68 tools, connecting a client, and asking Claude to use it.
 
 ## ✨ What you get
 
@@ -66,6 +66,7 @@ AI assistants read, summarise and act well, but your real work lives in accounts
 | 📧 **Gmail** (17 tools) | Search with Gmail syntax, read, send, reply, forward, drafts, labels, archive, trash. No Google Cloud project, just an app password. |
 | 💬 **Discord** (47 tools) | Read and post, edit, delete, react, threads, forums, polls, files, webhooks, channels, roles, permissions, moderation, audit log. |
 | 🐦 **X / Twitter** (1 tool) | Search tweets through an Apify scraper. |
+| ✈️ **Telegram** (3 tools) | Send messages, get chat info, poll recent updates. |
 | 🖥️ **Dashboard** | Test each service's credentials, browse and try the tools, watch recent activity, copy ready-made client config. |
 | 🛡️ **Limits you control** | Turn a service or a single tool off, or make the whole server read-only. Tools are labelled read, write or destructive. |
 | 🔑 **You own it** | Your credentials live only in your Vercel project. No central service, no account with us, no database. |
@@ -138,6 +139,7 @@ Click a guide for the exact steps, permissions and limits of each service.
 | **Gmail** | Read, send and organize email (free, no Google Cloud project) | `GMAIL_ADDRESS` and an app password `GMAIL_APP_PASSWORD` | [Google app passwords](https://myaccount.google.com/apppasswords) | [Gmail setup](docs/setup/gmail.md) |
 | **Discord** | Read and manage servers, channels, messages, roles | Bot token `DISCORD_BOT_TOKEN`, bot invited with permissions | [Developer Portal](https://discord.com/developers/applications) | [Discord setup](docs/setup/discord.md) |
 | **Apify** (for X/Twitter) | Search tweets | API token `APIFY_TOKEN` | [Apify API settings](https://console.apify.com/settings/integrations) | [Apify setup](docs/setup/apify.md) |
+| **Telegram** | Send messages, read chats, poll updates | Bot token `TELEGRAM_BOT_TOKEN` | [@BotFather](https://t.me/BotFather) | [Telegram setup](docs/setup/telegram.md) |
 | *Database* | **Not needed.** Nothing is stored on the server. | (Advanced, optional: a free Redis via `vercel integration add upstash` lets the dashboard flip switches without redeploying.) | [Vercel Marketplace](https://vercel.com/marketplace/upstash) | [Dashboard guide](docs/usage/dashboard.md#switches-read-only-mode-and-where-settings-are-stored) |
 
 Only `MCP_API_KEY` is required. A tool whose credentials are missing returns a clear message instead of failing.
@@ -230,7 +232,7 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 ## 🧰 Tools
 
-65 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
+68 tools. The lists below are the quick view; [docs/usage/tools.md](docs/usage/tools.md) is the generated reference with every tool's description, kind and arguments.
 
 <details>
 <summary><b>📧 Gmail (17)</b></summary>
@@ -261,6 +263,13 @@ Sending mail and messages cannot be undone, so ask for a draft first when it mat
 
 </details>
 
+<details>
+<summary><b>✈️ Telegram (3)</b></summary>
+
+`telegram_send_message`, `telegram_get_chat`, `telegram_get_updates`
+
+</details>
+
 Tools are flagged read, write or destructive so clients can ask before risky calls, and you can switch any of them off in the dashboard. Discord channel and thread IDs are interchangeable wherever a `channel_id` is asked for.
 
 ## ✅ Check that it works
@@ -272,7 +281,7 @@ Tools are flagged read, write or destructive so clients can ask before risky cal
 
 ## 🏁 What's built
 
-- [x] **65 tools across three services:** Gmail (17), Discord (47) and X search (1). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
+- [x] **68 tools across four services:** Gmail (17), Discord (47), X search (1) and Telegram (3). The Discord toolkit covers messages, DMs, files, polls, threads, forums, webhooks, channels, roles, permissions, moderation, invites and the audit log.
 - [x] **Owner dashboard:** sign in with your key, test each connector, browse the tools, try read-only ones, watch activity, copy client config, and generate your Discord invite link in one click.
 - [x] **One-click deploy to your own Vercel** (Deploy button or one installer command), no database needed.
 - [x] **Works in Claude Desktop, Claude Code, Cursor and Codex** (and any client that speaks MCP over HTTP).

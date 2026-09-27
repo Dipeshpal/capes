@@ -87,6 +87,7 @@ Set these under **Project > Settings > Environment Variables** (Production), or 
 | `DISCORD_BOT_TOKEN` | For Discord | [Discord guide](discord.md) |
 | `GMAIL_ADDRESS`, `GMAIL_APP_PASSWORD` | For Gmail | [Gmail guide](gmail.md) |
 | `APIFY_TOKEN` | For X/Twitter search | [Apify guide](apify.md) |
+| `TELEGRAM_BOT_TOKEN` | For Telegram | [Telegram guide](telegram.md) |
 | `KV_REST_API_URL`, `KV_REST_API_TOKEN` | For dashboard switches | Set by `vercel integration add upstash` (`UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` also work) |
 | `PULSE_SESSION_HOURS` | No | How long a dashboard sign-in lasts, 1 to 168 hours (default 8). Then you sign in again with your key. |
 | `PULSE_READ_ONLY` | No | `1` hides every tool that changes anything. Cannot be undone from the dashboard. |
