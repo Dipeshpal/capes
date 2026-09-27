@@ -1,6 +1,6 @@
 # Tool reference
 
-65 tools.
+68 tools.
 
 Generated from the code by `python scripts/gen_tools_doc.py`. Do not edit by hand; change the tool's description or schema in `pulse/` and regenerate.
 
@@ -91,3 +91,13 @@ Needs `APIFY_TOKEN`. Setup: [Apify guide](../setup/apify.md).
 | Tool | Kind | What it does | Arguments |
 |------|------|--------------|-----------|
 | `twitter_search` | read | Search tweets on X/Twitter via Apify (needs APIFY_TOKEN). | `query*`, `limit` |
+
+## Telegram
+
+Needs `TELEGRAM_BOT_TOKEN`. Setup: [Telegram guide](../setup/telegram.md).
+
+| Tool | Kind | What it does | Arguments |
+|------|------|--------------|-----------|
+| `telegram_send_message` | write | Send a text message to a Telegram chat (user, group or channel the bot is a member of). | `chat_id*`, `text*`, `parse_mode`, `disable_notification` |
+| `telegram_get_chat` | read | Get basic info about a chat: title, type, description, member count where available. | `chat_id*` |
+| `telegram_get_updates` | read | Poll recent incoming updates (messages, edits, etc.) the bot has received. Only for bots without a webhook set; each update is returned once, then marked read. | `limit`, `timeout_seconds` |

@@ -22,6 +22,7 @@ from pulse import (  # noqa: F401  (importing registers the tools)
     discord,
     gmail,
     security,
+    telegram,
     twitter,
 )
 from pulse.dashboard import router as dashboard_router

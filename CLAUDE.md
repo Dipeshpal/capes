@@ -1,6 +1,6 @@
 # Capes
 
-Personal MCP server for Gmail, Discord and X/Twitter (via Apify), deployed by each user to their own Vercel account, with an owner dashboard. It speaks MCP over HTTP (JSON-RPC at `POST /mcp`) behind a Bearer key (`MCP_API_KEY`, 24+ characters). Clients: Claude Desktop/Code, Cursor, Codex. Deployment for users is **Vercel only** (no Docker, no self-hosting options). User-facing docs are in `README.md` and `docs/`.
+Personal MCP server for Gmail, Discord, X/Twitter (via Apify) and Telegram, deployed by each user to their own Vercel account, with an owner dashboard. It speaks MCP over HTTP (JSON-RPC at `POST /mcp`) behind a Bearer key (`MCP_API_KEY`, 24+ characters). Clients: Claude Desktop/Code, Cursor, Codex. Deployment for users is **Vercel only** (no Docker, no self-hosting options). User-facing docs are in `README.md` and `docs/`.
 
 ## Layout
 

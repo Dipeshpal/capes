@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from pulse import discord, gmail, twitter  # noqa: E402,F401  (importing registers the tools)
+from pulse import discord, gmail, telegram, twitter  # noqa: E402,F401  (importing registers the tools)
 from pulse.registry import TOOLS  # noqa: E402
 
 TARGET = ROOT / "docs" / "usage" / "tools.md"
@@ -20,6 +20,7 @@ SERVICES = [
     ("gmail", "Gmail", "Needs `GMAIL_ADDRESS` and `GMAIL_APP_PASSWORD`. Setup: [Gmail guide](../setup/gmail.md)."),
     ("discord", "Discord", "Needs `DISCORD_BOT_TOKEN` and a bot invited with the right permissions. Setup: [Discord guide](../setup/discord.md)."),
     ("twitter", "X/Twitter", "Needs `APIFY_TOKEN`. Setup: [Apify guide](../setup/apify.md)."),
+    ("telegram", "Telegram", "Needs `TELEGRAM_BOT_TOKEN`. Setup: [Telegram guide](../setup/telegram.md)."),
 ]
 
 

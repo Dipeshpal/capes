@@ -53,7 +53,7 @@ Each call is independent (stateless). The server holds no data between calls exc
 | `pulse/registry.py` | The `@tool(...)` decorator, `ToolError`, and read/write/destructive labels |
 | `pulse/security.py` | Key check, session cookies, CSRF, origin checks, security headers |
 | `pulse/store.py` | Owner settings (environment plus optional Redis), activity log, rate limiting |
-| `pulse/connectors.py` | The three services: what each needs, whether it is configured, connection tests |
+| `pulse/connectors.py` | The connected services: what each needs, whether it is configured, connection tests |
 | `pulse/dashboard.py`, `dashboard/` | The dashboard API and its HTML, CSS and JavaScript |
 | `pulse/gmail.py`, `discord.py`, `twitter.py` | The integrations |
 | `scripts/capes.mjs` | Optional installer: deploys to Vercel and wires up your AI clients |

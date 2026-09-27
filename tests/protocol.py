@@ -293,7 +293,7 @@ readme = (ROOT / "README.md").read_text(encoding="utf-8")
 # Headings may carry an emoji, so match the section by its words rather than the exact "## Tools".
 section = re.split(r"^## .*Tools\s*$", readme, maxsplit=1, flags=re.M)[1]
 section = re.split(r"^## .*Check that it works\s*$", section, maxsplit=1, flags=re.M)[0]
-documented = set(re.findall(r"\b(?:discord|gmail|twitter)_[a-z_]+\b", section))
+documented = set(re.findall(r"\b(?:discord|gmail|twitter|telegram)_[a-z_]+\b", section))
 check(
     "README tool list equals tools/list",
     documented == set(names),
