@@ -169,8 +169,13 @@
 
   function connectors() {
     const d = app.data;
+    const none = d.connectors.every((c) => !c.configured);
     return h('div', { class: 'stack' },
       h('div', { class: 'section-head' }, h('h1', { text: 'Connectors' }), editHint()),
+      none
+        ? h('div', { class: 'banner' }, h('b', {}, 'Nothing connected yet. '),
+            'Pick a service below, click its Guide, and add the credential it asks for on Vercel. Setting up several at once? Run ', h('code', {}, 'node scripts/capes.mjs env'), ' from a clone of the repo to add them all in one go.')
+        : null,
       h('div', { class: 'grid' }, d.connectors.map((c) => {
         const result = app.tests[c.id];
         return h('div', { class: 'card stack' },
