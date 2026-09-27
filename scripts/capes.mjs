@@ -3,7 +3,7 @@
 //   node scripts/capes.mjs install    deploy to your Vercel account, then connect your clients
 //   node scripts/capes.mjs connect    connect clients to an existing deployment
 //   node scripts/capes.mjs env        add or update service credentials on an existing deployment (never touches MCP_API_KEY)
-// Flags: --name --database --encryption-key --discord --apify --gmail --gmail-password --telegram --url --key --clients desktop,claude-code,cursor,codex,none
+// Flags: --name --database --encryption-key --dashboard-user --dashboard-password --discord --apify --gmail --gmail-password --telegram --url --key --clients desktop,claude-code,cursor,codex,none
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -50,6 +50,8 @@ async function addEnv() {
   const telegram = flags.telegram ?? (await ask('Telegram bot token (from @BotFather)'));
   const database = flags.database ?? (await ask('Postgres DATABASE_URL (optional, e.g. from supabase.com) -- enables dashboard-managed credentials and API keys'));
   const encryptionKey = database ? (flags['encryption-key'] ?? randomBytes(32).toString('base64url')) : '';
+  const dashboardUser = flags['dashboard-user'] ?? (await ask('Dashboard username (optional) -- switches the dashboard to username/password login instead of MCP_API_KEY'));
+  const dashboardPassword = dashboardUser ? (flags['dashboard-password'] ?? (await ask('Dashboard password, 8+ characters'))) : '';
 
   const env = {
     ...(discord && { DISCORD_BOT_TOKEN: discord }),
@@ -57,6 +59,7 @@ async function addEnv() {
     ...(gmail && gmailPass && { GMAIL_ADDRESS: gmail, GMAIL_APP_PASSWORD: gmailPass }),
     ...(telegram && { TELEGRAM_BOT_TOKEN: telegram }),
     ...(database && { DATABASE_URL: database, ENCRYPTION_KEY: encryptionKey }),
+    ...(dashboardUser && dashboardPassword && { DASHBOARD_USER: dashboardUser, DASHBOARD_PASSWORD: dashboardPassword }),
   };
   if (!Object.keys(env).length) {
     log('Nothing entered, nothing changed.');
@@ -79,6 +82,7 @@ async function addEnv() {
   if (dep.status !== 0) throw new Error(`Deploy failed:\n${dep.stderr || dep.stdout}`);
   log('\nDone. MCP_API_KEY and your connected clients are unchanged.');
   if (encryptionKey && !flags['encryption-key']) log(`Generated ENCRYPTION_KEY (save this -- losing it makes stored credentials unrecoverable):\n  ${encryptionKey}\n`);
+  if (dashboardUser) log(`Dashboard sign-in is now username "${dashboardUser}" and your password, instead of MCP_API_KEY.`);
   log('Open your dashboard\'s Connectors tab and click Test connection to confirm.');
 }
 
@@ -98,6 +102,11 @@ async function install() {
   log('then Project Settings > Database > Connection string > Session pooler).');
   let database = flags.database;
   while (!database) database = await ask('Postgres DATABASE_URL (required)');
+  log('\nDashboard sign-in (separate from the MCP API key generated below):');
+  let dashboardUser = flags['dashboard-user'];
+  while (!dashboardUser) dashboardUser = await ask('Dashboard username (required)');
+  let dashboardPassword = flags['dashboard-password'];
+  while (!dashboardPassword || dashboardPassword.length < 8) dashboardPassword = await ask('Dashboard password, 8+ characters (required)');
   log('\nOther credentials (press Enter to skip any you do not need yet):');
   const discord = flags.discord ?? (await ask('Discord bot token'));
   const apify = flags.apify ?? (await ask('Apify token (for X/Twitter search)'));
@@ -115,6 +124,8 @@ async function install() {
     MCP_API_KEY: key,
     DATABASE_URL: database,
     ENCRYPTION_KEY: encryptionKey,
+    DASHBOARD_USER: dashboardUser,
+    DASHBOARD_PASSWORD: dashboardPassword,
     ...(discord && { DISCORD_BOT_TOKEN: discord }),
     ...(apify && { APIFY_TOKEN: apify }),
     ...(gmail && gmailPass && { GMAIL_ADDRESS: gmail, GMAIL_APP_PASSWORD: gmailPass }),
@@ -140,7 +151,7 @@ async function install() {
   await verify(url, key);
   writeFileSync(SAVED, JSON.stringify({ url, key, encryptionKey }, null, 2), { mode: 0o600 });
   log(`\nDeployed: ${url}`);
-  log(`Dashboard: ${url}/dashboard  (sign in with your MCP API key)`);
+  log(`Dashboard: ${url}/dashboard  (sign in with username "${dashboardUser}" and your dashboard password)`);
   log('Optional, free: run `vercel integration add upstash` then `vercel deploy --prod` so the dashboard can save switches.');
   log(`Your MCP API key (also saved to .capes.local.json, which is git-ignored):\n  ${key}\n`);
   log(`Your ENCRYPTION_KEY (save this -- losing it makes stored credentials unrecoverable):\n  ${encryptionKey}\n`);
