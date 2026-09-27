@@ -21,11 +21,10 @@ By default, open `/dashboard` (browsers opening the plain address are sent there
 | Tab | What you can do |
 |-----|-----------------|
 | **Overview** | See tools available to clients, connectors configured, the current mode (full access or read-only), your MCP endpoint address (with a copy button), and what still needs setup. |
-| **Connectors** | One card per service (Gmail, Discord, Apify). Shows whether its credentials are set, how many read/write/destructive tools it has, a **Test connection** button, an enable switch, and a link to its setup guide. The Discord card also has **Get invite link**: it builds the bot's invite URL (with the right permissions) from your token, so you do not need the Application ID. |
+| **Connectors** | One card per service (Gmail, Discord, Apify, Telegram). Shows whether its credentials are set, how many read/write/destructive tools it has, a **Test connection** button, an enable switch, and a link to its setup guide. With `DATABASE_URL` set, each card also has **Set credentials here**: enter them directly and they're stored encrypted in the database instead of as Vercel env vars. The Discord card also has **Get invite link**: it builds the bot's invite URL (with the right permissions) from your token, so you do not need the Application ID. |
 | **Tools** | Every tool with its kind and description. Filter by text, kind or connector. Switch individual tools off. **Try** runs a read-only tool with a small form. |
-| **Activity** | The last calls: time, tool, whether it came from a client or the dashboard, success or error. Tool names and outcomes only, never arguments or results. |
 | **Connect a client** | Ready-to-copy config for Claude Code, Claude Desktop, Cursor and Codex, filled in with your endpoint address. The key is never shown; you replace `YOUR_MCP_API_KEY` yourself. |
-| **Settings** | Read-only mode, the state of settings storage, and sign out. |
+| **Settings** | Read-only mode, the state of settings storage, API keys, and sign out. |
 
 ![Connectors: credentials status, tool counts, enable switch, connection test](../assets/dashboard-connectors.png)
 

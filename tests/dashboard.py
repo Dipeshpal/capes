@@ -499,8 +499,8 @@ check("expires_days rejects a float", mut(c, "POST", "/dashboard/api/keys", {"ex
 
 check("unknown connector 404 for setting secrets", mut(c, "PUT", "/dashboard/api/connectors/nope/secrets", {"values": {"X": "y"}}).status_code == 404)
 check(
-    "gmail is not db-backed yet",
-    mut(c, "PUT", "/dashboard/api/connectors/gmail/secrets", {"values": {"GMAIL_ADDRESS": "a@b.com"}}).status_code == 400,
+    "gmail secrets need a database (db-backed like the others now)",
+    mut(c, "PUT", "/dashboard/api/connectors/gmail/secrets", {"values": {"GMAIL_ADDRESS": "a@b.com"}}).status_code == 409,
 )
 check(
     "discord secrets need a database",
