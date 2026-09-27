@@ -5191,11 +5191,11 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
         </g>
         </g>
 
-        <g data-edge-from="mcp" data-edge-to="guard" data-edge-label="key, arguments, policy" data-edge-key="1" data-edge-id="check">
+        <g data-edge-from="mcp" data-edge-to="guard" data-edge-label="key (env or DB), args, policy" data-edge-key="1" data-edge-id="check">
           <path data-composition-edge-from="mcp" data-composition-edge-to="guard" data-composition-edge-id="check" data-composition-points="305.1,196;459.7,196" d="M 305.1 196 L 459.7 196" class="a-security" stroke-width="1.4" marker-end="url(#arrowhead-security)"/>
         <g data-detail="context">
-          <rect x="319.2" y="176" width="126.4" height="16" rx="3" class="c-mask"/>
-          <text x="382.4" y="186" class="t-security" font-size="9" text-anchor="middle">key, arguments, policy</text>
+          <rect x="301" y="176" width="162.8" height="16" rx="3" class="c-mask"/>
+          <text x="382.4" y="186" class="t-security" font-size="9" text-anchor="middle">key (env or DB), args, policy</text>
         </g>
         </g>
 
@@ -5305,15 +5305,15 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <text data-detail="context" x="466.7" y="111" class="t-muted" font-size="7" text-anchor="middle">key, schema, policy</text>
         </g>
 
-        <g id="node-tool" data-node-id="tool" data-node-label="Tool" tabindex="0" role="button" aria-label="Focus Tool, Gmail, Discord, X, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Gmail, Discord, X" data-node-context="Sequence participant">
-          <title>Tool · Gmail, Discord, X · Sequence participant</title>
+        <g id="node-tool" data-node-id="tool" data-node-label="Tool" tabindex="0" role="button" aria-label="Focus Tool, Gmail, Discord, X, Telegram, Sequence participant" aria-pressed="false" data-node-kind="backend" data-node-sublabel="Gmail, Discord, X, Telegram" data-node-context="Sequence participant">
+          <title>Tool · Gmail, Discord, X, Telegram · Sequence participant</title>
           <rect x="567.8" y="72" width="135" height="54" rx="6" class="c-mask"/>
           <rect x="567.8" y="72" width="135" height="54" rx="6" class="c-backend" stroke-width="1.5"/>
           <g aria-hidden="true" data-semantic-sigil="backend" class="semantic-sigil s-backend" transform="translate(573.8 78) scale(0.6875)">
             <path d="M6 3 3 8l3 5M10 3l3 5-3 5"/>
           </g>
           <text data-node-label="" data-detail-anchor="" x="635.3" y="94" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Tool</text>
-          <text data-detail="context" x="635.3" y="111" class="t-muted" font-size="7" text-anchor="middle">Gmail, Discord, X</text>
+          <text data-detail="context" x="635.3" y="111" class="t-muted" font-size="7" text-anchor="middle">Gmail, Discord, X, Telegram</text>
         </g>
 
         <g id="node-service" data-node-id="service" data-node-label="Service" tabindex="0" role="button" aria-label="Focus Service, upstream API, Sequence participant" aria-pressed="false" data-node-kind="external" data-node-sublabel="upstream API" data-node-context="Sequence participant">
@@ -5568,7 +5568,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
           <h3>Run with your token</h3>
         </div>
         <ul>
-          <li>&bull; The token is read from Vercel env vars</li>
+          <li>&bull; The token comes from Vercel env vars, or your encrypted Postgres</li>
           <li>&bull; Results are trimmed to the useful fields</li>
         </ul>
       </div>

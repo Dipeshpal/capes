@@ -21,7 +21,7 @@ End users deploy to Vercel and never run the server locally. As a contributor yo
 ```bash
 git clone <this repo>
 cd capes
-cp .env.example .env        # fill in only what you want to test; MCP_API_KEY must be 24+ characters
+cp .env.example .env        # fill in only what you want to test; MCP_API_KEY must be 24+ characters, DATABASE_URL is optional locally
 uv run --with fastapi --with aiohttp --with python-dotenv --with uvicorn python api/index.py
 ```
 
@@ -42,9 +42,11 @@ Run before every pull request. None needs credentials.
 
 ```bash
 uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/protocol.py
-uv run --with fastapi --with aiohttp --with python-dotenv --with httpx python tests/dashboard.py
+uv run --with fastapi --with aiohttp --with python-dotenv --with httpx --with asyncpg --with cryptography python tests/dashboard.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/gmail_offline.py
 uv run --with fastapi --with aiohttp --with python-dotenv python tests/discord_offline.py
+uv run --with fastapi --with aiohttp --with python-dotenv python tests/telegram_offline.py
+uv run --with fastapi --with aiohttp --with python-dotenv --with asyncpg --with cryptography python tests/db_offline.py
 python tests/claude_config.py
 python scripts/check_claude_config.py
 uv run --with aiohttp python scripts/gen_tools_doc.py --check
@@ -56,9 +58,11 @@ uvx ruff check . && uvx ruff format --check .
 What they protect:
 
 - `protocol.py`: the MCP protocol, authentication, argument validation, read-only and disabled-tool enforcement, every tool's schema and safety label, and that the README tool list, the Discord permission number and the environment variables in docs agree with the code.
-- `dashboard.py`: sign-in, cookie flags, rate limiting, tampered and expired sessions, CSRF and origin checks, secrets never leaking, settings and activity through a fake Redis, fail-closed behaviour, security headers and the Content-Security-Policy, and rules for the front-end code (no inline scripts, no `innerHTML`, no outside origins).
-- `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail.
+- `dashboard.py`: sign-in (both `MCP_API_KEY` and `DASHBOARD_USER`/`DASHBOARD_PASSWORD` modes), cookie flags, rate limiting, tampered and expired sessions, CSRF and origin checks, secrets never leaking, settings through a fake Redis, API keys and connector credentials through a fake database (including an unreachable-but-configured database degrading gracefully, not crashing), fail-closed behaviour, security headers and the Content-Security-Policy, and rules for the front-end code (no inline scripts, no `innerHTML`, no outside origins).
+- `gmail_offline.py`: all Gmail tools against an in-memory fake IMAP/SMTP server that answers like real Gmail, including credentials supplied through the (faked) database instead of env vars.
 - `discord_offline.py`: the Discord tools against a fake Discord REST server that records every request, so the exact endpoint, method, payload, headers, multipart upload and retry behaviour of each write tool is checked without touching a real server.
+- `telegram_offline.py`: the Telegram tools against a fake Bot API server, the same way.
+- `db_offline.py`: encryption, key hashing, the Supabase Direct-connection-vs-pooler hint, and the API-key/connector-credential create/list/revoke logic against a fake in-memory Postgres double (no real database needed).
 - `claude_config.py` and `check_claude_config.py`: the guard for assistant and CI configuration, and proof that each attack it exists for is blocked (see [below](#the-guard-for-assistant-and-ci-configuration)).
 - `gen_tools_doc.py --check`: [docs/usage/tools.md](../usage/tools.md) matches the code. If it fails, run `python scripts/gen_tools_doc.py` and commit the result.
 - `check_docs.py`: every relative link and `#anchor` in the docs resolves.
@@ -105,12 +109,23 @@ The conventions are in [`CLAUDE.md`](../../CLAUDE.md) and `.claude/rules/tools.m
 
 ## Add a service
 
-1. Create `pulse/<service>.py` with its `@tool` functions. Read credentials with `os.getenv` inside the function, not at import time. Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request.
-2. Import the module in `api/index.py` and in `scripts/gen_tools_doc.py` (add it to `SERVICES` there too). Register the service in `pulse/connectors.py` (name, tool prefix, environment variables, guide, and a read-only connection test) so it appears in the dashboard with a status and a **Test connection** button.
-3. Add the environment variables to `.env.example`, `docs/setup/vercel.md` and the installer prompts in `scripts/capes.mjs`.
-4. Write `docs/setup/<service>.md` in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
-5. Add a row to the README services table and a line to `docs/usage/troubleshooting.md`.
-6. Add tests.
+A "connector" (Gmail, Discord, ...) is its own module, its own credentials, its own row in the dashboard. Here is the full checklist, in order.
+
+1. **Create `pulse/<service>.py`** with its `@tool` functions (see [Add a tool](#add-a-tool) above for the tool-level conventions). Prefer the standard library or `aiohttp`; a new dependency needs a reason in the pull request and must be added to `ALLOWED_DEPENDENCIES` in `scripts/check_claude_config.py` -- as its own, separate pull request, reviewed and merged *before* the one that uses it (the guard checks a PR's `requirements.txt` against the base branch's copy of the allowlist by design, so a PR can never approve its own new dependency).
+
+2. **Read credentials through `creds.get(name)`, not `os.getenv` directly** (`from . import creds`, then `token = await creds.get("SERVICE_TOKEN")`). This one call checks the database first (if `DATABASE_URL` is set and the value was entered from the dashboard's Connectors tab) and falls back to the plain environment variable of the same name -- so the service works identically for someone using env vars and someone using the dashboard, with no extra code. If your service's client library is synchronous (like `imaplib`/`smtplib` for Gmail), you can't call `creds.get` from inside a worker thread; see `pulse/gmail.py`'s `run()`/`session()`/`credentials()` for the pattern (fetch async, hand the value into the thread via a `contextvars.ContextVar`, since `asyncio.to_thread` copies the calling context).
+
+3. **Import the module in `api/index.py`** (registers its tools) **and separately in `scripts/gen_tools_doc.py`** (add it to `SERVICES` there too -- this script imports independently of `api/index.py`, so it's easy to update one and forget the other, and `tests/protocol.py` will catch it if you do).
+
+4. **Register the service in `pulse/connectors.py`**: a `Connector(id, name, tool_prefix, env_vars_tuple, guide_path, summary)`. Leave `db_backed` at its default (`True`) unless there's a real reason your credentials can't live in the database. This makes it appear in the dashboard with a configured/not-configured status, a **Test connection** button, and (if `db_backed`) a "Set credentials here" form -- write its connection test in `connectors.test_connection()`: read-only, must never raise, must never echo a secret in its result (route unexpected exceptions through `security.redact()`).
+
+5. **Add the environment variables** to `.env.example`, the table in `docs/setup/vercel.md`, and the prompts in `scripts/capes.mjs` (both `install()` and `addEnv()`).
+
+6. **Write `docs/setup/<service>.md`** in the style of the existing guides: where to click, what permissions, limits, how to check it works, common errors, how to rotate or revoke.
+
+7. **Add a row to the README services table** and a line to `docs/usage/troubleshooting.md`.
+
+8. **Add tests.** Offline if at all possible: build a fake server for the service's API (see `tests/discord_offline.py` or `tests/telegram_offline.py` for the pattern -- a `ThreadingHTTPServer` that records every request and answers with canned responses, monkeypatching your module's base-URL constant) so the test suite needs no real credentials or network access. Cover at minimum: a successful call, the exact request shape (method, path, body) for at least one write tool, a missing-credential error, and (if `db_backed`) that a credential supplied via a faked `creds.get` reaches the request instead of the env var.
 
 With Claude Code, `/add-tool <service> <tool>` does the scaffolding and reminds you of every step.
 
@@ -139,7 +154,7 @@ The repo ships its Claude Code setup so every contributor's assistant starts wit
 | `.claude/settings.local.json` | Your personal overrides (git-ignored, never committed) | Every session |
 | `.claude/rules/security.md` | Secret-handling rules | Every session |
 | `.claude/rules/tools.md` | How to write a tool | When you touch `pulse/` or `api/` |
-| `.claude/rules/dashboard.md` | Front-end and dashboard security rules | When you touch `dashboard/` or `pulse/dashboard.py`, `pulse/security.py`, `pulse/store.py` |
+| `.claude/rules/dashboard.md` | Front-end, dashboard and database security rules | When you touch `dashboard/`, `pulse/dashboard.py`, `pulse/security.py`, `pulse/store.py`, `pulse/db.py`, `pulse/creds.py`, `pulse/apikeys.py` or `migrations/` |
 | `.claude/rules/discord.md` | Discord specifics and limits | When you touch `pulse/discord.py` or its guide |
 | `.claude/rules/gmail.md` | IMAP/SMTP conventions | When you touch `pulse/gmail.py`, its guide or its test |
 | `.claude/rules/github.md` | CI, ruleset and governance rules | When you touch `.github/`, `docs/project/governance.md` or `SECURITY.md` |

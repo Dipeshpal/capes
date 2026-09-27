@@ -180,6 +180,21 @@ check("revoke_key revokes an existing key", run(apikeys.revoke_key(created["id"]
 check("revoking the same key again reports not-found", run(apikeys.revoke_key(created["id"])) is False)
 check("a revoked key no longer validates", run(security._db_key_valid(created["key"])) is False)
 check("revoking an unknown id reports not-found", run(apikeys.revoke_key(str(uuid.uuid4()))) is False)
+check("revoking a malformed (non-UUID) id reports not-found, not a crash", run(apikeys.revoke_key("not-a-uuid")) is False)
+
+
+async def unreachable_execute(*a, **kw):
+    raise db.DatabaseUnavailable("simulated: connection dropped mid-request")
+
+
+real_execute = db.execute
+db.execute = unreachable_execute
+try:
+    run(apikeys.revoke_key(str(uuid.uuid4())))
+    check("an unreachable database during revoke_key raises, not a false not-found", False)
+except db.DatabaseUnavailable:
+    check("an unreachable database during revoke_key raises, not a false not-found", True)
+db.execute = real_execute
 
 del os.environ["ENCRYPTION_KEY"]
 

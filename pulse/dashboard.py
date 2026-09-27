@@ -1,4 +1,5 @@
-"""Owner dashboard: sign in with MCP_API_KEY, see connectors and tools, switch things off, try read-only tools.
+"""Owner dashboard: sign in with MCP_API_KEY (or DASHBOARD_USER/DASHBOARD_PASSWORD), see connectors and tools,
+manage credentials and API keys, switch things off, try read-only tools.
 
 Security notes (details in docs/usage/dashboard.md and docs/project/architecture.md):
 - The session is a signed, HttpOnly, SameSite=Strict cookie; every state-changing call also needs a per-session CSRF token.

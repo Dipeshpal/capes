@@ -10,17 +10,18 @@
     { "id": "clients", "type": "external", "label": "AI clients", "sublabel": "Claude, Codex, Cursor", "pos": [40, 300], "size": [150, 64] },
     { "id": "owner", "type": "external", "label": "You (owner)", "sublabel": "browser", "pos": [40, 110], "size": [150, 64] },
     { "id": "mcp", "type": "backend", "label": "POST /mcp", "sublabel": "FastAPI on Vercel", "pos": [280, 300], "size": [150, 64] },
-    { "id": "dashboard", "type": "frontend", "label": "Dashboard", "sublabel": "/dashboard", "pos": [280, 110], "size": [150, 64] },
-    { "id": "policy", "type": "security", "label": "Guard", "sublabel": "auth, validate, policy", "pos": [520, 300], "size": [160, 64], "tag": "read-only mode" },
-    { "id": "limits", "type": "database", "label": "Settings", "sublabel": "env vars or optional Redis", "pos": [520, 110], "size": [160, 64] },
-    { "id": "tools", "type": "backend", "label": "Tool registry", "sublabel": "64 tools", "pos": [770, 300], "size": [150, 64] },
-    { "id": "secrets", "type": "security", "label": "Credentials", "sublabel": "Vercel env vars", "pos": [770, 470], "size": [150, 64] },
-    { "id": "gmail", "type": "external", "label": "Gmail", "sublabel": "IMAP / SMTP", "pos": [1010, 170], "size": [130, 60] },
-    { "id": "discord", "type": "external", "label": "Discord", "sublabel": "REST API", "pos": [1010, 300], "size": [130, 60] },
-    { "id": "apify", "type": "external", "label": "Apify", "sublabel": "X search", "pos": [1010, 430], "size": [130, 60] }
+    { "id": "dashboard", "type": "frontend", "label": "Dashboard", "sublabel": "/dashboard, key or user/pass", "pos": [280, 110], "size": [160, 64] },
+    { "id": "policy", "type": "security", "label": "Guard", "sublabel": "auth, validate, policy", "pos": [530, 300], "size": [160, 64], "tag": "read-only mode" },
+    { "id": "limits", "type": "database", "label": "Switches", "sublabel": "env vars or optional Redis", "pos": [530, 110], "size": [160, 64] },
+    { "id": "tools", "type": "backend", "label": "Tool registry", "sublabel": "68 tools", "pos": [790, 300], "size": [150, 64] },
+    { "id": "credentials", "type": "security", "label": "Credentials & keys", "sublabel": "env vars or encrypted Postgres", "pos": [790, 470], "size": [170, 64] },
+    { "id": "gmail", "type": "external", "label": "Gmail", "sublabel": "IMAP / SMTP", "pos": [1120, 145], "size": [130, 60] },
+    { "id": "discord", "type": "external", "label": "Discord", "sublabel": "REST API", "pos": [1120, 255], "size": [130, 60] },
+    { "id": "apify", "type": "external", "label": "Apify", "sublabel": "X search", "pos": [1120, 365], "size": [130, 60] },
+    { "id": "telegram", "type": "external", "label": "Telegram", "sublabel": "Bot API", "pos": [1120, 475], "size": [130, 60] }
   ],
   "boundaries": [
-    { "kind": "region", "label": "Your Vercel project", "wraps": ["mcp", "dashboard", "policy", "limits", "tools", "secrets"] }
+    { "kind": "region", "label": "Your Vercel project", "wraps": ["mcp", "dashboard", "policy", "limits", "tools", "credentials"] }
   ],
   "connections": [
     { "id": "clients-to-mcp", "from": "clients", "to": "mcp", "label": "Bearer key", "variant": "emphasis" },
@@ -29,14 +30,15 @@
     { "id": "limits-to-policy", "from": "limits", "to": "policy", "label": "limits", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "labelDy": 60 },
     { "id": "dashboard-to-limits", "from": "dashboard", "to": "limits", "label": "edit" },
     { "id": "policy-to-tools", "from": "policy", "to": "tools", "label": "allowed" },
-    { "id": "secrets-to-tools", "from": "secrets", "to": "tools", "label": "tokens", "variant": "security", "fromSide": "top", "toSide": "bottom" },
-    { "id": "tools-to-gmail", "from": "tools", "to": "gmail" },
-    { "id": "tools-to-discord", "from": "tools", "to": "discord" },
-    { "id": "tools-to-apify", "from": "tools", "to": "apify" }
+    { "id": "credentials-to-tools", "from": "credentials", "to": "tools", "label": "tokens (decrypted)", "variant": "security", "fromSide": "top", "toSide": "bottom" },
+    { "id": "tools-to-gmail", "from": "tools", "to": "gmail", "fromSide": "right", "toSide": "left" },
+    { "id": "tools-to-discord", "from": "tools", "to": "discord", "fromSide": "right", "toSide": "left" },
+    { "id": "tools-to-apify", "from": "tools", "to": "apify", "fromSide": "right", "toSide": "left" },
+    { "id": "tools-to-telegram", "from": "tools", "to": "telegram", "fromSide": "right", "toSide": "left" }
   ],
   "cards": [
-    { "dot": "cyan", "title": "One endpoint", "items": ["AI clients speak MCP to POST /mcp with your key", "The dashboard shares the same server"] },
+    { "dot": "cyan", "title": "One endpoint", "items": ["AI clients speak MCP to POST /mcp with your key", "The dashboard shares the same server, its own login optional"] },
     { "dot": "emerald", "title": "Every call is checked", "items": ["Arguments are validated against each tool's schema", "Owner limits can disable tools or force read-only"] },
-    { "dot": "rose", "title": "Secrets stay put", "items": ["Tokens live only in Vercel environment variables", "Errors and logs are redacted before they leave"] }
+    { "dot": "rose", "title": "Secrets stay put", "items": ["Tokens live in Vercel env vars, or encrypted in your own Postgres", "Errors and logs are redacted before they leave"] }
   ]
 }

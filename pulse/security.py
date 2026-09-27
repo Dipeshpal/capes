@@ -154,7 +154,11 @@ def credentials_match(user: str, password: str) -> bool:
     if creds is None:
         return False
     expected_user, expected_password = creds
-    return secrets.compare_digest(user.encode(), expected_user.encode()) and secrets.compare_digest(password.encode(), expected_password.encode())
+    # Compute both unconditionally (not `and`-short-circuited) so a wrong username can't be distinguished from a
+    # wrong password by timing -- the login endpoint also adds a fixed delay, but this keeps the check itself honest.
+    user_ok = secrets.compare_digest(user.encode(), expected_user.encode())
+    password_ok = secrets.compare_digest(password.encode(), expected_password.encode())
+    return user_ok and password_ok
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +184,8 @@ def decrypt(ciphertext: bytes, nonce: bytes) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Sessions and CSRF (stateless, signed with a key derived from MCP_API_KEY, or ENCRYPTION_KEY for DB-only deploys)
+# Sessions and CSRF (stateless, signed with a key derived from whichever secret is the login credential:
+# DASHBOARD_PASSWORD in userpass mode, else MCP_API_KEY, else ENCRYPTION_KEY as a last resort)
 # ---------------------------------------------------------------------------
 
 
