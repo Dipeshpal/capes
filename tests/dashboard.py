@@ -40,7 +40,7 @@ os.environ["DISCORD_BOT_TOKEN"] = SECRET_TOKEN
 from fastapi.testclient import TestClient
 
 from api.index import app
-from pulse import security, store
+from pulse import db, security, store
 from pulse.mcp import handle_rpc
 from pulse.registry import TOOLS, tool
 
@@ -478,6 +478,58 @@ store._memory_hits.update({f"b{i}": [time.monotonic() - 10_000] for i in range(6
 run(store.allow_attempt("new-caller", 10, 900))
 check("the in-memory rate-limit table is pruned", len(store._memory_hits) < 10, len(store._memory_hits))
 store.reset_for_tests()
+
+# ================================================================ API keys and connector secrets, no database configured
+check("db.configured() is False in this test environment", db.configured() is False)
+c = fresh_client()
+login(c)
+r = c.get("/dashboard/api/keys")
+check(
+    "keys list works without a database, reports db_configured false",
+    r.status_code == 200 and r.json() == {"db_configured": False, "degraded": False, "keys": []},
+)
+check("creating a key without a database is 409", mut(c, "POST", "/dashboard/api/keys", {"label": "test"}).status_code == 409)
+check("revoking a key without a database is 409", mut(c, "DELETE", "/dashboard/api/keys/00000000-0000-0000-0000-000000000000").status_code == 409)
+check("keys list needs a session", fresh_client().get("/dashboard/api/keys").status_code == 401)
+check("creating a key needs CSRF", mut(c, "POST", "/dashboard/api/keys", {"label": "x"}, token=False).status_code == 403)
+check("label must be a string", mut(c, "POST", "/dashboard/api/keys", {"label": 5}).status_code == 400)
+check("expires_days must be a positive int", mut(c, "POST", "/dashboard/api/keys", {"expires_days": 0}).status_code == 400)
+check("expires_days rejects a bool", mut(c, "POST", "/dashboard/api/keys", {"expires_days": True}).status_code == 400)
+check("expires_days rejects a float", mut(c, "POST", "/dashboard/api/keys", {"expires_days": 1.5}).status_code == 400)
+
+check("unknown connector 404 for setting secrets", mut(c, "PUT", "/dashboard/api/connectors/nope/secrets", {"values": {"X": "y"}}).status_code == 404)
+check(
+    "gmail is not db-backed yet",
+    mut(c, "PUT", "/dashboard/api/connectors/gmail/secrets", {"values": {"GMAIL_ADDRESS": "a@b.com"}}).status_code == 400,
+)
+check(
+    "discord secrets need a database",
+    mut(c, "PUT", "/dashboard/api/connectors/discord/secrets", {"values": {"DISCORD_BOT_TOKEN": "x"}}).status_code == 409,
+)
+
+# A database that IS configured but unreachable (wrong URL, paused, network blip) must degrade, not crash.
+real_configured, real_execute, real_fetch = db.configured, db.execute, db.fetch
+db.configured = lambda: True
+os.environ["ENCRYPTION_KEY"] = "test-encryption-key-not-a-real-secret-value"
+
+
+async def unreachable(*a, **kw):
+    raise db.DatabaseUnavailable("simulated: could not connect")
+
+
+db.execute, db.fetch = unreachable, unreachable
+check(
+    "an unreachable (but configured) database is a 409, not a 500 on connector secrets",
+    mut(c, "PUT", "/dashboard/api/connectors/discord/secrets", {"values": {"DISCORD_BOT_TOKEN": "x"}}).status_code == 409,
+)
+r = c.get("/dashboard/api/keys")
+check(
+    "an unreachable (but configured) database degrades the keys list to empty, not a 500",
+    r.status_code == 200 and r.json() == {"db_configured": True, "degraded": True, "keys": []},
+    r.text,
+)
+db.configured, db.execute, db.fetch = real_configured, real_execute, real_fetch
+del os.environ["ENCRYPTION_KEY"]
 
 print(f"\n{passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

@@ -31,13 +31,13 @@ async def pool() -> asyncpg.Pool:
     global _pool
     if not configured():
         raise DatabaseUnavailable("DATABASE_URL is not set")
-    if _pool is None:
-        try:
+    try:
+        if _pool is None:
             _pool = await asyncpg.create_pool(os.getenv("DATABASE_URL"), min_size=0, max_size=5, command_timeout=10)
-        except (OSError, asyncpg.PostgresError) as e:
-            raise DatabaseUnavailable("Could not connect to the database") from e
-    if not _migrated:
-        await _migrate(_pool)
+        if not _migrated:
+            await _migrate(_pool)
+    except (OSError, asyncpg.PostgresError) as e:
+        raise DatabaseUnavailable("Could not connect to the database") from e
     return _pool
 
 
@@ -62,7 +62,9 @@ async def fetch(query: str, *args):
         p = await pool()
         async with p.acquire() as conn:
             return await conn.fetch(query, *args)
-    except asyncpg.PostgresError as e:
+    except DatabaseUnavailable:
+        raise
+    except (OSError, asyncpg.PostgresError) as e:
         raise DatabaseUnavailable("Database query failed") from e
 
 
@@ -71,7 +73,9 @@ async def fetchrow(query: str, *args):
         p = await pool()
         async with p.acquire() as conn:
             return await conn.fetchrow(query, *args)
-    except asyncpg.PostgresError as e:
+    except DatabaseUnavailable:
+        raise
+    except (OSError, asyncpg.PostgresError) as e:
         raise DatabaseUnavailable("Database query failed") from e
 
 
@@ -80,7 +84,9 @@ async def execute(query: str, *args):
         p = await pool()
         async with p.acquire() as conn:
             return await conn.execute(query, *args)
-    except asyncpg.PostgresError as e:
+    except DatabaseUnavailable:
+        raise
+    except (OSError, asyncpg.PostgresError) as e:
         raise DatabaseUnavailable("Database query failed") from e
 
 

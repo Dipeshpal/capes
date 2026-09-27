@@ -13,7 +13,7 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 
-from . import connectors, security, store
+from . import apikeys, connectors, creds, db, security, store
 from .mcp import run_tool, tool_allowed
 from .registry import TOOLS, kind
 
@@ -158,6 +158,7 @@ async def state(request: Request):
                 "degraded": policy.degraded,
                 "can_edit": store.kv_config() is not None,
                 "session_hours": security.SESSION_TTL // 3600,
+                "db_configured": db.configured(),
             },
             "connectors": cons,
             "tools": tools,
@@ -233,3 +234,84 @@ async def run(request: Request):
         raise HTTPException(403, "Only read-only tools can be run from the dashboard")
     ok, text = await run_tool(name, body.get("arguments") or {}, source="dashboard")
     return json_response(request, {"ok": ok, "output": text[:MAX_OUTPUT], "truncated": len(text) > MAX_OUTPUT})
+
+
+# ---------------------------------------------------------------------------
+# API keys (requires a database; the legacy MCP_API_KEY env var always works regardless)
+# ---------------------------------------------------------------------------
+
+
+@router.get("/dashboard/api/keys")
+async def list_keys(request: Request):
+    security.require_session(request)
+    try:
+        keys, degraded = await apikeys.list_keys(), False
+    except db.DatabaseUnavailable:
+        keys, degraded = [], True
+    return json_response(request, {"db_configured": db.configured(), "degraded": degraded, "keys": keys})
+
+
+@router.post("/dashboard/api/keys")
+async def create_key(request: Request):
+    cookie = security.require_session(request)
+    security.require_csrf(request, cookie)
+    body = await json_body(request, 500)
+    label = body.get("label")
+    expires_days = body.get("expires_days")
+    if label is not None and not isinstance(label, str):
+        raise HTTPException(400, "label must be a string")
+    if expires_days is not None and (not isinstance(expires_days, int) or isinstance(expires_days, bool) or not (0 < expires_days <= 3650)):
+        raise HTTPException(400, "expires_days must be a whole number of days between 1 and 3650")
+    try:
+        row = await apikeys.create_key(label, expires_days)
+    except db.DatabaseUnavailable as e:
+        raise HTTPException(409, str(e)) from e
+    return json_response(request, row, status=201)
+
+
+@router.delete("/dashboard/api/keys/{key_id}")
+async def revoke_key(request: Request, key_id: str):
+    cookie = security.require_session(request)
+    security.require_csrf(request, cookie)
+    try:
+        found = await apikeys.revoke_key(key_id)
+    except db.DatabaseUnavailable as e:
+        raise HTTPException(409, str(e)) from e
+    if not found:
+        raise HTTPException(404, "Unknown or already-revoked key")
+    return json_response(request, {"revoked": True})
+
+
+# ---------------------------------------------------------------------------
+# Connector credentials (requires a database; env vars always work regardless)
+# ---------------------------------------------------------------------------
+
+
+@router.put("/dashboard/api/connectors/{connector_id}/secrets")
+async def set_connector_secrets(request: Request, connector_id: str):
+    cookie = security.require_session(request)
+    security.require_csrf(request, cookie)
+    c = connectors.BY_ID.get(connector_id)
+    if not c:
+        raise HTTPException(404, "Unknown connector")
+    if not c.db_backed:
+        raise HTTPException(400, f"{c.name} credentials are env-var only for now (see issue #36)")
+    if not db.configured():
+        raise HTTPException(409, "Add DATABASE_URL to set credentials from the dashboard")
+    body = await json_body(request, 4_000)
+    values = body.get("values")
+    if not isinstance(values, dict) or not values:
+        raise HTTPException(400, "Expected a non-empty 'values' object")
+    if any(k not in c.env for k in values):
+        raise HTTPException(400, f"Unknown field(s) for {c.name}; expected one of {list(c.env)}")
+    try:
+        for name, value in values.items():
+            if value is None or (isinstance(value, str) and not value.strip()):
+                await creds.clear(name)
+            elif isinstance(value, str):
+                await creds.set(name, value.strip())
+            else:
+                raise HTTPException(400, f"{name} must be a string")
+    except db.DatabaseUnavailable as e:
+        raise HTTPException(409, str(e)) from e
+    return json_response(request, await connectors.describe(c))
