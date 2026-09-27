@@ -27,8 +27,7 @@ async def set(name: str, value: str) -> None:
         raise db.DatabaseUnavailable("No database configured; set the credential as an environment variable instead")
     ciphertext, nonce = security.encrypt(value)
     await db.execute(
-        "insert into secrets (name, ciphertext, nonce) values ($1, $2, $3) "
-        "on conflict (name) do update set ciphertext = $2, nonce = $3, updated_at = now()",
+        "insert into secrets (name, ciphertext, nonce) values ($1, $2, $3) on conflict (name) do update set ciphertext = $2, nonce = $3, updated_at = now()",
         name,
         ciphertext,
         nonce,

@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 for name in ("MCP_API_KEY", "ENCRYPTION_KEY", "DATABASE_URL", "DISCORD_BOT_TOKEN"):
     os.environ.pop(name, None)
 
-from pulse import creds, db, security  # noqa: E402
+from pulse import creds, db, security
 
 passed = failed = 0
 
