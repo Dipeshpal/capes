@@ -13,7 +13,11 @@ Example:  GUILD=123 MODE=read python tests/discord_e2e.py
 
 import json
 import os
+import sys
 import urllib.request
+
+if hasattr(sys.stdout, "reconfigure"):  # Discord content can contain emoji; Windows consoles default to cp1252.
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 URL = os.environ.get("URL", "http://localhost:8000") + "/mcp"
 KEY = os.environ.get("KEY", "localtestkey")
