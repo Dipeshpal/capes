@@ -1,4 +1,4 @@
-fastapi>=0.141.1
+fastapi>=0.142.2
 aiohttp>=3.14.3
 python-dotenv>=1.2.3
 asyncpg>=0.30.0
